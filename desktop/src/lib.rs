@@ -2,6 +2,7 @@ mod agents;
 mod credentials;
 mod deep_link;
 mod fig_container;
+mod folder_picker;
 mod fonts;
 mod http;
 mod menu;
@@ -15,6 +16,7 @@ use credentials::{
 };
 use deep_link::path_matches_suffix;
 use fig_container::build_fig_file;
+use folder_picker::pick_mcp_root_folder;
 use fonts::{list_system_fonts, load_system_font};
 use http::{cancel_http_request, proxy_http_request, ProxyHttpRequests};
 use menu::{install_app_menu, native_menu_checked, set_native_menu_checked};
@@ -373,6 +375,7 @@ pub fn run() {
             credential_write,
             mcp_lookup,
             path_matches_suffix,
+            pick_mcp_root_folder,
             list_system_fonts,
             load_system_font,
             proxy_http_request,
@@ -389,6 +392,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_fs::init())
+        // The capability allows documents only where the user put them: files picked in a
+        // dialog or handed over by the OS. This keeps those grants across restarts, so
+        // recent files and reopened documents stay readable; it must follow the fs plugin.
+        .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())

@@ -51,20 +51,33 @@
         { "path": "$LOCALDATA/Microsoft/WindowsApps" },
         { "path": "$LOCALDATA/Microsoft/WindowsApps/**" },
         { "path": "$HOME/scoop" },
-        { "path": "$HOME/scoop/**" }
+        { "path": "$HOME/scoop/**" },
+        { "path": "$APPCACHE/WebKit" },
+        { "path": "$APPCACHE/WebKit/**" },
+        { "path": "$APPLOCALDATA/EBWebView" },
+        { "path": "$APPLOCALDATA/EBWebView/**" }
       ]
     },
     {
       "identifier": "fs:allow-read-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
+      ]
     },
     {
       "identifier": "fs:allow-stat",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
+      ]
     },
     {
       "identifier": "fs:allow-open",
-      "allow": [{ "path": "**" }],
+      "allow": [
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
+      ],
       "deny": [
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
         { "path": "$LOCALDATA/OpenPencil/mcp.json" },
@@ -87,7 +100,10 @@
     },
     {
       "identifier": "fs:allow-write-file",
-      "allow": [{ "path": "**" }],
+      "allow": [
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
+      ],
       "deny": [
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
         { "path": "$LOCALDATA/OpenPencil/mcp.json" },
@@ -107,11 +123,14 @@
     },
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
+      ]
     },
     {
       "identifier": "fs:allow-remove",
-      "allow": [{ "path": "**" }],
+      "allow": [{ "path": "$APPLOCALDATA/cache" }, { "path": "$APPLOCALDATA/cache/**" }],
       "deny": [
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
         { "path": "$LOCALDATA/OpenPencil/mcp.json" },
@@ -119,10 +138,7 @@
         { "path": "$HOME/.openpencil/mcp.json" }
       ]
     },
-    {
-      "identifier": "fs:allow-watch",
-      "allow": [{ "path": "**" }]
-    },
+    "fs:allow-watch",
     "fs:allow-unwatch",
     {
       "identifier": "shell:allow-spawn",

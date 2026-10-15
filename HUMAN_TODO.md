@@ -26,4 +26,13 @@ The strict CSP and the QuickJS sandbox were verified in Chromium (Linux) only; W
 
 ### Delete merged PR branches
 
-The agent's git proxy refuses branch deletion. Delete these merged branches on GitHub (Branches page, trash icon): `peel/phase1-ai-eval`.
+The agent's git proxy refuses branch deletion. Delete these merged branches on GitHub (Branches page, trash icon): `peel/phase1-ai-eval`, `peel/phase1-csp`.
+
+### Check the filesystem allow-list on macOS and Windows
+
+Only Linux was exercised; the macOS-only native cases were skipped.
+
+1. Run `bun run test:native` on macOS and on Windows.
+2. On an installed build: open a `.fig` through the Open dialog, quit and relaunch, and check Recent Files reopens it with a thumbnail.
+3. Edit that file in another app and check Peel reloads it.
+4. Save As into a new folder, export a PNG, and double-click a `.fig` in Finder or Explorer; each must work.
