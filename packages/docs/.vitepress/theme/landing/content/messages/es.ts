@@ -52,12 +52,6 @@ export const es: LandingMessages = {
         'Pide lo que necesitas con tus propias palabras y el agente edita el documento con las mismas herramientas que tú, mostrando su trabajo en el lienzo a medida que llega. Conecta cualquier proveedor con tu propia clave o usa el agente de programación que ya utilizas.',
       hint: 'Un turno grabado se reproduce con el bucle real del agente. Mira cómo se construye el lienzo mientras llega.'
     },
-    collab: {
-      title: 'Trabajad juntos, personas y agentes',
-      detail:
-        'Comparte un enlace y todos editan el mismo documento, de igual a igual, con cursores en vivo, modo seguir, comentarios fijados a las capas y llamadas de voz. Los agentes de IA se unen igual: todos en la sala los ven construir mientras transmiten.',
-      hint: 'Las dos pantallas son tuyas. Arrastra una capa en una y mira cómo se mueve en la otra; después pregunta al agente.'
-    },
     code: {
       title: 'Del diseño al código',
       detail:
@@ -265,12 +259,6 @@ export const es: LandingMessages = {
         'El reproductor está solo en el marco del hero, que coloca a sus hijos en fila, así que una tarjeta añadida ahí queda justo a su lado. Vincularé el fondo, el radio y los colores de texto de la tarjeta a las variables Theme que usa el reproductor, para que cambie con él entre oscuro y claro, y listaré tres pistas, cada una con una portada pequeña, un título y un artista.',
       reply:
         'He añadido una tarjeta **Up next** junto al reproductor con tres pistas. Sus colores y su radio vienen de las variables Theme, así que sigue al reproductor entre oscuro y claro.'
-    },
-    collab: {
-      you: 'Tú',
-      yourScreen: 'Tu pantalla',
-      theirScreen: 'Pantalla de Sam',
-      askAgent: 'Preguntar al agente'
     },
     sdk: {
       install: 'Instalar'

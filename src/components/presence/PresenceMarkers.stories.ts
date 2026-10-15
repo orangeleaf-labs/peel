@@ -5,22 +5,20 @@ import type { PagePresenceEntry } from '@/app/presence/registry'
 
 import PresenceMarkers from './PresenceMarkers.vue'
 
-const ana = { r: 0.92, g: 0.34, b: 0.29, a: 1 }
-const ben = { r: 0.2, g: 0.55, b: 0.95, a: 1 }
 const you = { r: 0.3, g: 0.7, b: 0.45, a: 1 }
 
-const anaWithAgent: PagePresenceEntry[] = [
-  { id: 'person:ana', kind: 'person', name: 'Ana', color: ana },
-  { id: 'agent:orbit', kind: 'agent', name: 'Orbit', color: ana }
+const twoAgents: PagePresenceEntry[] = [
+  { id: 'agent:fern', kind: 'agent', name: 'Fern', color: you },
+  { id: 'agent:orbit', kind: 'agent', name: 'Orbit', color: you }
 ]
 
 type Args = { entries: PagePresenceEntry[] }
 
 const meta = {
-  title: 'App/Collaboration/Page Presence Markers',
+  title: 'App/Presence/Page Presence Markers',
   component: PresenceMarkers,
   tags: ['autodocs'],
-  args: { entries: anaWithAgent },
+  args: { entries: twoAgents },
   render: (args) => ({
     components: { PresenceMarkers },
     setup: () => ({ args }),
@@ -32,33 +30,29 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Person: Story = {
-  args: { entries: [{ id: 'person:ben', kind: 'person', name: 'Ben', color: ben }] }
-}
-
-export const PersonAndTheirAgent: Story = {
-  play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('img')).toHaveAccessibleName('Ana, Orbit')
-  }
-}
-
 export const YourAgent: Story = {
   args: { entries: [{ id: 'agent:fern', kind: 'agent', name: 'Fern', color: you }] }
+}
+
+export const TwoAgents: Story = {
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('img')).toHaveAccessibleName('Fern, Orbit')
+  }
 }
 
 export const MoreThanFit: Story = {
   args: {
     entries: [
-      ...anaWithAgent,
-      { id: 'person:ben', kind: 'person', name: 'Ben', color: ben },
-      { id: 'agent:pixel', kind: 'agent', name: 'Pixel', color: ben },
-      { id: 'agent:fern', kind: 'agent', name: 'Fern', color: you }
+      ...twoAgents,
+      { id: 'agent:pixel', kind: 'agent', name: 'Pixel', color: you },
+      { id: 'agent:juniper', kind: 'agent', name: 'Juniper', color: you },
+      { id: 'agent:wren', kind: 'agent', name: 'Wren', color: you }
     ]
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByText('+2')).toBeVisible()
-    await expect(canvas.getByRole('img')).toHaveAccessibleName('Ana, Orbit, Ben, Pixel, Fern')
+    await expect(canvas.getByRole('img')).toHaveAccessibleName('Fern, Orbit, Pixel, Juniper, Wren')
   }
 }
 

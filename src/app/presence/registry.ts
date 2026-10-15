@@ -5,25 +5,20 @@ import { computeContentBounds } from '@open-pencil/core/io'
 import type { Color } from '@open-pencil/scene-graph/primitives'
 import { randomHex } from '@open-pencil/scene-graph/random'
 
-import type { RemotePeer } from '@/app/collab/types'
 import type { EditorStore } from '@/app/editor/active-store'
 import { appPreferences } from '@/app/settings/preferences/store'
 
 import { pickCallsign } from './callsigns'
 import { glideViewTo, showCursors, stopViewGlide, type TrackedCursor } from './cursor-motion'
-import { MAX_NAME_LENGTH } from './schema'
+import { MAX_NAME_LENGTH } from './limits'
 import type { AgentKind, AgentPresence, FollowTarget, PersonPoint } from './types'
 
-/** Agents' color outside a room, where there is no collaborator color to inherit. */
+/** Agents' color on the canvas and in the page list. */
 const SOLO_AGENT_COLOR: Color = { ...AI_ACTIVE_COLOR, a: 1 }
 
 interface Presence {
   /** Agents running in this app for the document. */
   agents: ShallowRef<readonly AgentPresence[]>
-  /** People in the room, with their agents. */
-  peers: ShallowRef<readonly RemotePeer[]>
-  /** The local collaborator's color while in a room. */
-  ownerColor: ShallowRef<Color | null>
   /** Who the viewport follows, if anyone. */
   following: ShallowRef<FollowTarget | null>
   /** The page following put the view on; landing anywhere else means you left. */
@@ -45,8 +40,6 @@ export function presenceOf(store: EditorStore): Presence {
   if (existing) return existing
   const presence: Presence = {
     agents: shallowRef([]),
-    peers: shallowRef([]),
-    ownerColor: shallowRef(null),
     following: shallowRef(null),
     followPage: null,
     switching: null,
@@ -67,15 +60,11 @@ export function presenceOf(store: EditorStore): Presence {
   return presence
 }
 
-function localAgentColor(store: EditorStore): Color {
-  return presenceOf(store).ownerColor.value ?? SOLO_AGENT_COLOR
-}
-
-/** Someone working on a page, as page lists show them. */
+/** An agent working on a page, as page lists show them. */
 export interface PagePresenceEntry {
-  /** Stable per person or agent; names can repeat, such as two people named Anonymous. */
+  /** Stable per agent; names can repeat. */
   id: string
-  kind: 'person' | 'agent'
+  kind: 'agent'
   name: string
   color: Color
 }
@@ -86,37 +75,18 @@ export function agentPage(agent: AgentPresence): string | undefined {
 }
 
 /**
- * People and working agents by page. Reads reactive state, so computed values that call it
- * update as people move and agents start and stop.
+ * Working agents by page. Reads reactive state, so computed values that call it update as
+ * agents start and stop.
  */
 export function presenceByPage(store: EditorStore): Map<string, PagePresenceEntry[]> {
-  const { agents, peers } = presenceOf(store)
   const byPage = new Map<string, PagePresenceEntry[]>()
-  const add = (pageId: string | undefined, entry: PagePresenceEntry) => {
-    if (pageId) byPage.set(pageId, [...(byPage.get(pageId) ?? []), entry])
-  }
-  for (const peer of peers.value) {
-    add(peer.cursor?.pageId, {
-      id: `person:${peer.clientId}`,
-      kind: 'person',
-      name: peer.name,
-      color: peer.color
-    })
-    for (const agent of peer.agents)
-      add(agentPage(agent), {
-        id: `agent:${agent.id}`,
-        kind: 'agent',
-        name: agent.name,
-        color: peer.color
-      })
-  }
-  for (const agent of agents.value) {
-    add(agentPage(agent), {
-      id: `agent:${agent.id}`,
-      kind: 'agent',
-      name: agent.name,
-      color: localAgentColor(store)
-    })
+  for (const agent of presenceOf(store).agents.value) {
+    const pageId = agentPage(agent)
+    if (!pageId) continue
+    byPage.set(pageId, [
+      ...(byPage.get(pageId) ?? []),
+      { id: `agent:${agent.id}`, kind: 'agent', name: agent.name, color: SOLO_AGENT_COLOR }
+    ])
   }
   return byPage
 }
@@ -138,28 +108,13 @@ function agentCursor(agent: AgentPresence, color: Color, pageId: string): Tracke
   ]
 }
 
-/** Draw everyone working on the page on screen: people, their agents, and ours. */
+/** Draw the agents working on the page on screen. */
 export function refreshCursors(store: EditorStore): void {
-  const { agents, peers } = presenceOf(store)
   const pageId = store.state.currentPageId
-  showCursors(store, [
-    ...peers.value.flatMap((peer): TrackedCursor[] => [
-      ...(peer.cursor?.pageId === pageId
-        ? [
-            {
-              id: `person:${peer.clientId}`,
-              kind: 'person' as const,
-              name: peer.name,
-              color: peer.color,
-              ...peer.cursor,
-              selection: peer.selection
-            }
-          ]
-        : []),
-      ...peer.agents.flatMap((agent) => agentCursor(agent, peer.color, pageId))
-    ]),
-    ...agents.value.flatMap((agent) => agentCursor(agent, localAgentColor(store), pageId))
-  ])
+  showCursors(
+    store,
+    presenceOf(store).agents.value.flatMap((agent) => agentCursor(agent, SOLO_AGENT_COLOR, pageId))
+  )
   autoFollow(store)
   keepFollowing(store)
 }
@@ -188,10 +143,7 @@ function autoFollow(store: EditorStore): void {
     presence.autoFollowed = null
   }
   if (!appPreferences.value.chat.followAgents) return
-  if (target?.kind === 'person') return
   if (target && working.some((agent) => agent.id === target.agentId)) return
-  // A followed agent of someone else's is theirs to stop; only a resting one of ours hands over.
-  if (target && !presence.agents.value.some((agent) => agent.id === target.agentId)) return
   const next = working.find((agent) => !presence.declined.has(agent.id))
   if (next) {
     presence.following.value = { kind: 'agent', agentId: next.id }
@@ -209,24 +161,14 @@ export function followWorkingAgents(store: EditorStore): void {
   keepFollowing(store)
 }
 
-/**
- * Where the followed person or agent is: null when they left, idle while an agent rests or a
- * person has not pointed anywhere yet.
- */
+/** Where the followed agent is: null when it is gone, idle while it rests. */
 function followedPoint(store: EditorStore, target: FollowTarget): PersonPoint | 'idle' | null {
-  const { agents, peers } = presenceOf(store)
-  if (target.kind === 'person') {
-    const peer = peers.value.find((entry) => entry.clientId === target.clientId)
-    return peer ? (peer.cursor ?? 'idle') : null
-  }
-  const agent = [...agents.value, ...peers.value.flatMap((peer) => peer.agents)].find(
-    (entry) => entry.id === target.agentId
-  )
+  const agent = presenceOf(store).agents.value.find((entry) => entry.id === target.agentId)
   if (!agent) return null
   return agent.status === 'idle' ? 'idle' : (agent.cursor ?? 'idle')
 }
 
-/** Move the view to the followed person or agent; stop when they are gone. */
+/** Move the view to the followed agent; stop when it is gone. */
 function keepFollowing(store: EditorStore): void {
   const presence = presenceOf(store)
   const target = presence.following.value
@@ -237,7 +179,7 @@ function keepFollowing(store: EditorStore): void {
     presence.following.value = null
     return
   }
-  // A peer's cursor can name a page this document does not have; wait as for a resting agent.
+  // A cursor can name a page this document no longer has; wait as for a resting agent.
   if (store.graph.getNode(point.pageId)?.type !== 'CANVAS') return
   presence.followPage = point.pageId
   if (point.pageId !== store.state.currentPageId) {
@@ -276,35 +218,24 @@ function stopIfLeftFollowedPage(store: EditorStore): void {
 /** The person stopped following an agent of ours at work: auto-follow leaves it until it rests. */
 function declineFollowed(presence: Presence): void {
   const target = presence.following.value
-  if (target?.kind !== 'agent') return
+  if (!target) return
   const agent = presence.agents.value.find((entry) => entry.id === target.agentId)
   if (agent && isWorking(agent)) presence.declined.add(agent.id)
 }
 
-/** Who the view follows, for showing it: their name, an agent's owner, and the color. */
+/** Who the view follows, for showing it: the agent's name and color. */
 export interface FollowedLabel {
   kind: FollowTarget['kind']
   name: string
-  /** For an agent, the person who runs it; undefined for our own agents. */
-  owner?: string
   color: Color
 }
 
 export function followedLabel(store: EditorStore): FollowedLabel | null {
-  const { agents, peers, ownerColor, following } = presenceOf(store)
+  const { agents, following } = presenceOf(store)
   const target = following.value
   if (!target) return null
-  if (target.kind === 'person') {
-    const peer = peers.value.find((entry) => entry.clientId === target.clientId)
-    return peer ? { kind: 'person', name: peer.name, color: peer.color } : null
-  }
-  const own = agents.value.find((agent) => agent.id === target.agentId)
-  if (own) return { kind: 'agent', name: own.name, color: ownerColor.value ?? SOLO_AGENT_COLOR }
-  for (const peer of peers.value) {
-    const agent = peer.agents.find((entry) => entry.id === target.agentId)
-    if (agent) return { kind: 'agent', name: agent.name, owner: peer.name, color: peer.color }
-  }
-  return null
+  const agent = agents.value.find((entry) => entry.id === target.agentId)
+  return agent ? { kind: 'agent', name: agent.name, color: SOLO_AGENT_COLOR } : null
 }
 
 /** Stop following; a follow switch still loading is overtaken, so it does not land later. */
@@ -319,7 +250,7 @@ function stopFollowing(store: EditorStore, byPerson: boolean): void {
   }
 }
 
-/** Follow a person or an agent, or stop following with null. */
+/** Follow an agent, or stop following with null. */
 export function follow(store: EditorStore, target: FollowTarget | null): void {
   if (!target) {
     stopFollowing(store, true)
@@ -333,7 +264,7 @@ export function follow(store: EditorStore, target: FollowTarget | null): void {
   keepFollowing(store)
 }
 
-/** Rename one of our agents; the new name reaches the room with our next awareness update. */
+/** Rename one of our agents. */
 export function renameAgent(store: EditorStore, agentId: string, name: string): void {
   const trimmed = name.trim().slice(0, MAX_NAME_LENGTH)
   const presence = presenceOf(store)
@@ -341,16 +272,6 @@ export function renameAgent(store: EditorStore, agentId: string, name: string): 
   presence.agents.value = presence.agents.value.map((agent) =>
     agent.id === agentId ? { ...agent, name: trimmed } : agent
   )
-  refreshCursors(store)
-}
-
-export function setPeers(store: EditorStore, peers: readonly RemotePeer[]): void {
-  presenceOf(store).peers.value = peers
-  refreshCursors(store)
-}
-
-export function setOwnerColor(store: EditorStore, color: Color | null): void {
-  presenceOf(store).ownerColor.value = color
   refreshCursors(store)
 }
 
@@ -364,10 +285,7 @@ export interface AgentHandle {
 /** Announce an agent working in this document under a callsign unique among visible agents. */
 export function addAgent(store: EditorStore, kind: AgentKind, model?: string): AgentHandle {
   const presence = presenceOf(store)
-  const taken = new Set([
-    ...presence.agents.value.map((agent) => agent.name),
-    ...presence.peers.value.flatMap((peer) => peer.agents.map((agent) => agent.name))
-  ])
+  const taken = new Set(presence.agents.value.map((agent) => agent.name))
   const agent: AgentPresence = {
     id: randomHex(8),
     name: pickCallsign(taken),

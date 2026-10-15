@@ -52,12 +52,6 @@ export const pl: LandingMessages = {
         'Opisz zadanie zwykłym językiem, a agent edytuje dokument tymi samymi narzędziami co Ty i pokazuje efekty na obszarze roboczym już w trakcie generowania. Podłącz dowolnego dostawcę własnym kluczem albo użyj agenta programistycznego, z którego już korzystasz.',
       hint: 'Nagrana tura przechodzi przez prawdziwą pętlę agenta. Zobacz, jak obszar roboczy powstaje w trakcie strumieniowania.'
     },
-    collab: {
-      title: 'Współpraca ludzi i agentów',
-      detail:
-        'Udostępnij link, a wszyscy edytują ten sam dokument, peer-to-peer, z kursorami na żywo, trybem śledzenia, komentarzami przypiętymi do warstw i rozmowami głosowymi. Agenci AI dołączają tak samo: wszyscy w pokoju widzą, jak budują, gdy strumieniują.',
-      hint: 'Oba ekrany są Twoje. Przeciągnij warstwę na jednym i zobacz, jak przesuwa się na drugim, a potem poproś agenta.'
-    },
     code: {
       title: 'Od projektu do kodu',
       detail:
@@ -264,12 +258,6 @@ export const pl: LandingMessages = {
         'Odtwarzacz stoi sam w ramce hero, która układa dzieci w rzędzie, więc dodana tam karta trafi tuż obok. Powiążę tło, promień i kolory tekstu karty ze zmiennymi Theme, których używa odtwarzacz, żeby przełączała się razem z nim między ciemnym a jasnym, i wypiszę trzy utwory, każdy z małą okładką, tytułem i wykonawcą.',
       reply:
         'Obok odtwarzacza jest teraz karta **Up next** z trzema utworami. Kolory i promień pochodzą ze zmiennych Theme, więc podąża za odtwarzaczem między ciemnym a jasnym.'
-    },
-    collab: {
-      you: 'Ty',
-      yourScreen: 'Twój ekran',
-      theirScreen: 'Ekran Sama',
-      askAgent: 'Poproś agenta'
     },
     sdk: {
       install: 'Instalacja'

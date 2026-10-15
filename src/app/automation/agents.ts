@@ -2,8 +2,8 @@ import * as v from 'valibot'
 
 import { isUnknownRecord } from '@/app/automation/bridge/target'
 import type { EditorStore } from '@/app/editor/active-store'
+import { MAX_NAME_LENGTH } from '@/app/presence/limits'
 import { addAgent, agentPlacement, type AgentHandle } from '@/app/presence/registry'
-import { MAX_NAME_LENGTH } from '@/app/presence/schema'
 
 /** After this long without a tool call, a session's agent rests and leaves the canvas. */
 export const MCP_AGENT_IDLE_MS = 20_000

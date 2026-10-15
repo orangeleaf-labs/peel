@@ -111,14 +111,6 @@ export interface LandingMessages {
       reasoning: string
       reply: string
     }
-    collab: {
-      /** How the visitor appears on the other screen. */
-      you: string
-      yourScreen: string
-      /** The other screen, belonging to the teammate named Sam. */
-      theirScreen: string
-      askAgent: string
-    }
     sdk: {
       /** Heads the install command under the snippet. */
       install: string

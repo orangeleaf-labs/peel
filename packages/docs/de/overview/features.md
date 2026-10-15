@@ -92,10 +92,6 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 Alle Befehle unterstützen `--json`. Installation: `npm install -g @open-pencil/cli` oder `bun add -g @open-pencil/cli`.
 
-## Zusammenarbeit in Echtzeit
-
-Die Zusammenarbeit erfolgt direkt zwischen den Teilnehmern über WebRTC und benötigt keinen zentralen Server. Ein Link genügt. Verfügbar sind Zeiger der Teilnehmer, Anwesenheitsanzeigen, das Folgen der Ansicht eines anderen Teilnehmers und Sprachanrufe mit anderen Teilnehmern im Raum.
-
 ## Desktop und Web
 
 **Desktop:** Tauri v2, rund 7 MB, für macOS, Windows und Linux, mit nativen Menüs, Offlinebetrieb und automatischem Speichern.

@@ -52,12 +52,6 @@ export const it: LandingMessages = {
         'Chiedi con parole tue e l’agente modifica il documento con gli stessi strumenti che usi tu, mostrando il lavoro sulla tela man mano che arriva. Collega qualsiasi provider con la tua chiave, oppure usa l’agente di programmazione che già utilizzi.',
       hint: 'Un turno registrato passa per il vero ciclo dell’agente. Guarda la tela costruirsi mentre arriva.'
     },
-    collab: {
-      title: 'Lavorare insieme, persone e agenti',
-      detail:
-        'Condividi un link e tutti modificano lo stesso documento, peer to peer, con cursori dal vivo, modalità segui, commenti fissati ai livelli e chiamate vocali. Gli agenti di IA entrano allo stesso modo: tutti nella stanza li guardano costruire mentre trasmettono.',
-      hint: 'Entrambi gli schermi sono tuoi. Trascina un livello su uno e guardalo muoversi sull’altro, poi chiedi all’agente.'
-    },
     code: {
       title: 'Dal design al codice',
       detail:
@@ -265,12 +259,6 @@ export const it: LandingMessages = {
         'Il lettore è da solo nel frame dell’hero, che dispone i figli in riga, quindi una scheda aggiunta lì finisce proprio accanto. Collego sfondo, raggio e colori del testo della scheda alle variabili Theme usate dal lettore, così passa con lui da scuro a chiaro, ed elenco tre brani, ciascuno con una piccola copertina, un titolo e un artista.',
       reply:
         'Ho aggiunto una scheda **Up next** accanto al lettore con tre brani. Colori e raggio vengono dalle variabili Theme, quindi segue il lettore tra scuro e chiaro.'
-    },
-    collab: {
-      you: 'Tu',
-      yourScreen: 'Il tuo schermo',
-      theirScreen: 'Lo schermo di Sam',
-      askAgent: 'Chiedi all’agente'
     },
     sdk: {
       install: 'Installa'

@@ -13,9 +13,9 @@ import {
 } from '@open-pencil/scene-graph'
 import type { Vector } from '@open-pencil/scene-graph/primitives'
 
-import { useCollabIdentity } from '@/app/collab/identity'
 import { useActiveEditorStoreRef } from '@/app/editor/active-store'
 import type { PagePoint } from '@/app/editor/pages/point'
+import { useLocalIdentity } from '@/app/identity/use'
 import { setCommentsOnCanvas } from '@/app/settings/preferences/apply'
 import {
   appPreferences,
@@ -44,7 +44,7 @@ function preference<K extends keyof CommentPreferences>(
  * editor's Escape asks `closeCard` before it leaves the Comment tool.
  */
 export const useComments = createGlobalState(() => {
-  const identity = useCollabIdentity()
+  const identity = useLocalIdentity()
   const storeRef = useActiveEditorStoreRef()
 
   const activeThreadId = ref<string | null>(null)

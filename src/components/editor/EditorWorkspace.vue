@@ -11,9 +11,6 @@ import { loadEditorLayout, saveEditorLayout } from '@/app/shell/layout-storage'
 import { appMenuShortcut } from '@/app/shell/menu/shortcut'
 import type { Tab } from '@/app/tabs'
 import CanvasSplitRoot from '@/components/canvas/CanvasSplitRoot.vue'
-import CollabPanel from '@/components/collab-panel/CollabPanel.vue'
-import ActiveRoomOverlay from '@/components/collab-room/ActiveRoomOverlay.vue'
-import { useRoomActions } from '@/components/collab-room/useRoomActions'
 import CommentDeleteDialog from '@/components/comments/CommentDeleteDialog.vue'
 import EditorCanvas from '@/components/EditorCanvas.vue'
 import LayersPanel from '@/components/LayersPanel.vue'
@@ -42,17 +39,11 @@ const horizontalSplitterStyles = tv(splitterTheme)({ direction: 'horizontal' })
 /** One canvas previewing takes the whole window, in the canvas-only layout; split view keeps panels. */
 const playingAlone = computed(() => store.state.play !== null && store.visiblePaneCount.value <= 1)
 const { editor } = useI18n()
-// Until a room's document arrives there is nothing to edit, so its screen replaces the editor.
-const { pending: roomPending } = useRoomActions()
 </script>
 
 <template>
-  <div v-if="roomPending" :key="'room-' + tab.id" class="relative flex flex-1 overflow-hidden">
-    <ActiveRoomOverlay />
-  </div>
-
   <SplitterGroup
-    v-else-if="!isMobile && showChrome && store.state.showUI && !playingAlone"
+    v-if="!isMobile && showChrome && store.state.showUI && !playingAlone"
     :key="tab.id"
     direction="horizontal"
     class="flex-1 overflow-hidden"
@@ -76,7 +67,6 @@ const { pending: roomPending } = useRoomActions()
     <SplitterPanel id="canvas" :default-size="initialEditorLayout[1]" :min-size="30" class="flex">
       <div class="relative flex min-w-0 flex-1">
         <CanvasSplitRoot />
-        <ActiveRoomOverlay />
         <Toolbar />
       </div>
     </SplitterPanel>
@@ -91,7 +81,7 @@ const { pending: roomPending } = useRoomActions()
       class="flex flex-col"
     >
       <div class="flex shrink-0 items-center gap-1 border-b border-border px-1.5 py-1.5">
-        <CollabPanel class="min-w-0 flex-1" />
+        <div class="min-w-0 flex-1" />
         <IconButton
           :label="
             editor.startPreview({
@@ -115,7 +105,6 @@ const { pending: roomPending } = useRoomActions()
   >
     <div class="relative flex min-w-0 flex-1">
       <EditorCanvas />
-      <ActiveRoomOverlay />
       <MobileHud />
       <Toolbar />
     </div>
@@ -125,7 +114,6 @@ const { pending: roomPending } = useRoomActions()
   <div v-else-if="showChrome" :key="'collapsed-' + tab.id" class="flex flex-1 overflow-hidden">
     <div class="relative flex min-w-0 flex-1">
       <EditorCanvas />
-      <ActiveRoomOverlay />
       <WorkspacePill
         v-if="!isMobile && playingAlone"
         mode="preview"
@@ -147,7 +135,6 @@ const { pending: roomPending } = useRoomActions()
   <div v-else :key="'bare-' + tab.id" class="flex flex-1 overflow-hidden">
     <div class="relative flex min-w-0 flex-1">
       <EditorCanvas />
-      <ActiveRoomOverlay />
     </div>
   </div>
 

@@ -90,10 +90,6 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 Wszystkie polecenia obsługują `--json`. Instalacja: `npm install -g @open-pencil/cli` albo `bun add -g @open-pencil/cli`.
 
-## Współpraca w czasie rzeczywistym
-
-Połączenie równorzędne WebRTC nie wymaga centralnego serwera. Udostępnij odnośnik i edytuj dokument wspólnie z innymi osobami, korzystając z kursorów, informacji o obecności, trybu śledzenia i rozmów głosowych z osobami w pokoju.
-
 ## Wersja komputerowa i internetowa
 
 **Komputer:** Tauri v2, około 7 MB, dla macOS, Windows i Linux, z menu systemowymi, pracą bez sieci i automatycznym zapisem.

@@ -52,12 +52,6 @@ export const fr: LandingMessages = {
         'Demandez en langage courant : l’agent modifie le document avec les mêmes outils que vous et affiche son travail sur le canevas au fil de la génération. Connectez le fournisseur de votre choix avec votre propre clé, ou utilisez l’agent de code que vous employez déjà.',
       hint: 'Un échange enregistré passe par la vraie boucle de l’agent. Regardez le canevas se construire au fil du flux.'
     },
-    collab: {
-      title: 'Travailler ensemble, humains et agents',
-      detail:
-        "Partagez un lien et tout le monde modifie le même document, de pair à pair, avec curseurs en direct, mode suivi, commentaires épinglés aux calques et appels vocaux. Les agents d'IA rejoignent la salle de la même façon : tout le monde les regarde construire pendant qu'ils diffusent.",
-      hint: 'Les deux écrans sont à vous. Faites glisser un calque sur l’un et regardez-le bouger sur l’autre, puis sollicitez l’agent.'
-    },
     code: {
       title: 'Du design au code',
       detail:
@@ -265,12 +259,6 @@ export const fr: LandingMessages = {
         'Le lecteur est seul dans le cadre du hero, qui aligne ses enfants en ligne : une carte ajoutée là se place juste à côté. Je lie le fond, le rayon et les couleurs de texte de la carte aux variables Theme qu’utilise le lecteur, pour qu’elle passe du sombre au clair avec lui, et j’y liste trois morceaux, chacun avec une petite pochette, un titre et un artiste.',
       reply:
         'J’ai ajouté une carte **Up next** à côté du lecteur, avec trois morceaux. Ses couleurs et son rayon viennent des variables Theme : elle suit le lecteur entre sombre et clair.'
-    },
-    collab: {
-      you: 'Vous',
-      yourScreen: 'Votre écran',
-      theirScreen: 'L’écran de Sam',
-      askAgent: 'Demander à l’agent'
     },
     sdk: {
       install: 'Installer'
