@@ -45,3 +45,7 @@ The agent's GitHub token has no `workflow` scope, so it cannot change files unde
 2. Delete the applied patch file, and remove the `.github/workflows` exclusion in `tests/app/shell/egress.test.ts`.
 3. Commit, open a PR, and confirm `bun test tests/app/shell/egress.test.ts` passes.
 4. To let future agent runs change workflows directly, reconnect GitHub with the `workflow` permission at https://claude.ai/connect-github.
+
+### Fix the Native app contracts CI job
+
+The `Native app contracts` job in `.github/workflows/ci.yml` runs inside `ghcr.io/open-pencil/native-contracts-ci`, an upstream image this fork cannot pull ("manifest unknown"), so it fails on every PR. Build and push an equivalent image to an Orangeleaf registry and point the job's `container.image` at it, or remove the job until one exists. The agent can't make this change without `workflow` scope.
