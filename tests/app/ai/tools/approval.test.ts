@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test'
+import { afterEach, beforeEach, expect, jest, mock, spyOn, test } from 'bun:test'
 
 import type { ToolExecutionOptions } from 'ai'
 
@@ -10,6 +10,7 @@ import { runWithWriteApproval } from '@/app/ai/tools/approval'
 import * as figmaFactory from '@/app/automation/bridge/figma-factory'
 import { currentWriteApproval } from '@/app/automation/write-approval'
 import { createEditorStore } from '@/app/editor/session/create'
+import { WRITE_APPROVAL_TIMEOUT_MS } from '@/constants'
 
 import { answerNextWriteApproval, nextWriteApproval } from '#tests/helpers/write-approval'
 
@@ -51,6 +52,20 @@ test('Deny returns an error to the model and runs nothing', async () => {
   const result = await pending
   expect(result).toEqual({ error: expect.stringContaining('did not allow "save_copy"') })
   expect(execute).not.toHaveBeenCalled()
+})
+
+test('no answer before the timeout counts as Deny and runs nothing', async () => {
+  jest.useFakeTimers()
+  try {
+    const execute = mock(async () => ({ written: true }))
+    const pending = runWithWriteApproval(store, fileWriter, target, execute)
+    await Promise.resolve()
+    jest.advanceTimersByTime(WRITE_APPROVAL_TIMEOUT_MS)
+    expect(await pending).toEqual({ error: expect.stringContaining('did not allow "save_copy"') })
+    expect(execute).not.toHaveBeenCalled()
+  } finally {
+    jest.useRealTimers()
+  }
 })
 
 test('a reply stopped while the user decided runs nothing, even on Allow', async () => {

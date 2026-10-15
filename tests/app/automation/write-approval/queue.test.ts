@@ -1,4 +1,4 @@
-import { expect, test } from 'bun:test'
+import { expect, jest, test } from 'bun:test'
 
 import {
   answerWriteApproval,
@@ -7,6 +7,7 @@ import {
   requestWriteApproval,
   WriteDeniedError
 } from '@/app/automation/write-approval'
+import { WRITE_APPROVAL_TIMEOUT_MS } from '@/constants'
 
 import { answerNextWriteApproval } from '#tests/helpers/write-approval'
 
@@ -42,4 +43,18 @@ test('approveWrite throws on Deny, naming the tool and target', async () => {
   const allowed = approveWrite(save)
   await answerNextWriteApproval(true)
   expect(await allowed).toBeUndefined()
+})
+
+test('a request no one answers is denied once the timeout passes', async () => {
+  jest.useFakeTimers()
+  try {
+    const pending = requestWriteApproval(save)
+    jest.advanceTimersByTime(WRITE_APPROVAL_TIMEOUT_MS - 1)
+    expect(currentWriteApproval.value).toBe(save)
+    jest.advanceTimersByTime(1)
+    expect(await pending).toBe(false)
+    expect(currentWriteApproval.value).toBeNull()
+  } finally {
+    jest.useRealTimers()
+  }
 })
