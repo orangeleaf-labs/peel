@@ -116,7 +116,16 @@ export const automationMessageDefaults = {
   statusStarting: 'Starting',
   statusRunning: 'Running',
   statusStopped: 'Stopped',
-  statusError: 'Error'
+  statusError: 'Error',
+  writeApprovalTitle: 'Allow a write outside the document?',
+  writeApprovalSave: params('An agent wants to save a document with {tool} to {target}.'),
+  writeApprovalExport: params('An agent wants to export {format} with {tool} to {target}.'),
+  writeApprovalSettings: params('An agent wants to change app settings with {tool}: {target}.'),
+  writeApprovalWrite: params('An agent wants to write a file with {tool}: {target}.'),
+  writeApprovalUnknownTarget: params('An agent wants to write outside the document with {tool}.'),
+  writeApprovalDenyHint: 'If you deny, the agent gets an error and nothing is written.',
+  writeApprovalAllow: 'Allow',
+  writeApprovalDeny: 'Deny'
 } as const
 
 export const automationMessages = i18n('automation', automationMessageDefaults)

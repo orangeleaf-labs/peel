@@ -19,6 +19,7 @@ import type { EditorStore } from '@/app/editor/active-store'
 import { ensureGraphFonts } from '@/app/editor/fonts'
 import { useLibraryService } from '@/app/libraries'
 
+import { runWithWriteApproval } from './approval'
 import { aiToolDefinitions } from './catalog'
 import { recordToolChange } from './changes/capture'
 import { createMutex } from './mutex'
@@ -160,8 +161,10 @@ export function createAITools(store: EditorStore, diagnosticContext?: AIDiagnost
         }
         return figma
       },
-      executeTool: async (def, figma, args, options) =>
-        withUndoNote(await executeCall(def, figma, args, options), takeRunUndoNote(store)),
+      executeTool: (def, figma, args, options) =>
+        runWithWriteApproval(store, def, args, async () =>
+          withUndoNote(await executeCall(def, figma, args, options), takeRunUndoNote(store))
+        ),
       onAfterExecute: (def) => {
         if (def.mutates && !isAtomicTool(def)) store.requestRender()
       },
