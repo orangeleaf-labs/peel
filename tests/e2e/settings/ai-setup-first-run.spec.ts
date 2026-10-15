@@ -37,8 +37,6 @@ const CONFIGURED_MODEL_SETTINGS = {
     {
       id: 'connection-anthropic',
       providerID: 'anthropic',
-      customBaseURL: '',
-      customAPIType: 'completions',
       credentialProfileId: 'connection-anthropic'
     }
   ],

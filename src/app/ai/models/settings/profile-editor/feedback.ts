@@ -20,7 +20,6 @@ export function useModelProfileFeedback(
     name: profile.draft.name,
     modelID: profile.draft.modelID,
     customModelID: profile.draft.customModelID,
-    baseURL: profile.draft.customBaseURL,
     credential: Boolean(keyInput.value.trim() || profile.hasExistingKey.value),
     tools: (profile.knownModel.value
       ? profile.knownCapabilities.value
@@ -33,7 +32,6 @@ export function useModelProfileFeedback(
         customModel: profile.customModelSelected.value,
         intent: testing.value ? 'test' : 'save',
         providerKind: providerKind.value,
-        supportsCustomBaseURL: Boolean(profile.providerDef.value.supportsCustomBaseURL),
         design: profile.draft.profileId === aiModelSettings.value.assignments.design
       },
       messages.value

@@ -21,14 +21,6 @@ const legacyValues = {
     serializer: StorageSerializers.string,
     writeDefaults: false
   }),
-  'ai-base-url': useLocalStorage<string | null>(`${STORAGE_PREFIX}ai-base-url`, null, {
-    serializer: StorageSerializers.string,
-    writeDefaults: false
-  }),
-  'ai-api-type': useLocalStorage<string | null>(`${STORAGE_PREFIX}ai-api-type`, null, {
-    serializer: StorageSerializers.string,
-    writeDefaults: false
-  }),
   'ai-max-output-tokens': useLocalStorage<string | null>(
     `${STORAGE_PREFIX}ai-max-output-tokens`,
     null,

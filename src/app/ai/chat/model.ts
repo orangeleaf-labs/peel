@@ -8,16 +8,8 @@ import { tauriFetch } from '@/app/tauri/http'
 
 export type { ModelConfig } from '@/app/ai/providers/types'
 
-export function resolveLanguageModelID(
-  config: Pick<ModelConfig, 'providerID' | 'modelID' | 'customModelID'>
-): string {
-  if (
-    config.providerID === 'openrouter' ||
-    config.providerID === 'openai-compatible' ||
-    config.providerID === 'anthropic-compatible'
-  ) {
-    return config.customModelID.trim() || config.modelID
-  }
+/** The model a request names; Anthropic models come from the checked-in catalog. */
+export function resolveLanguageModelID(config: Pick<ModelConfig, 'modelID'>): string {
   return config.modelID
 }
 

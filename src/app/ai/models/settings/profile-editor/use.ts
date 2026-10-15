@@ -143,10 +143,7 @@ export function useModelProfileEditor({ profileId, keyInput, labels: ai }: Profi
     }
   }
 
-  watch(
-    () => [draft.customBaseURL, draft.customModelID, draft.customAPIType, draft.modelID],
-    resetConnectionTest
-  )
+  watch(() => [draft.customModelID, draft.modelID], resetConnectionTest)
 
   void refreshKeyStatus()
 

@@ -81,10 +81,6 @@ export const programmableSidebar = (
       ...(!prefix
         ? [
             { text: 'Coding agents', link: '/programmable/coding-agents' },
-            {
-              text: 'BYOK Compatibility',
-              link: '/programmable/byok-provider-compatibility',
-            },
           ]
         : []),
       { text: labels.collaboration, link: `${prefix}/programmable/collaboration` },

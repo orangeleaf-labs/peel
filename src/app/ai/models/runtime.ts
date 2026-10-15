@@ -95,9 +95,7 @@ export async function createAIModelRuntime(role: AIModelRole): Promise<AIModelRu
       providerID: resolved.connection.providerID,
       apiKey,
       modelID: resolved.profile.modelID,
-      customModelID: resolved.profile.customModelID,
-      customBaseURL: resolved.connection.customBaseURL,
-      customAPIType: resolved.connection.customAPIType
+      customModelID: resolved.profile.customModelID
     })
   }
 }

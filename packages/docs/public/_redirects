@@ -66,3 +66,6 @@
 /ru/programmable/sdk/api/composables/use-variables-editor /ru/programmable/sdk/api/advanced/use-variables 301
 /ru/programmable/sdk/api/advanced/use-variables-dialog-state /ru/programmable/sdk/api/advanced/use-variables 301
 /ru/programmable/sdk/api/advanced/use-variables-table /ru/programmable/sdk/api/advanced/use-variables 301
+
+# Removed pages
+/programmable/byok-provider-compatibility /programmable/ai-chat 301

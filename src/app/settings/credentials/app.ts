@@ -21,13 +21,22 @@ export const browserCredentialsRemembered = ref(
   !IS_TAURI && (browserRemembersCredentials() || legacyCredentialsPresent)
 )
 
-function initialCredentialStore(): CredentialStore {
-  if (IS_TAURI) return new NativeCredentialStore()
-  if (browserCredentialsRemembered.value) return new BrowserCredentialStore()
+/**
+ * The store secrets start in: the desktop app always uses the system credential store
+ * (Keychain on macOS, Credential Manager on Windows), with no browser or plaintext fallback.
+ */
+export function initialCredentialStore(options: {
+  desktop: boolean
+  remembered: boolean
+}): CredentialStore {
+  if (options.desktop) return new NativeCredentialStore()
+  if (options.remembered) return new BrowserCredentialStore()
   return new MemoryCredentialStore()
 }
 
-export const appCredentialStore = new SwitchableCredentialStore(initialCredentialStore())
+export const appCredentialStore = new SwitchableCredentialStore(
+  initialCredentialStore({ desktop: IS_TAURI, remembered: browserCredentialsRemembered.value })
+)
 export const appCredentialServices = createCredentialServices(appCredentialStore)
 
 export async function setBrowserCredentialPersistence(

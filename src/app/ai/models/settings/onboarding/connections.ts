@@ -11,67 +11,29 @@ import {
   resolveModelConnectionAPIKey,
   type AIModelConnection
 } from '@/app/ai/models'
-import type { OpenRouterKeyInfo } from '@/app/ai/providers/openrouter/key'
 import type { CredentialStatus } from '@/app/settings/credentials/types'
 
-import {
-  isOnboardingAgent,
-  ONBOARDING_SERVER_PROVIDER,
-  type OnboardingAccess,
-  type PlannedModel
-} from './plan'
+import { isOnboardingAgent, type OnboardingAccess, type PlannedModel } from './plan'
 
 export type ConnectionTestStatus = 'idle' | 'testing' | 'success' | 'error'
 
 export interface OnboardingConnectionState {
   /** A newly entered key; kept only until it is saved or setup closes. */
   apiKey: string
-  customBaseURL: string
-  customModelID: string
   test: ConnectionTestStatus
   reason: ProviderConnectionTestFailureReason | null
-  /** Set once a key from signing in has been checked with the provider. */
-  account: OpenRouterKeyInfo | null
-}
-
-/** Local servers with a well-known OpenAI-compatible address. */
-export const ONBOARDING_SERVER_PRESETS = [
-  { id: 'ollama', name: 'Ollama', baseURL: 'http://localhost:11434/v1' },
-  { id: 'lmstudio', name: 'LM Studio', baseURL: 'http://localhost:1234/v1' }
-] as const
-
-export type OnboardingServerPreset = (typeof ONBOARDING_SERVER_PRESETS)[number]['id'] | 'custom'
-
-/** The preset whose address the person entered, or `custom` for any other server. */
-export function serverPresetFor(baseURL: string): OnboardingServerPreset {
-  return (
-    ONBOARDING_SERVER_PRESETS.find((preset) => preset.baseURL === baseURL.trim())?.id ?? 'custom'
-  )
 }
 
 /** Details the person edits while connecting. */
-export type OnboardingConnectionPatch = Partial<
-  Pick<OnboardingConnectionState, 'apiKey' | 'customBaseURL' | 'customModelID'>
->
+export type OnboardingConnectionPatch = Partial<Pick<OnboardingConnectionState, 'apiKey'>>
 
-/**
- * The configured connection onboarding would reuse: the provider's connection without an
- * address, or for a server the one at the given address (any server when none is given).
- */
+/** The configured connection of a provider, which onboarding reuses. */
 export function existingOnboardingConnection(
-  providerID: OnboardingAccess,
-  customBaseURL?: string
+  providerID: OnboardingAccess
 ): AIModelConnection | null {
-  const server = providerID === ONBOARDING_SERVER_PROVIDER
   return (
-    aiModelSettings.value.connections.find(
-      (connection) =>
-        connection.providerID === providerID &&
-        (server
-          ? Boolean(connection.customBaseURL) &&
-            (customBaseURL === undefined || connection.customBaseURL === customBaseURL.trim())
-          : !connection.customBaseURL)
-    ) ?? null
+    aiModelSettings.value.connections.find((connection) => connection.providerID === providerID) ??
+    null
   )
 }
 
@@ -107,26 +69,14 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
   function connection(providerID: OnboardingAccess): OnboardingConnectionState {
     const current = states[providerID]
     if (current) return current
-    const existing = existingOnboardingConnection(providerID)
-    const serverProfile =
-      providerID === ONBOARDING_SERVER_PROVIDER && existing
-        ? aiModelSettings.value.models.find((profile) => profile.connectionId === existing.id)
-        : undefined
-    states[providerID] = {
-      apiKey: '',
-      customBaseURL: existing?.customBaseURL ?? '',
-      customModelID: serverProfile?.customModelID ?? '',
-      test: 'idle',
-      reason: null,
-      account: null
-    }
+    states[providerID] = { apiKey: '', test: 'idle', reason: null }
     return states[providerID]
   }
 
   /** The configured connection matching what is entered now, whose saved key may be used. */
   function savedConnection(providerID: OnboardingAccess): AIModelConnection | null {
     if (isOnboardingAgent(providerID)) return null
-    const saved = existingOnboardingConnection(providerID, connection(providerID).customBaseURL)
+    const saved = existingOnboardingConnection(providerID)
     if (saved && !(saved.id in keyStatuses)) {
       keyStatuses[saved.id] = 'missing'
       void loadKeyStatus(saved.id)
@@ -142,10 +92,8 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
   function ready(providerID: OnboardingAccess): boolean {
     if (isOnboardingAgent(providerID)) return true
     const state = connection(providerID)
-    if (state.test === 'success' || state.account) return true
-    return (
-      providerID !== ONBOARDING_SERVER_PROVIDER && hasSavedKey(providerID) && !state.apiKey.trim()
-    )
+    if (state.test === 'success') return true
+    return hasSavedKey(providerID) && !state.apiKey.trim()
   }
 
   /** Invalidates a finished or running test after the details it checked change. */
@@ -178,9 +126,7 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
         providerID,
         apiKey: state.apiKey.trim() || savedKey || '',
         modelID: plannedModel(providerID)?.modelID ?? '',
-        customModelID: state.customModelID.trim(),
-        customBaseURL: state.customBaseURL.trim(),
-        customAPIType: saved?.customAPIType ?? 'completions'
+        customModelID: ''
       })
       if (!current()) return
       state.test = result.ok ? 'success' : 'error'

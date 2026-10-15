@@ -11,7 +11,7 @@ interface Args {
 }
 
 const plan = planOnboarding(
-  { goals: ['design', 'vision'], access: ['openrouter'], spending: 'existing' },
+  { goals: ['design', 'vision'], access: ['anthropic'] },
   { agentsAvailable: false }
 )
 
@@ -33,7 +33,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const RecommendedOpenRouter: Story = {
+export const RecommendedAnthropic: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('combobox', { name: 'Fast tasks' })).not.toHaveTextContent(

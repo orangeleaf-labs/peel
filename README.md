@@ -28,7 +28,7 @@ Requires macOS 13 or later with current Safari updates, Windows 10 or later, or 
 ## What it does
 
 - **Opens `.fig` and `.pen` files** — read and write native Figma files, open supported Pencil documents from the app or OS file browser, copy & paste nodes between apps
-- **AI builds designs** — describe what you want in chat, 100+ tools create and modify nodes. Connect OpenRouter, Anthropic, OpenAI, Google AI, DeepSeek, Z.ai, MiniMax, or compatible endpoints
+- **AI builds designs** — describe what you want in chat, 100+ tools create and modify nodes. Uses the Anthropic API with your own key, stored in the OS keychain on desktop
 - **Fully programmable** — headless CLI, XPath queries, Figma Plugin API plus an `openpencil` API via `eval`, MCP server for AI agents, and desktop agent integrations for Claude Code, Codex, and Gemini CLI
 - **Lint, convert, and extract tokens** — inspect documents, lint naming/layout/accessibility, convert between supported formats, analyze colors/typography/spacing/clusters, and extract design tokens
 - **Components and variants** — create reusable components, group variants into component sets, insert local assets as instances, and switch variants from the inspector
@@ -132,9 +132,7 @@ Every command supports `--json`. See the [CLI reference](https://openpencil.dev/
 
 ### Built-in chat
 
-Press <kbd>⌘</kbd><kbd>J</kbd> (<kbd>Ctrl</kbd><kbd>J</kbd> on Windows and Linux) to open the AI assistant. It has 100+ tools that can create shapes, set fills and strokes, manage auto-layout, work with components and variables, run boolean operations, analyze design tokens, and export assets. Bring your own API key for OpenRouter, Anthropic, OpenAI, Google AI, DeepSeek, Z.ai, MiniMax, or compatible endpoints. No backend, no account.
-
-Not every provider works in the browser, and not every model streams tool calls correctly. See [BYOK provider & model compatibility](packages/docs/programmable/byok-provider-compatibility.md) for measured results — contributions welcome.
+Press <kbd>⌘</kbd><kbd>J</kbd> (<kbd>Ctrl</kbd><kbd>J</kbd> on Windows and Linux) to open the AI assistant. It has 100+ tools that can create shapes, set fills and strokes, manage auto-layout, work with components and variables, run boolean operations, analyze design tokens, and export assets. Bring your own Anthropic API key; requests go directly to the Anthropic API, and the desktop app keeps the key in the operating system's credential store. No backend, no account.
 
 ### Coding agents (desktop)
 
@@ -244,7 +242,7 @@ bun run tauri dev     # Desktop app (requires Rust)
 | File format   | Kiwi binary + Zstd + ZIP                                                          |
 | Collaboration | Trystero (WebRTC P2P) + Yjs (CRDT)                                                |
 | Desktop       | Tauri v2                                                                          |
-| AI/MCP        | Vercel AI SDK (multi-provider BYOK), MCP SDK, Hono                                |
+| AI/MCP        | Vercel AI SDK (Anthropic provider), MCP SDK, Hono                                 |
 
 ## Acknowledgments
 

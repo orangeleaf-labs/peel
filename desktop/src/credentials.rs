@@ -514,7 +514,7 @@ mod tests {
 
     fn reference() -> CredentialRef {
         CredentialRef {
-            integration_id: "openai-compatible".to_owned(),
+            integration_id: "anthropic".to_owned(),
             profile_id: "default".to_owned(),
             field: "api-key".to_owned(),
         }
@@ -524,7 +524,7 @@ mod tests {
     fn creates_stable_versioned_account_names() {
         assert_eq!(
             account_for(&reference()).expect("valid reference"),
-            "v1:openai-compatible:default:api-key"
+            "v1:anthropic:default:api-key"
         );
     }
 

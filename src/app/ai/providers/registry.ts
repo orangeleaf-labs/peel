@@ -1,58 +1,39 @@
-import { createDeepSeek } from '@ai-sdk/deepseek'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import { createAnthropic } from '@ai-sdk/anthropic'
 
-import type { AIProviderID } from '@open-pencil/core/constants'
+import { IS_TAURI, type AIProviderID } from '@open-pencil/core/constants'
 
-import {
-  createAnthropicCompatibleAdapter,
-  createOpenAICompatibleAdapter
-} from '@/app/ai/providers/compatible'
 import type { ModelProviderAdapter } from '@/app/ai/providers/types'
 
-type DirectProviderID = Exclude<AIProviderID, `acp:${string}` | `harness:${string}`>
+// Anthropic omits CORS headers unless the caller opts in, so browser requests fail with an
+// opaque "failed to fetch". The desktop build goes through tauriFetch and is not subject to CORS.
+const BROWSER_ACCESS_HEADERS = { 'anthropic-dangerous-direct-browser-access': 'true' }
+
+/**
+ * The Anthropic API at its default address. Peel offers no custom base URL, so requests go only
+ * to the host the AI SDK provider is built for.
+ */
+const anthropicAdapter: ModelProviderAdapter = {
+  create(config, runtime) {
+    const provider = createAnthropic({
+      apiKey: config.apiKey,
+      fetch: runtime.fetch,
+      headers: IS_TAURI ? undefined : BROWSER_ACCESS_HEADERS
+    })
+    return provider(config.modelID)
+  }
+}
+
+/** The API providers a model connection can use, which is Anthropic alone. */
+export const DIRECT_PROVIDER_IDS = ['anthropic'] as const satisfies readonly AIProviderID[]
+
+export type DirectProviderID = (typeof DIRECT_PROVIDER_IDS)[number]
 
 const MODEL_PROVIDER_ADAPTERS = {
-  openrouter: {
-    create(config, runtime) {
-      const provider = createOpenRouter({
-        apiKey: config.apiKey,
-        fetch: runtime.fetch,
-        headers: {
-          'X-OpenRouter-Title': 'OpenPencil',
-          'HTTP-Referer': 'https://github.com/open-pencil/open-pencil'
-        }
-      })
-      return provider(config.customModelID.trim() || config.modelID)
-    }
-  },
-  anthropic: createAnthropicCompatibleAdapter(),
-  openai: createOpenAICompatibleAdapter(),
-  google: {
-    create(config, runtime) {
-      return createGoogleGenerativeAI({ apiKey: config.apiKey, fetch: runtime.fetch })(
-        config.modelID
-      )
-    }
-  },
-  deepseek: {
-    create(config, runtime) {
-      return createDeepSeek({ apiKey: config.apiKey, fetch: runtime.fetch })(config.modelID)
-    }
-  },
-  zai: createAnthropicCompatibleAdapter({ baseURL: 'https://api.z.ai/api/anthropic' }),
-  minimax: createOpenAICompatibleAdapter({ baseURL: 'https://api.minimax.io/v1', mode: 'chat' }),
-  'openai-compatible': createOpenAICompatibleAdapter({
-    baseURL: (config) => config.customBaseURL,
-    mode: 'configurable'
-  }),
-  'anthropic-compatible': createAnthropicCompatibleAdapter({
-    baseURL: (config) => config.customBaseURL
-  })
+  anthropic: anthropicAdapter
 } satisfies Record<DirectProviderID, ModelProviderAdapter>
 
-function isDirectProviderID(providerID: AIProviderID): providerID is DirectProviderID {
-  return !providerID.startsWith('acp:') && providerID !== 'harness:pi'
+export function isDirectProviderID(providerID: AIProviderID): providerID is DirectProviderID {
+  return DIRECT_PROVIDER_IDS.some((candidate) => candidate === providerID)
 }
 
 export function modelProviderAdapter(providerID: AIProviderID): ModelProviderAdapter {

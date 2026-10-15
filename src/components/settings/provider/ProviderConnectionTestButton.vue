@@ -25,20 +25,14 @@ const resultMessage = computed(() => {
   switch (reason) {
     case 'missing-api-key':
       return ai.value.connectionTestMissingAPIKey
-    case 'missing-base-url':
-      return ai.value.connectionTestMissingBaseURL
     case 'missing-model':
       return ai.value.connectionTestMissingModel
-    case 'invalid-base-url':
-      return ai.value.connectionTestInvalidBaseURL
     case 'auth':
       return ai.value.connectionTestAuthFailed
     case 'insufficient-credit':
       return ai.value.connectionTestInsufficientCredit
     case 'model-not-found':
       return ai.value.connectionTestModelNotFound
-    case 'api-type':
-      return ai.value.connectionTestAPITypeMismatch
     case 'browser-network':
       return ai.value.connectionTestBrowserNetworkFailed
     case 'network':

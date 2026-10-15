@@ -80,7 +80,7 @@ test('model credential Clear is staged until Save and Cancel preserves the saved
     const models = await import(path)
     const draft = models.createModelProfileDraft()
     draft.name = 'Credential retention test'
-    draft.providerID = 'openai'
+    draft.providerID = 'anthropic'
     draft.customModelID = 'test-only-model'
     const profile = models.saveModelProfileDraft(draft)
     await models.setModelConnectionAPIKey(profile.connectionId, 'test-only-secret')

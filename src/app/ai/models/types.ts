@@ -26,8 +26,6 @@ export type OptionalAIModelRole = Exclude<AIModelRole, 'design'>
 export type AIModelConnection = {
   id: string
   providerID: AIProviderID
-  customBaseURL: string
-  customAPIType: 'completions' | 'responses'
   credentialProfileId: string
 }
 
@@ -64,8 +62,6 @@ export type AIModelProfileDraft = {
   providerID: AIProviderID
   modelID: string
   customModelID: string
-  customBaseURL: string
-  customAPIType: 'completions' | 'responses'
   maxOutputTokens: number
   thinkingLevel: ThinkingLevel
   harnessPermissionMode: HarnessPermissionMode

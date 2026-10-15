@@ -15,51 +15,32 @@ beforeEach(() => {
     version: 1,
     connections: [
       {
-        id: 'connection-proxy',
-        providerID: 'openai-compatible',
-        customBaseURL: 'https://proxy.example/v1',
-        customAPIType: 'responses',
-        credentialProfileId: 'connection-proxy'
-      },
-      {
-        id: 'connection-openai',
-        providerID: 'openai',
-        customBaseURL: '',
-        customAPIType: 'completions',
-        credentialProfileId: 'connection-openai'
+        id: 'connection-anthropic',
+        providerID: 'anthropic',
+        credentialProfileId: 'connection-anthropic'
       }
     ],
     models: [
       {
-        id: 'model-proxy',
-        name: 'Proxy',
-        connectionId: 'connection-proxy',
-        modelID: '',
-        customModelID: 'team/design',
+        id: 'model-sonnet',
+        name: 'Sonnet',
+        connectionId: 'connection-anthropic',
+        modelID: 'claude-sonnet-5',
+        customModelID: '',
         maxOutputTokens: 16_384,
         thinkingLevel: 'default',
         capabilities: ['tools']
       }
     ],
-    assignments: { design: 'model-proxy', review: null, fast: null, vision: null }
+    assignments: { design: 'model-sonnet', review: null, fast: null, vision: null }
   })
 })
 
 afterEach(() => replaceAIModelSettings(original))
 
 describe('existingOnboardingConnection', () => {
-  test('matches a server only at the address being entered', () => {
-    expect(existingOnboardingConnection('openai-compatible')?.id).toBe('connection-proxy')
-    expect(
-      existingOnboardingConnection('openai-compatible', ' https://proxy.example/v1 ')?.id
-    ).toBe('connection-proxy')
-    expect(existingOnboardingConnection('openai-compatible', 'http://localhost:11434/v1')).toBe(
-      null
-    )
-  })
-
-  test('matches an API account only without a custom address', () => {
-    expect(existingOnboardingConnection('openai')?.id).toBe('connection-openai')
-    expect(existingOnboardingConnection('anthropic')).toBeNull()
+  test('reuses the Anthropic connection that is already configured', () => {
+    expect(existingOnboardingConnection('anthropic')?.id).toBe('connection-anthropic')
+    expect(existingOnboardingConnection('acp:codex')).toBeNull()
   })
 })

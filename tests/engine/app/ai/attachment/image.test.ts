@@ -71,7 +71,7 @@ describe('image attachment analysis', () => {
           role: {
             requestedRole: 'vision',
             profile: { maxOutputTokens: 8000, thinkingLevel: 'low' },
-            connection: { providerID: 'openrouter' }
+            connection: { providerID: 'anthropic' }
           }
         }) as never,
       inspect: async (options) => {
@@ -89,10 +89,10 @@ describe('image attachment analysis', () => {
 
     expect(findings).toBe('Use a tighter grid and stronger heading contrast.')
     const request = requests[0] as {
-      providerOptions?: unknown
+      reasoning?: unknown
       messages: Array<{ content: Array<{ type: string; data?: Uint8Array }> }>
     }
-    expect(request.providerOptions).toEqual({ openrouter: { reasoning: { effort: 'low' } } })
+    expect(request.reasoning).toBe('low')
     expect(request.messages[0]?.content.map((part) => part.type)).toEqual([
       'text',
       'file',

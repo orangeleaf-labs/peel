@@ -85,7 +85,7 @@ OpenPencil is local-first, but some features reach the network. The desktop app 
 | Feature | Where it connects |
 | --- | --- |
 | Update checks (desktop) | GitHub Releases, for the latest version number |
-| AI chat and image tools | The provider you configure, with your own key; the model list comes from models.dev |
+| AI chat and image tools | The Anthropic API (`api.anthropic.com`), with your own key; the model list ships with the app |
 | Collaboration rooms | Other people in the room directly; public brokers introduce peers, and a TURN relay carries traffic when a direct connection is not possible |
 | Cloud storage | The storage provider you configure |
 | Fonts | Google Fonts, which can supply a font a document uses that is not installed |

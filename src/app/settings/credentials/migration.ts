@@ -8,7 +8,6 @@ import type { CredentialRef, CredentialStore } from '@/app/settings/credentials/
 const STORAGE_PREFIX = 'open-pencil:'
 const MIGRATION_VERSION_KEY = `${STORAGE_PREFIX}credential-migration`
 const MIGRATION_VERSION = '1'
-const LEGACY_OPENROUTER_KEY = `${STORAGE_PREFIX}openrouter-api-key`
 
 export function providerCredentialRef(
   providerId: AIProviderID,
@@ -31,7 +30,6 @@ type LegacyCredential = {
 
 function legacyCredentials(storage: Storage): LegacyCredential[] {
   const credentials: LegacyCredential[] = [
-    { storageKey: LEGACY_OPENROUTER_KEY, reference: providerCredentialRef('openrouter') },
     { storageKey: `${STORAGE_PREFIX}pexels-api-key`, reference: PEXELS_CREDENTIAL },
     { storageKey: `${STORAGE_PREFIX}unsplash-access-key`, reference: UNSPLASH_CREDENTIAL }
   ]

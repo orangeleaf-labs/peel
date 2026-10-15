@@ -10,32 +10,16 @@ export type ProviderConnectionTestResult =
 
 export type ProviderConnectionTestFailureReason =
   | 'missing-api-key'
-  | 'missing-base-url'
   | 'missing-model'
-  | 'invalid-base-url'
   | 'auth'
   | 'insufficient-credit'
   | 'model-not-found'
-  | 'api-type'
   | 'browser-network'
   | 'network'
   | 'unknown'
 
-function isCompatibleProvider(providerID: ModelConfig['providerID']): boolean {
-  return providerID === 'openai-compatible' || providerID === 'anthropic-compatible'
-}
-
 function validateConfig(config: ModelConfig): ProviderConnectionTestFailureReason | null {
   if (!config.apiKey.trim()) return 'missing-api-key'
-  if (isCompatibleProvider(config.providerID)) {
-    if (!config.customBaseURL.trim()) return 'missing-base-url'
-    try {
-      const url = new URL(config.customBaseURL.trim())
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') return 'invalid-base-url'
-    } catch {
-      return 'invalid-base-url'
-    }
-  }
   if (!resolveLanguageModelID(config).trim()) return 'missing-model'
   return null
 }
@@ -52,11 +36,7 @@ function classifyStatus(
   if (status === 401 || status === 403) return 'auth'
   if (status === 404) return 'model-not-found'
   if (status !== 400 && status !== 405) return null
-  if (text.includes('model')) return 'model-not-found'
-  if (text.includes('responses') || text.includes('chat') || text.includes('endpoint')) {
-    return 'api-type'
-  }
-  return null
+  return text.includes('model') ? 'model-not-found' : null
 }
 
 function classifyMessage(text: string): ProviderConnectionTestFailureReason | null {

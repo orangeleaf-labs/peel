@@ -45,12 +45,12 @@ export class ChatHarness {
     await this.page.waitForFunction(() => document.documentElement.dataset.theme === 'dark')
   }
 
-  async configureOpenRouter(apiKey: string): Promise<void> {
+  async configureAnthropic(apiKey: string): Promise<void> {
     await this.chatTab.click()
     await this.page.getByTestId('provider-setup-open-settings').click()
     await this.page.locator('[data-model-id]').first().click()
     await this.page.getByTestId('settings-model-provider').click()
-    await this.page.getByRole('option', { name: 'OpenRouter' }).click()
+    await this.page.getByRole('option', { name: 'Anthropic' }).click()
     await this.page.getByLabel('Name').fill('Claude Sonnet')
     await this.apiKeyInput.fill(apiKey)
     await this.page.getByRole('button', { name: 'Save model' }).click()

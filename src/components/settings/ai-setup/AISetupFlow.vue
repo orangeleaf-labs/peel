@@ -6,7 +6,6 @@ import { IS_TAURI } from '@open-pencil/core/constants'
 import { useI18n } from '@open-pencil/vue'
 
 import type { AISetupEntry } from '@/app/ai/models/settings/onboarding/dialog'
-import type { OnboardingAccess } from '@/app/ai/models/settings/onboarding/plan'
 import { AI_SETUP_STEPS, useAIOnboarding } from '@/app/ai/models/settings/onboarding/use'
 import SettingsSaveFeedback from '@/components/settings/layout/SettingsSaveFeedback.vue'
 import AppButton from '@/components/ui/button/AppButton.vue'
@@ -76,11 +75,6 @@ const header = computed(() => {
   }
 })
 
-/** Runs in the click handler, so the browser allows the sign-in popup. */
-function signIn(providerID: OnboardingAccess): void {
-  onboarding.signIn(providerID, { keyLabel: 'OpenPencil' })
-}
-
 function back(): void {
   if (onboarding.back()) return
   if (entry === 'welcome') phase.value = 'welcome'
@@ -145,29 +139,12 @@ async function finish(): Promise<void> {
 
       <template v-else-if="step === 'connect'">
         <AppAlert
-          v-if="gaps.length && answers.spending === 'metered'"
-          :heading="ai.aiSetupGapCoveredByOpenRouter"
-          data-slot="setup-gap"
-        >
-          <template #actions>
-            <AppButton size="xs" @click="answers.spending = 'existing'">
-              {{ ai.aiSetupGapRemoveOpenRouter }}
-            </AppButton>
-          </template>
-        </AppAlert>
-        <AppAlert
-          v-else-if="gaps.length"
+          v-if="gaps.length"
           :tone="hasDesign ? 'info' : 'warning'"
           :heading="gaps.includes('design') ? ai.aiSetupGapDesign : ai.aiSetupGapVision"
           :description="hasDesign ? ai.aiSetupGapContinue : ai.aiSetupNothingDescription"
           data-slot="setup-gap"
-        >
-          <template #actions>
-            <AppButton size="xs" variant="outline" @click="answers.spending = 'metered'">
-              {{ ai.aiSetupGapAddOpenRouter }}
-            </AppButton>
-          </template>
-        </AppAlert>
+        />
         <AppAlert
           v-if="hasDesign && !recommended.connections.length"
           tone="success"
@@ -179,19 +156,11 @@ async function finish(): Promise<void> {
           :provider-i-d="providerID"
           :state="onboarding.connection(providerID)"
           :has-saved-key="onboarding.hasSavedKey(providerID)"
-          :sign-in-status="onboarding.signInStatus(providerID)"
-          :server-vision="answers.serverVision ?? false"
           :agent-setup="onboarding.agentSetup(providerID)"
           :pi-setup="onboarding.piSetup(providerID)"
-          :recommended="!answers.access.includes(providerID)"
           :disabled="busy"
           @update="onboarding.updateConnection(providerID, $event)"
           @test="onboarding.testConnection(providerID)"
-          @sign-in="signIn(providerID)"
-          @reopen-sign-in="onboarding.reopenSignIn(providerID)"
-          @cancel-sign-in="onboarding.cancelSignIn(providerID)"
-          @sign-out="onboarding.signOut(providerID)"
-          @server-vision="answers.serverVision = $event"
           @check-agent="onboarding.refreshAgents()"
           @install-agent="onboarding.installAgent(providerID)"
           @install-bridge="onboarding.setupCanvasBridge()"

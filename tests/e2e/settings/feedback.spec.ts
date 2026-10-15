@@ -166,7 +166,7 @@ test('a partial model save is explained and retry does not duplicate the profile
   await page.getByTestId('settings-add-model').click()
   await page.getByLabel('Name', { exact: true }).fill('Partial model')
   await page.getByTestId('settings-model-provider').click()
-  await page.getByRole('option', { name: 'Google AI', exact: true }).click()
+  await page.getByRole('option', { name: 'Anthropic', exact: true }).click()
   await page.getByLabel('Model ID', { exact: true }).click()
   await page.getByRole('option').first().click()
   await page.getByTestId('provider-settings-api-key').fill('test-only-key')
@@ -196,7 +196,7 @@ test('the sole design-capable profile cannot be deleted even with other profiles
     if (!design) throw new Error('Missing Design profile')
     const draft = models.createModelProfileDraft()
     draft.name = 'Text only'
-    draft.providerID = 'google'
+    draft.providerID = 'anthropic'
     draft.customModelID = 'text-only'
     draft.capabilities = []
     models.saveModelProfileDraft(draft)

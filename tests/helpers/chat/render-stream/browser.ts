@@ -12,7 +12,7 @@ export function installBrowserRenderStream(scenario: RenderStreamScenario) {
     createToolLoopTransport({
       store,
       model,
-      providerID: 'openrouter',
+      providerID: 'anthropic',
       effectiveModelID: 'streaming-jsx',
       maxOutputTokens: 4096,
       thinkingLevel: () => 'default'

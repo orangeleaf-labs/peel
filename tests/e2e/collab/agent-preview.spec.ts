@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test'
 
-import { routeModelCatalog } from '#tests/helpers/chat/catalog'
 import { ChatHarness } from '#tests/helpers/chat/harness'
 import { documentState, previewKey } from '#tests/helpers/chat/render-preview'
 import { installRenderStream } from '#tests/helpers/chat/render-stream'
@@ -36,10 +35,9 @@ test("collaborators see the AI chat's streamed JSX on their own canvas before it
       .poll(() => host?.page.evaluate(() => window.openPencil?.test?.collab?.peerCount()))
       .toBe(1)
 
-    await routeModelCatalog(host.page)
     await routeVisionModel(host.page)
     const chat = new ChatHarness(host.page)
-    await chat.configureOpenRouter('sk-or-test-key-12345')
+    await chat.configureAnthropic('sk-ant-test-key-12345')
     const stream = await installRenderStream(host.page, scenario)
     const guestPage = guest.page
     try {

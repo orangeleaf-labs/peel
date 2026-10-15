@@ -9,7 +9,7 @@ Pulsa <kbd>⌘</kbd><kbd>J</kbd> o <kbd>Ctrl</kbd><kbd>J</kbd>. El asistente pue
 
 ## Configurar modelos
 
-La primera vez que abres OpenPencil, la configuración guiada pregunta en qué debe ayudarte la IA y qué usas ya: un agente de programación como Claude Code, Codex o Gemini CLI en la aplicación de escritorio, una cuenta de API o un servidor local o de la empresa. Conecta ese acceso y lo asigna a los roles **Design agent** y **Vision**, sin tocar lo que configuraste a mano. Con OpenRouter puedes iniciar sesión en lugar de pegar una clave de API. Puedes omitirla y volver a ejecutarla desde **Ajustes → IA y agentes → Iniciar la configuración guiada**. Para configurar los modelos a mano:
+La primera vez que abres OpenPencil, la configuración guiada pregunta en qué debe ayudarte la IA y qué usas ya: un agente de programación como Claude Code, Codex o Gemini CLI en la aplicación de escritorio o una clave de la API de Anthropic. Conecta ese acceso y lo asigna a los roles **Design agent** y **Vision**, sin tocar lo que configuraste a mano. Puedes omitirla y volver a ejecutarla desde **Ajustes → IA y agentes → Iniciar la configuración guiada**. Para configurar los modelos a mano:
 
 1. Abre el chat.
 2. Selecciona el icono de ajustes.
@@ -19,9 +19,7 @@ Puedes guardar varios perfiles y asignarlos por separado a diseño, revisiones, 
 
 ## Proveedores
 
-OpenPencil admite conexiones compatibles con OpenAI y Anthropic, además de OpenRouter, Google, Z.ai y proveedores locales. Los modelos y capacidades disponibles dependen de cada servicio.
-
-OpenPencil no usa un servidor intermediario. Las solicitudes se envían directamente al proveedor; en el navegador se aplican sus políticas CORS. La fiabilidad de las llamadas de herramientas en flujo continuo también puede variar entre despliegues. Consulta [Compatibilidad BYOK](/programmable/byok-provider-compatibility) para ver mediciones y pasos de reproducción.
+Peel usa únicamente la API de Anthropic. Obtén una clave en [console.anthropic.com](https://console.anthropic.com) y elige un modelo Claude de la lista integrada, que viene con la aplicación, de modo que elegir modelo no contacta con ningún otro servicio. Las solicitudes van directamente a `api.anthropic.com`; no hay URL base personalizada. En la aplicación de escritorio, la clave se guarda en el almacén de credenciales del sistema operativo.
 
 ## Agentes ACP y MCP remoto
 

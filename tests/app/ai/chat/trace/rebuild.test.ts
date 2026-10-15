@@ -79,7 +79,7 @@ test('every recorded step rebuilds from the conversation to the request the mode
   const recorder = createRunRecorder(traces.store)
   const transport = createToolLoopTransport({
     store,
-    providerID: 'openai',
+    providerID: 'anthropic',
     model,
     effectiveModelID: 'test',
     maxOutputTokens: 100,

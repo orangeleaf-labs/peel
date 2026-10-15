@@ -9,7 +9,7 @@ description: Integrierter AI-Assistent mit mehr als 90 Werkzeugen zum Erstellen 
 
 ## Einrichtung
 
-Beim ersten Start fragt die geführte Einrichtung, wobei die KI helfen soll und was bereits vorhanden ist: ein Coding-Agent wie Claude Code, Codex oder Gemini CLI in der Desktop-App, ein API-Konto oder ein lokaler bzw. Firmenserver. Sie verbindet diesen Zugang und weist ihn den Rollen **Design agent** und **Vision** zu; manuell Eingerichtetes bleibt erhalten. Bei OpenRouter genügt eine Anmeldung statt eines eingefügten API-Schlüssels. Sie lässt sich überspringen und jederzeit über **Einstellungen → KI und Agenten → Geführte Einrichtung starten** erneut ausführen. Modelle manuell einrichten:
+Beim ersten Start fragt die geführte Einrichtung, wobei die KI helfen soll und was bereits vorhanden ist: ein Coding-Agent wie Claude Code, Codex oder Gemini CLI in der Desktop-App oder ein Anthropic-API-Schlüssel. Sie verbindet diesen Zugang und weist ihn den Rollen **Design agent** und **Vision** zu; manuell Eingerichtetes bleibt erhalten. Sie lässt sich überspringen und jederzeit über **Einstellungen → KI und Agenten → Geführte Einrichtung starten** erneut ausführen. Modelle manuell einrichten:
 
 1. AI-Chat öffnen.
 2. Einstellungssymbol wählen.
@@ -20,18 +20,7 @@ Mehrere Modelle können getrennt für Gestaltung, Prüfung, schnelle Aufgaben un
 
 ### Anbieter
 
-| Anbieter | Beispiele | Einrichtung |
-|----------|-----------|-------------|
-| **OpenRouter** | Claude, GPT, Gemini, DeepSeek, Qwen und weitere | API-Schlüssel von [openrouter.ai](https://openrouter.ai) |
-| **Anthropic** | Claude Sonnet 4.6, Claude Opus 4.6 | API-Schlüssel von [console.anthropic.com](https://console.anthropic.com) |
-| **OpenAI** | GPT-5.3 Codex, GPT-4.1, o3, o4-mini | API-Schlüssel von [platform.openai.com](https://platform.openai.com) |
-| **Google AI** | Gemini 3.1 Pro, Gemini 3 Flash | API-Schlüssel von [aistudio.google.dev](https://aistudio.google.dev) |
-| **Z.ai** | GLM-5.1, GLM-5, GLM-4.7 und GLM-4.5 | API-Schlüssel laut [Z.ai-Dokumentation](https://docs.z.ai/devpack/quick-start) |
-| **MiniMax** | MiniMax M3, M2.7, M2.7-highspeed, M2.5 und M2.1 | API-Schlüssel von [platform.minimax.io](https://platform.minimax.io/user-center/basic-information/interface-key) |
-| **OpenAI-kompatibel** | Endpunkt im OpenAI-API-Format | Eigene Basisadresse und Schlüssel |
-| **Anthropic-kompatibel** | Endpunkt im Anthropic-API-Format | Eigene Basisadresse und Schlüssel |
-
-Anfragen gehen direkt an den Anbieter. Im Browser gelten dessen CORS-Regeln. Bereitstellungen unterscheiden sich darin, wie zuverlässig Werkzeugaufrufe gestreamt werden. Messergebnisse stehen unter [BYOK-Kompatibilität](/programmable/byok-provider-compatibility).
+Peel nutzt ausschließlich die Anthropic-API. Den API-Schlüssel gibt es unter [console.anthropic.com](https://console.anthropic.com); das Claude-Modell wird aus der mitgelieferten Liste gewählt, sodass für die Modellauswahl kein anderer Dienst kontaktiert wird. Anfragen gehen direkt an `api.anthropic.com`; eine eigene Basisadresse gibt es nicht. In der Desktop-App liegt der Schlüssel im Anmeldedatenspeicher des Betriebssystems.
 
 ### Externe MCP-Verbindungen
 

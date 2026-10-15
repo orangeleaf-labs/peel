@@ -73,7 +73,7 @@ export async function injectToolLoopTransport(page: Page): Promise<void> {
     api.setChatTransport(() =>
       createToolLoopTransport({
         store,
-        providerID: 'openai',
+        providerID: 'anthropic',
         model,
         effectiveModelID: 'scripted',
         maxOutputTokens: 1000,

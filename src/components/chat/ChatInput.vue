@@ -9,6 +9,7 @@ import { MAX_IMAGE_ATTACHMENTS } from '@/app/ai/attachment/image/types'
 import type { ChatSubmission } from '@/app/ai/chat/submission/types'
 import { useAIChat } from '@/app/ai/chat/use'
 import { designModelProfile } from '@/app/ai/models'
+import { catalogModel } from '@/app/ai/models/catalog'
 import { openSettingsDialog } from '@/app/settings/dialog'
 import ChatNodePreview from '@/components/chat/ChatNodePreview.vue'
 import ChatProfileSelect from '@/components/chat/ChatProfileSelect.vue'
@@ -98,9 +99,6 @@ const agentName = computed(() => {
   const agentId = providerID.value.replace('acp:', '')
   return ACP_AGENTS.find((a) => a.id === agentId)?.name ?? agentId
 })
-const isCustomProvider = computed(
-  () => providerID.value === 'openai-compatible' || providerID.value === 'anthropic-compatible'
-)
 const customModelName = computed(() => customModelID.value.trim())
 const usesCustomModel = computed(
   () => !!providerDef.value.supportsCustomModel && !!customModelName.value
@@ -108,8 +106,7 @@ const usesCustomModel = computed(
 
 const selectedModelName = computed(() => {
   if (usesCustomModel.value) return customModelName.value
-  if (isCustomProvider.value) return 'No model'
-  return providerDef.value.models.find((m) => m.id === modelID.value)?.name ?? modelID.value
+  return catalogModel(providerID.value, modelID.value)?.name ?? modelID.value
 })
 
 // The composer switches configured Design-role profiles; raw provider model selection lives in Settings.

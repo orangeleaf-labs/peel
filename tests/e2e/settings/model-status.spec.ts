@@ -15,8 +15,8 @@ test('an unreadable saved key marks its model row instead of failing Settings', 
   await openModels(page)
   await page.locator('[data-model-id]').first().click()
   await page.getByTestId('settings-model-provider').click()
-  await page.getByRole('option', { name: 'OpenRouter' }).click()
-  await page.getByTestId('provider-settings-api-key').fill('sk-or-unreadable')
+  await page.getByRole('option', { name: 'Anthropic' }).click()
+  await page.getByTestId('provider-settings-api-key').fill('sk-ant-unreadable')
   await page.getByRole('button', { name: 'Save model' }).click()
   await expect(page.getByTestId('settings-model-list')).toContainText('Connected')
 

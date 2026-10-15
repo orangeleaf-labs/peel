@@ -202,36 +202,6 @@ async function remove() {
               <div class="h-px flex-1 bg-border" />
             </div>
 
-            <ProviderSettingsField
-              v-if="providerDef.supportsCustomBaseURL"
-              v-slot="{ control }"
-              :label="ai.baseURL"
-              :hint="settings.baseURLHint"
-              :error="fieldErrors.baseURL"
-              @blur="feedback.blur('baseURL')"
-            >
-              <ProviderSettingsInput
-                v-bind="control"
-                v-model="draft.customBaseURL"
-                :aria-label="ai.baseURL"
-                placeholder="http://localhost:11434/v1"
-              />
-            </ProviderSettingsField>
-
-            <ProviderSettingsField
-              v-if="draft.providerID === 'openai-compatible'"
-              :label="ai.apiType"
-            >
-              <AppSelect
-                v-model="draft.customAPIType"
-                :label="ai.apiType"
-                :options="[
-                  { value: 'completions', label: ai.completions },
-                  { value: 'responses', label: ai.responses }
-                ]"
-              />
-            </ProviderSettingsField>
-
             <ProviderSettingsKeyField
               v-model="keyInput"
               :label="ai.apiKey"

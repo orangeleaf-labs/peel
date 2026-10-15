@@ -2,6 +2,7 @@ import { uniq } from 'es-toolkit'
 
 import { AI_PROVIDERS, type AIProviderID, type ModelOption } from '@open-pencil/core/constants'
 
+import { catalogModels } from '@/app/ai/models/catalog'
 import { modelProviderName } from '@/app/ai/models/provider-name'
 import type { AIModelCapability, AIModelProfileId, AIModelRole } from '@/app/ai/models/types'
 
@@ -16,46 +17,27 @@ export const ONBOARDING_AGENTS = [
   'acp:gemini-cli',
   'harness:pi'
 ] as const
-/** API accounts, in the order onboarding prefers them when several are available. */
-export const ONBOARDING_API_PROVIDERS = ['anthropic', 'openai', 'google', 'openrouter'] as const
-/** Further API accounts the catalog supports, offered behind "More providers". */
-export const ONBOARDING_MORE_API_PROVIDERS = ['deepseek', 'zai', 'minimax'] as const
-/** A local model server or a company proxy that speaks the OpenAI API. */
-export const ONBOARDING_SERVER_PROVIDER = 'openai-compatible'
-/** One account for models from several vendors, recommended when no API account exists yet. */
-export const ONBOARDING_METERED_PROVIDER = 'openrouter'
+/** The API account onboarding connects; Peel talks to the Anthropic API only. */
+export const ONBOARDING_API_PROVIDERS = ['anthropic'] as const
 
 export type OnboardingAccess =
   | (typeof ONBOARDING_AGENTS)[number]
   | (typeof ONBOARDING_API_PROVIDERS)[number]
-  | (typeof ONBOARDING_MORE_API_PROVIDERS)[number]
-  | typeof ONBOARDING_SERVER_PROVIDER
 
-const ONBOARDING_ACCESS = new Set<string>([
-  ...ONBOARDING_AGENTS,
-  ...ONBOARDING_API_PROVIDERS,
-  ...ONBOARDING_MORE_API_PROVIDERS,
-  ONBOARDING_SERVER_PROVIDER
-])
+const ONBOARDING_ACCESS = new Set<string>([...ONBOARDING_AGENTS, ...ONBOARDING_API_PROVIDERS])
 
 export function isOnboardingAccess(providerID: string): providerID is OnboardingAccess {
   return ONBOARDING_ACCESS.has(providerID)
 }
 
-export type OnboardingSpending = 'existing' | 'metered'
-
 export interface OnboardingAnswers {
   goals: OnboardingGoal[]
   access: OnboardingAccess[]
-  /** `metered` lets setup add OpenRouter for goals nothing selected covers. */
-  spending: OnboardingSpending
-  /** The person says their server's model can read images. */
-  serverVision?: boolean
 }
 
 export interface PlannedModel {
   providerID: AIProviderID
-  /** Catalog model ID; empty when the connection supplies its own model (server, agent). */
+  /** Catalog model ID; empty when the connection supplies its own model (an agent). */
   modelID: string
   name: string
   capabilities: AIModelCapability[]
@@ -109,10 +91,6 @@ function isAgentModel(model: PlannedModel | null): boolean {
   return Boolean(model && isOnboardingAgent(model.providerID))
 }
 
-function catalogModels(providerID: AIProviderID): ModelOption[] {
-  return AI_PROVIDERS.find((definition) => definition.id === providerID)?.models ?? []
-}
-
 function fromCatalog(providerID: AIProviderID, model: ModelOption): PlannedModel {
   return {
     providerID,
@@ -122,15 +100,7 @@ function fromCatalog(providerID: AIProviderID, model: ModelOption): PlannedModel
   }
 }
 
-function plannedModel(providerID: OnboardingAccess, serverVision = false): PlannedModel {
-  if (providerID === ONBOARDING_SERVER_PROVIDER) {
-    return {
-      providerID,
-      modelID: '',
-      name: modelProviderName(providerID),
-      capabilities: serverVision ? ['tools', 'vision'] : ['tools']
-    }
-  }
+function plannedModel(providerID: OnboardingAccess): PlannedModel {
   if (isOnboardingAgent(providerID)) {
     return { providerID, modelID: '', name: modelProviderName(providerID), capabilities: ['tools'] }
   }
@@ -157,9 +127,13 @@ function availableAccess(answers: OnboardingAnswers, options: PlanOptions): Onbo
   return answers.access.filter((access) => options.agentsAvailable || !isOnboardingAgent(access))
 }
 
-/** A configured model stays while its access is still selected or onboarding cannot offer it. */
+/**
+ * A configured model stays while its access is still selected or onboarding cannot offer it.
+ * An API profile that names no model, such as the fresh-install placeholder, is never kept.
+ */
 function keepable(model: PlannedModel | null, access: OnboardingAccess[]): model is PlannedModel {
   if (!model) return false
+  if (!model.modelID && !isOnboardingAgent(model.providerID)) return false
   return !isOnboardingAccess(model.providerID) || access.includes(model.providerID)
 }
 
@@ -169,44 +143,24 @@ export function canFollowDesign(role: AIModelRole, design: PlannedModel | null):
   return role !== 'vision' || hasVision(design)
 }
 
-function planDesign(
-  answers: OnboardingAnswers,
-  access: OnboardingAccess[],
-  current: PlannedModel | null
-) {
+function planDesign(access: OnboardingAccess[], current: PlannedModel | null) {
   if (keepable(current, access)) return current
-  const preferred: OnboardingAccess[] = [
-    ...ONBOARDING_AGENTS,
-    ...ONBOARDING_API_PROVIDERS,
-    ...ONBOARDING_MORE_API_PROVIDERS,
-    ONBOARDING_SERVER_PROVIDER
-  ]
+  const preferred: OnboardingAccess[] = [...ONBOARDING_AGENTS, ...ONBOARDING_API_PROVIDERS]
   const existing = preferred.find((providerID) => access.includes(providerID))
-  if (existing) return plannedModel(existing, answers.serverVision)
-  return answers.spending === 'metered' ? plannedModel(ONBOARDING_METERED_PROVIDER) : null
+  return existing ? plannedModel(existing) : null
 }
 
 function planVision(
-  answers: OnboardingAnswers,
   design: PlannedModel | null,
   access: OnboardingAccess[],
   current: PlannedRole
 ): PlannedRole {
   if (current !== null && current !== 'design' && keepable(current, access)) return current
   if (canFollowDesign('vision', design)) return 'design'
-  // A local server that reads images is preferred over a paid account.
-  const candidates: OnboardingAccess[] = [
-    ONBOARDING_SERVER_PROVIDER,
-    ...ONBOARDING_API_PROVIDERS,
-    ...ONBOARDING_MORE_API_PROVIDERS
-  ]
-  const existing = candidates
-    .filter((providerID) => access.includes(providerID))
-    .map((providerID) => plannedModel(providerID, answers.serverVision))
+  const existing = ONBOARDING_API_PROVIDERS.filter((providerID) => access.includes(providerID))
+    .map((providerID) => plannedModel(providerID))
     .find(hasVision)
   if (existing) return existing
-  const metered = plannedModel(ONBOARDING_METERED_PROVIDER)
-  if (answers.spending === 'metered' && hasVision(metered)) return metered
   // Nothing new covers visual review, so a configured vision model stays as it is; inheriting
   // from a design model that cannot accept images is not possible.
   return current === 'design' ? null : current
@@ -268,10 +222,10 @@ export function planOnboarding(answers: OnboardingAnswers, options: PlanOptions)
   const access = availableAccess(answers, options)
   const current = options.current ?? NO_CURRENT
   const design = answers.goals.includes('design')
-    ? planDesign(answers, access, current.design)
+    ? planDesign(access, current.design)
     : current.design
   const vision = answers.goals.includes('vision')
-    ? planVision(answers, design, access, current.vision)
+    ? planVision(design, access, current.vision)
     : current.vision
   const roles = {
     design,
@@ -296,9 +250,9 @@ export function coversGoals(plan: OnboardingPlan, goals: OnboardingGoal[]): bool
   return goals.every((goal) => plan[goal] !== null)
 }
 
-/** Requested goals that the access the person selected cannot cover without OpenRouter. */
+/** Requested goals that the access the person selected cannot cover. */
 export function uncoveredGoals(answers: OnboardingAnswers, options: PlanOptions): OnboardingGoal[] {
-  const plan = planOnboarding({ ...answers, spending: 'existing' }, options)
+  const plan = planOnboarding(answers, options)
   return answers.goals.filter((goal) => plan[goal] === null)
 }
 
@@ -314,7 +268,7 @@ export function roleChoiceKey(choice: PlannedRole): string {
 
 /**
  * Choices for a role: configured models, every suitable catalog model of a connected provider,
- * an agent or server for the design role, and for the other roles the design model or nothing.
+ * an agent for the design role, and for the other roles the design model or nothing.
  */
 export function roleOptions(
   role: AIModelRole,
@@ -325,7 +279,7 @@ export function roleOptions(
   // Planned models come first so a provider whose catalog lists no capabilities still offers one.
   const candidates: PlannedModel[] = [...configured, ...roleModels(plan)]
   for (const providerID of plan.connections) {
-    if (isOnboardingAgent(providerID) || providerID === ONBOARDING_SERVER_PROVIDER) {
+    if (isOnboardingAgent(providerID)) {
       candidates.push(
         roleModels(plan).find((model) => model.providerID === providerID) ??
           plannedModel(providerID)

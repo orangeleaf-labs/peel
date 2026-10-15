@@ -81,7 +81,7 @@ test('stop condition, warnings and limit detection share the budget captured per
     aiToolOverrides.value = {}
     const transport = createToolLoopTransport({
       store,
-      providerID: 'openai',
+      providerID: 'anthropic',
       model,
       effectiveModelID: 'test',
       maxOutputTokens: 100,

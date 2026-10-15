@@ -9,7 +9,7 @@ Premi <kbd>⌘</kbd><kbd>J</kbd> o <kbd>Ctrl</kbd><kbd>J</kbd>. L’assistente p
 
 ## Configurare i modelli
 
-Al primo avvio, la configurazione guidata chiede in cosa deve aiutarti l’IA e cosa usi già: un agente di programmazione come Claude Code, Codex o Gemini CLI nell’app desktop, un account API o un server locale o aziendale. Collega quell’accesso e lo assegna ai ruoli **Design agent** e **Vision**, lasciando invariato ciò che hai configurato a mano. Con OpenRouter puoi accedere invece di incollare una chiave API. Puoi saltarla e riavviarla da **Impostazioni → IA e agenti → Avvia la configurazione guidata**. Per configurare i modelli a mano:
+Al primo avvio, la configurazione guidata chiede in cosa deve aiutarti l’IA e cosa usi già: un agente di programmazione come Claude Code, Codex o Gemini CLI nell’app desktop o una chiave API di Anthropic. Collega quell’accesso e lo assegna ai ruoli **Design agent** e **Vision**, lasciando invariato ciò che hai configurato a mano. Puoi saltarla e riavviarla da **Impostazioni → IA e agenti → Avvia la configurazione guidata**. Per configurare i modelli a mano:
 
 1. Apri la chat.
 2. Seleziona l’icona delle impostazioni.
@@ -19,9 +19,7 @@ Puoi salvare più profili e assegnarli separatamente a design, revisioni, attivi
 
 ## Provider
 
-OpenPencil supporta connessioni compatibili con OpenAI e Anthropic, oltre a OpenRouter, Google, Z.ai e provider locali.
-
-Non usa un server intermedio. Le richieste vengono inviate direttamente al provider; nel browser si applicano le sue regole CORS. L’affidabilità delle chiamate agli strumenti in streaming può variare tra i deployment. Consulta la [compatibilità BYOK](/programmable/byok-provider-compatibility).
+Peel usa esclusivamente l’API di Anthropic. Ottieni una chiave su [console.anthropic.com](https://console.anthropic.com) e scegli un modello Claude dall’elenco integrato nell’app, così la scelta del modello non contatta altri servizi. Le richieste vanno direttamente a `api.anthropic.com`; non è previsto un URL di base personalizzato. Nell’app desktop la chiave è conservata nell’archivio delle credenziali del sistema operativo.
 
 ## Agenti ACP e MCP remoto
 

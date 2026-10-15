@@ -1,9 +1,5 @@
 const BROWSER_PERSISTENCE_KEY = 'open-pencil:credential-persistence'
-const LEGACY_CREDENTIAL_KEYS = [
-  'open-pencil:openrouter-api-key',
-  'open-pencil:pexels-api-key',
-  'open-pencil:unsplash-access-key'
-]
+const LEGACY_CREDENTIAL_KEYS = ['open-pencil:pexels-api-key', 'open-pencil:unsplash-access-key']
 
 export function browserCredentialStorage(): Storage | null {
   return 'window' in globalThis ? window.localStorage : null

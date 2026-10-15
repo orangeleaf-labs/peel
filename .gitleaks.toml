@@ -30,12 +30,6 @@ paths = ['''packages/vue/src/editor/commands/registry\.ts''']
 regexes = ['''keybinding:\s*['\"][^'\"]+['\"]''']
 
 [[allowlists]]
-description = "Documented dummy OpenRouter test key"
-regexTarget = "line"
-paths = ['''tests/e2e/chat/panel\.spec\.ts''']
-regexes = ['''sk-or-test-key-12345''']
-
-[[allowlists]]
 description = "Figma fixture identifiers are public test metadata"
 regexTarget = "line"
 paths = [

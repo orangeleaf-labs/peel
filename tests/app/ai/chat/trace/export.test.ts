@@ -30,7 +30,7 @@ function recordedRun(conversationId: string, runId: string): RunTrace {
     conversationId,
     runId,
     startedAt: '2026-10-13T10:01:00.000Z',
-    model: { provider: 'openrouter', id: 'anthropic/claude-sonnet-4.6' },
+    model: { provider: 'anthropic', id: 'claude-sonnet-4-6' },
     settings: { maxOutputTokens: 16000, maxSteps: 25, thinking: 'default', cache: true },
     instructions: `sha256:${runId}-instructions`,
     input: { through: 'request', messages: 1 },
@@ -80,7 +80,7 @@ test('a trace keeps every message part and its conversation’s runs and events'
   const run = { sessionId: conversation.id, runId: 'run-one' }
   recordModelStepCompleted(
     {
-      provider: 'openrouter',
+      provider: 'anthropic',
       model: 'anthropic/claude-sonnet-4.6',
       inputTokens: 10,
       outputTokens: 2,

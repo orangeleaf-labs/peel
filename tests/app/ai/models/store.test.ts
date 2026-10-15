@@ -5,9 +5,7 @@ import type { AIModelConnection } from '@/app/ai/models/types'
 
 const connection = {
   id: 'connection-a',
-  providerID: 'openrouter',
-  customBaseURL: '',
-  customAPIType: 'completions',
+  providerID: 'anthropic',
   credentialProfileId: 'default'
 } satisfies AIModelConnection
 
@@ -61,6 +59,29 @@ describe('parseAIModelSettings', () => {
     expect(parsed?.models.map((candidate) => candidate.id)).toEqual(['model-a'])
   })
 
+  test('drops connections to providers other than Anthropic, with their models', () => {
+    const parsed = parseAIModelSettings(
+      settings({
+        connections: [
+          connection,
+          ...['openrouter', 'openai', 'google', 'openai-compatible', 'anthropic-compatible'].map(
+            (providerID) => ({
+              ...connection,
+              id: `connection-${providerID}`,
+              providerID,
+              customBaseURL: 'https://proxy.example'
+            })
+          )
+        ],
+        models: [profile, { ...profile, id: 'model-b', connectionId: 'connection-openai' }],
+        assignments: { design: 'model-b', review: 'model-b', fast: null, vision: null }
+      })
+    )
+    expect(parsed?.connections).toEqual([connection])
+    expect(parsed?.models.map((candidate) => candidate.id)).toEqual(['model-a'])
+    expect(parsed?.assignments.design).toBe('model-a')
+  })
+
   test('fills and bounds the fields of a stored model', () => {
     const parsed = parseAIModelSettings(
       settings({
@@ -76,11 +97,7 @@ describe('parseAIModelSettings', () => {
         ]
       })
     )
-    expect(parsed?.connections[0]).toEqual({
-      ...connection,
-      customBaseURL: '',
-      customAPIType: 'completions'
-    })
+    expect(parsed?.connections[0]).toEqual(connection)
     expect(parsed?.models[0]).toEqual({
       id: 'model-a',
       name: 'Model',

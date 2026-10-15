@@ -17,7 +17,11 @@ import type { ACPAgentID, AIProviderID } from '@open-pencil/core/constants'
 import { AgentSetupError, assertAgentReady } from '@/app/ai/agents/readiness'
 import { classifyAIChatError, type AIChatFailure } from '@/app/ai/chat/failure'
 import { resolveLanguageModelID } from '@/app/ai/chat/model'
-import { reasoningCallSettings, type AIProviderOptions } from '@/app/ai/chat/reasoning'
+import {
+  reasoningCallSettings,
+  type AIProviderOptions,
+  type ReasoningCallSettings
+} from '@/app/ai/chat/reasoning'
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { chatThinkingLevel } from '@/app/ai/chat/thinking'
 import { createAIModelRuntime, resolveModelConnectionAPIKey } from '@/app/ai/models'
@@ -75,29 +79,16 @@ const ANTHROPIC_CACHE_CONTROL = {
   anthropic: { cacheControl: { type: 'ephemeral' } }
 } as const
 
-function supportsAnthropicCaching(providerID: AIProviderID, modelID: string): boolean {
-  return (
-    providerID === 'anthropic' ||
-    providerID === 'anthropic-compatible' ||
-    (providerID === 'openrouter' && modelID.startsWith('anthropic/'))
-  )
-}
-
-function mergeProviderOptions(
-  cacheOptions: typeof ANTHROPIC_CACHE_CONTROL | undefined,
-  reasoningOptions: AIProviderOptions | undefined
-): AIProviderOptions | undefined {
-  if (!cacheOptions && !reasoningOptions) return undefined
-  return { ...cacheOptions, ...reasoningOptions }
+function supportsAnthropicCaching(providerID: AIProviderID): boolean {
+  return providerID === 'anthropic'
 }
 
 function callSettings(
-  providerID: AIProviderID,
   cacheOptions: typeof ANTHROPIC_CACHE_CONTROL | undefined,
   thinkingLevel: ThinkingLevel
-) {
-  const { reasoning, providerOptions } = reasoningCallSettings(providerID, thinkingLevel)
-  return { reasoning, providerOptions: mergeProviderOptions(cacheOptions, providerOptions) }
+): { reasoning: ReasoningCallSettings['reasoning']; providerOptions?: AIProviderOptions } {
+  const { reasoning } = reasoningCallSettings(thinkingLevel)
+  return { reasoning, providerOptions: cacheOptions }
 }
 
 export async function createACPTransport(providerID: AIProviderID) {
@@ -133,7 +124,7 @@ export function createToolLoopTransport({
     preview.delta(toolCallId, inputTextDelta)
   renderTool.onInputAvailable = ({ toolCallId }: ToolExecutionOptions<unknown>) =>
     preview.finish(toolCallId)
-  const cacheProviderOptions = supportsAnthropicCaching(providerID, effectiveModelID)
+  const cacheProviderOptions = supportsAnthropicCaching(providerID)
     ? ANTHROPIC_CACHE_CONTROL
     : undefined
   let recording: RunRecording | undefined
@@ -159,7 +150,7 @@ export function createToolLoopTransport({
         stopWhen: stepCountIs(currentRun(store).maxSteps),
         tools: offered,
         maxOutputTokens,
-        ...callSettings(providerID, cacheProviderOptions, thinkingLevel())
+        ...callSettings(cacheProviderOptions, thinkingLevel())
       }
     },
     onFinish: () => {
@@ -386,11 +377,7 @@ export function createChatSessionManager({
       store,
       providerID: runtime.role.connection.providerID,
       model: runtime.model,
-      effectiveModelID: resolveLanguageModelID({
-        providerID: runtime.role.connection.providerID,
-        modelID: runtime.role.profile.modelID,
-        customModelID: runtime.role.profile.customModelID
-      }),
+      effectiveModelID: resolveLanguageModelID({ modelID: runtime.role.profile.modelID }),
       maxOutputTokens: runtime.role.profile.maxOutputTokens,
       thinkingLevel: () => chatThinkingLevel.value,
       onError: captureProviderError,
