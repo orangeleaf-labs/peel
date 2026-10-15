@@ -36,3 +36,12 @@ Only Linux was exercised; the macOS-only native cases were skipped.
 2. On an installed build: open a `.fig` through the Open dialog, quit and relaunch, and check Recent Files reopens it with a thumbnail.
 3. Edit that file in another app and check Peel reloads it.
 4. Save As into a new folder, export a PNG, and double-click a `.fig` in Finder or Explorer; each must work.
+
+### Review the write-approval translations
+
+The nine write-approval dialog strings in `packages/vue/src/i18n/locales/{de,es,fr,it,ja,pl,ru,zh-cn}/automation.json` were machine-written. Have a native speaker check them and open a PR with corrections.
+
+### Check the write-approval dialog on the desktop app
+
+1. With an MCP client connected, call `save_file` with a path; the dialog must name the tool and the file.
+2. Check Allow saves, Deny and Escape save nothing, and a minute without an answer denies.

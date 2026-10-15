@@ -1,0 +1,1 @@
+- Agents now ask before saving files, writing exports, or changing app settings, and a denied request changes nothing.

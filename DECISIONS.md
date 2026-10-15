@@ -29,3 +29,6 @@ did not cover a case, the safer and more reversible option was taken.
 | AI writes are approved per call; there is no "allow for this session". | Safer default; nothing is remembered that the user cannot see. |
 | No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, stock photos, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
+| Bridge `export`/`export_jsx` (CLI export) do not ask for write approval. | The app only returns bytes; the CLI writes the file itself, so the app cannot see or enforce the destination. |
+| Automation saves ask first, then let the fs scope refuse an ungranted path. | A reliable scope pre-check needs a Rust command; checking with `exists` uses a different allow-list and could refuse legitimate saves. |
+| Each write-approval request gets its full 60 s once it is shown, and Stop withdraws a chat run's pending requests. | Queued requests must not expire unseen behind an earlier one. |
