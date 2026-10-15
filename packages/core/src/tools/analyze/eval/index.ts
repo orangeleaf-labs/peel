@@ -9,6 +9,9 @@ export const evalCode = defineTool({
   description:
     'Execute JavaScript with full Figma Plugin API access. Use for operations not covered by other tools. The `figma` global is the Figma Plugin API; the `openpencil` global adds what Figma has no API for, such as component behaviours (`openpencil.setBehaviour`, `openpencil.getBehaviour`, `openpencil.behaviourKinds`), slots (`openpencil.createSlot`), and comments (`openpencil.getComments`, `openpencil.getComment`, `openpencil.addComment`, and each comment’s `reply` and `resolve`).',
   execution: { kind: 'async', mutation: 'document' },
+  // Model-written code runs with the host's privileges, so the in-app AI chat never offers it;
+  // MCP offers it only behind `allowEval`.
+  exposure: { ai: false },
   capabilities: ['document:read', 'document:write', 'code:execute'],
   availability: 'eval',
   input: v.strictObject({

@@ -1,4 +1,10 @@
-import { ALL_TOOLS, CORE_TOOLS, isToolExposed, toolChangesDocument } from '@open-pencil/core/tools'
+import {
+  ALL_TOOLS,
+  CORE_TOOLS,
+  isToolExposed,
+  toolChangesDocument,
+  type ToolDef
+} from '@open-pencil/core/tools'
 
 import type { ToolAccessEntry } from '@/app/automation/tool-access/types'
 
@@ -13,7 +19,7 @@ const defaultNames = new Set([
   'add_comment',
   'reply_to_comment',
   'resolve_comment',
-  // Design JSX references variables but cannot create them, and `eval` names differ from Figma's.
+  // Design JSX references variables but cannot create them.
   'list_variables',
   'create_collection',
   'create_variable',
@@ -27,7 +33,19 @@ const defaultNames = new Set([
   'create_page'
 ])
 
-export const aiToolDefinitions = ALL_TOOLS.filter((tool) => isToolExposed(tool, 'ai'))
+/**
+ * Chat never runs model-written scripts: a tool that executes code is neither offered nor
+ * configurable, whatever its exposure says or a saved override asks.
+ */
+function isChatTool(tool: ToolDef): boolean {
+  return (
+    isToolExposed(tool, 'ai') &&
+    tool.availability !== 'eval' &&
+    !tool.capabilities.includes('code:execute')
+  )
+}
+
+export const aiToolDefinitions = ALL_TOOLS.filter(isChatTool)
 
 export const configurableAITools: ToolAccessEntry[] = aiToolDefinitions.map((tool) => ({
   name: tool.name,

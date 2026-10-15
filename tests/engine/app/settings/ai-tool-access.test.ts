@@ -8,6 +8,17 @@ import { configurableMCPTools, disabledMCPTools } from '@/app/automation/mcp/pre
 import { useToolAccessSettings } from '@/app/automation/tool-access/settings/use'
 
 const originalAI = aiToolOverrides.value
+
+test('chat can neither enable nor configure a tool that runs model-written code', () => {
+  const codeTools = ALL_TOOLS.filter((tool) => tool.capabilities.includes('code:execute'))
+  expect(codeTools.map((tool) => tool.name)).toContain('eval')
+  const forced = Object.fromEntries(codeTools.map((tool) => [tool.name, true]))
+  for (const tool of codeTools) {
+    expect(configurableAITools.map((entry) => entry.name)).not.toContain(tool.name)
+    expect(enabledAIToolDefinitions(forced).map((entry) => entry.name)).not.toContain(tool.name)
+    expect(isToolExposed(tool, 'ai')).toBe(false)
+  }
+})
 const originalMCP = disabledMCPTools.value
 const originalCatalog = configurableMCPTools.value
 
@@ -20,7 +31,9 @@ afterEach(() => {
 
 test('AI catalog includes exposed extended tools while preserving compact defaults', () => {
   expect(configurableAITools.map((tool) => tool.name)).toEqual(
-    ALL_TOOLS.filter((tool) => isToolExposed(tool, 'ai')).map((tool) => tool.name)
+    ALL_TOOLS.filter(
+      (tool) => isToolExposed(tool, 'ai') && !tool.capabilities.includes('code:execute')
+    ).map((tool) => tool.name)
   )
   const defaults = enabledAIToolDefinitions({}).map((tool) => tool.name)
   for (const tool of CORE_TOOLS) {
