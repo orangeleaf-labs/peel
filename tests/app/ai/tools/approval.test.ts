@@ -1,6 +1,8 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test'
 
+import type { ToolExecutionOptions } from 'ai'
+
 import { FigmaAPI } from '@open-pencil/core/figma-api'
 
 import { createAITools, endRun, startRun } from '@/app/ai/tools'
@@ -70,17 +72,23 @@ test('document edits, reads and returned exports from the chat never ask', async
   })
   try {
     const tools = createAITools(store)
-    const options = { toolCallId: 'call-1', messages: [] }
-    const calls: Array<[keyof typeof tools, Record<string, unknown>]> = [
-      ['create_shape', { type: 'RECTANGLE', x: 0, y: 0, width: 10, height: 10 }],
-      ['get_page_tree', {}],
+    const options: ToolExecutionOptions<unknown> = {
+      toolCallId: 'call-1',
+      messages: [],
+      context: undefined
+    }
+    const runs = [
+      () =>
+        tools.create_shape.execute?.(
+          { type: 'RECTANGLE', x: 0, y: 0, width: 10, height: 10 },
+          options
+        ),
+      () => tools.get_page_tree.execute?.({}, options),
       // The chat returns the SVG to the model; the `path` is not written.
-      ['export_svg', { path: '/tmp/never-written.svg' }]
+      () => tools.export_svg.execute?.({ path: '/tmp/never-written.svg' }, options)
     ]
-    for (const [name, input] of calls) {
-      const execute = tools[name].execute
-      if (!execute) throw new Error(`${String(name)} has no execute`)
-      const result = execute(input, options)
+    for (const run of runs) {
+      const result = run()
       expect(currentWriteApproval.value).toBeNull()
       await result
       expect(currentWriteApproval.value).toBeNull()
