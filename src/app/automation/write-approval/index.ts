@@ -4,9 +4,11 @@ export {
   currentWriteApproval,
   denyWriteApprovals,
   requestWriteApproval,
-  WriteDeniedError
+  WriteDeniedError,
+  type WriteApprovalOptions
 } from './queue'
 export {
+  codeWriteRequest,
   settingsPatchPaths,
   toolWriteRequest,
   writeDeniedMessage,

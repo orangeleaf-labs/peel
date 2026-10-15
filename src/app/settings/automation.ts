@@ -103,7 +103,6 @@ export function readAutomationSettings(): AutomationSettings {
   }
 }
 
-/** Validates a partial settings object, applies it through the owning stores, and returns the result. */
 /** The patch an automation client sent, or an error naming its first invalid setting. */
 export function parseAutomationSettingsPatch(input: unknown): AutomationSettingsPatch {
   const result = v.safeParse(automationSettingsPatchSchema, input)
@@ -115,6 +114,7 @@ export function parseAutomationSettingsPatch(input: unknown): AutomationSettings
   return result.output
 }
 
+/** Validates a partial settings object, applies it through the owning stores, and returns the result. */
 export function updateAutomationSettings(input: unknown): AutomationSettings {
   const patch = parseAutomationSettingsPatch(input)
 

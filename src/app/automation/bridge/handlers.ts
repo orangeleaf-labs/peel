@@ -8,6 +8,7 @@ import {
   handleUndo,
   handleUpdateSettings
 } from '@/app/automation/bridge/app-handlers'
+import { receiveAutomationCall, type AutomationCall } from '@/app/automation/bridge/call'
 import { createAutomationEvalHandler } from '@/app/automation/bridge/eval-handler'
 import { handleExport, handleExportJSX } from '@/app/automation/bridge/export-handlers'
 import {
@@ -33,7 +34,11 @@ import type { EditorStore } from '@/app/editor/active-store'
 
 type FigmaFactory = (store: EditorStore, pageId?: string) => FigmaAPI
 
-type CommandHandler = (target: AutomationTarget, args: unknown) => Promise<unknown>
+type CommandHandler = (
+  target: AutomationTarget,
+  args: unknown,
+  call: AutomationCall
+) => Promise<unknown>
 
 export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
   const handleEval = createAutomationEvalHandler(makeFigma)
@@ -58,7 +63,8 @@ export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
   async function handleTargetCommand(
     target: AutomationTarget,
     command: string,
-    args: UnknownRecord
+    args: UnknownRecord,
+    call = receiveAutomationCall(args)
   ): Promise<unknown> {
     await installDesignJSXSandbox()
     if (!(await target.store.preparePageNodes(target.pageId))) {
@@ -66,7 +72,7 @@ export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
     }
     const handler = commandHandlers[command]
     const result = handler
-      ? await handler(target, args)
+      ? await handler(target, args, call)
       : await handleRPCFallback(target, command, args)
     return responseWithTarget(result, target)
   }
@@ -76,6 +82,8 @@ export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
     command: string,
     args: unknown
   ): Promise<unknown> {
+    // An approval the call asks for must be settled before its caller gives up.
+    const call = receiveAutomationCall(args)
     if (command === 'list_documents') {
       return { ok: true, result: { documents: listAutomationDocuments(store) } }
     }
@@ -85,16 +93,16 @@ export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
       return { ok: true, result: null }
     }
     if (command === 'get_settings') return handleGetSettings()
-    if (command === 'update_settings') return handleUpdateSettings(args)
+    if (command === 'update_settings') return handleUpdateSettings(args, call)
 
     if (command === 'open_file' || command === 'new_document') {
       const handler = commandHandlers[command]
-      if (handler) return handler(resolveAutomationTarget(store, undefined), args)
+      if (handler) return handler(resolveAutomationTarget(store, undefined), args, call)
     }
 
     const rawArgs = isUnknownRecord(args) ? args : {}
     const target = resolveAutomationTarget(store, rawArgs)
-    return handleTargetCommand(target, command, stripAutomationTargetArgs(rawArgs))
+    return handleTargetCommand(target, command, stripAutomationTargetArgs(rawArgs), call)
   }
 
   return { handleRequest, handleTargetCommand }

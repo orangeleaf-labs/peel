@@ -157,7 +157,7 @@ Endpoints are available over both active transports:
 7. **Save** — `save_file` to write back to `.fig`
 8. **Close** — `close_file` to close an open document tab. With unsaved changes it fails unless `unsaved` is `"save"` or `"discard"`; it never opens the Save dialog.
 
-Calls that write outside the document wait until the person in the app allows them: `save_file`, `close_file` with `unsaved: "save"`, `new_document` with a `path`, `update_settings`, and an export (`export_svg`, `export_pdf`, `export_image`, `get_jsx`) with a `path`. The dialog names the tool and the file, format, or settings; Deny, or no answer within a minute, fails the call and nothing is written. Document edits, reads, and exports returned without a `path` never ask.
+Calls that write outside the document wait until the person in the app allows them: `save_file`, `close_file` with `unsaved: "save"`, `new_document` with a `path`, `update_settings`, `eval` (a script runs with the app's permissions), and `export_svg`, `export_image`, or `get_jsx` with a `path` inside the MCP root. The dialog names the tool and the file, format, settings, or the start of the script. Deny, or no answer within 75 seconds of the app receiving the call, fails the call and nothing is written; the server waits 90 seconds for these calls, so it always hears the outcome. Document edits, reads, and exports returned without a `path` never ask.
 
 `undo` and `redo` step back through the agent's own changes, and `activate_document` brings a tab to the front when the user should see it.
 

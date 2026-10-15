@@ -1,13 +1,23 @@
 import 'fake-indexeddb/auto'
-import { afterEach, beforeEach, describe, expect, spyOn, test, vi } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, jest, spyOn, test, vi } from 'bun:test'
 
 import { toRaw } from 'vue'
 
 import * as layoutModule from '@open-pencil/core/layout'
-
-import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
-import { createAutomationCommandHandlers } from '@/app/automation/bridge/handlers'
 import {
+  AUTOMATION_APPROVAL_DEADLINE_MS,
+  AUTOMATION_APPROVAL_RPC_TIMEOUT_MS,
+  automationRPCTimeout
+} from '@open-pencil/core/rpc'
+
+import { restAgents } from '@/app/automation/agents'
+import { receiveAutomationCall } from '@/app/automation/bridge/call'
+import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
+import { handleSaveFile } from '@/app/automation/bridge/file-handlers'
+import { createAutomationCommandHandlers } from '@/app/automation/bridge/handlers'
+import { resolveAutomationTarget } from '@/app/automation/bridge/target'
+import {
+  answerWriteApproval,
   currentWriteApproval,
   denyWriteApprovals,
   WriteDeniedError
@@ -16,6 +26,7 @@ import { readAutomationSettings } from '@/app/settings/automation'
 import { appPreferences } from '@/app/settings/preferences/store'
 import { createTab, getActiveStore, getTabById, getTabsSnapshot } from '@/app/tabs'
 
+import { expectDefined } from '#tests/helpers/assert'
 import { asDouble } from '#tests/helpers/doubles'
 import { answerNextWriteApproval, nextWriteApproval } from '#tests/helpers/write-approval'
 
@@ -213,5 +224,89 @@ describe('tool', () => {
       expect(currentWriteApproval.value).toBeNull()
     }
     expect(tab.store.graph.getChildren(page)).toHaveLength(1)
+  })
+})
+
+describe('scripts', () => {
+  const code = "figma.createRectangle(); return 'ran'"
+
+  test('eval waits for the user, shows the script, and runs on Allow', async () => {
+    const tab = createTab()
+    const page = tab.store.state.currentPageId
+    const pending = request('eval', { document_id: tab.id, code })
+    const asked = await nextWriteApproval()
+    expect(asked).toMatchObject({ tool: 'eval', kind: 'code' })
+    expect(asked.target).toContain('figma.createRectangle()')
+    expect(tab.store.graph.getChildren(page)).toHaveLength(0)
+
+    await answerNextWriteApproval(true)
+    const result: unknown = (await pending).result
+    expect(result).toBe('ran')
+    expect(tab.store.graph.getChildren(page)).toHaveLength(1)
+  })
+
+  test('Deny runs nothing, through eval or the eval tool', async () => {
+    const tab = createTab()
+    const page = tab.store.state.currentPageId
+    const viaCommand = request('eval', { document_id: tab.id, code })
+    await answerNextWriteApproval(false)
+    await expect(viaCommand).rejects.toBeInstanceOf(WriteDeniedError)
+
+    const viaTool = request('tool', { document_id: tab.id, name: 'eval', args: { code } })
+    expect((await answerNextWriteApproval(false)).kind).toBe('code')
+    await expect(viaTool).rejects.toBeInstanceOf(WriteDeniedError)
+    expect(tab.store.graph.getChildren(page)).toHaveLength(0)
+  })
+})
+
+describe('approvals never outlive their caller', () => {
+  test('past the deadline from receipt the call is denied, and a later Allow writes nothing', async () => {
+    const tab = dirtyTab()
+    const save = spyOn(tab.store, 'saveFigFileToPath').mockResolvedValue(true)
+    const target = resolveAutomationTarget(tab.store, { document_id: tab.id })
+    jest.useFakeTimers()
+    try {
+      const args = { path: '/tmp/late.fig' }
+      const pending = handleSaveFile(target, args, receiveAutomationCall(args))
+      const asked = expectDefined(currentWriteApproval.value, 'approval')
+      jest.advanceTimersByTime(AUTOMATION_APPROVAL_DEADLINE_MS)
+      expect(currentWriteApproval.value).toBeNull()
+      answerWriteApproval(asked, true)
+      await expect(pending).rejects.toBeInstanceOf(WriteDeniedError)
+    } finally {
+      jest.useRealTimers()
+    }
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  test('the deadline ends before the MCP server and the CLI stop waiting', () => {
+    expect(AUTOMATION_APPROVAL_DEADLINE_MS).toBeLessThan(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)
+    for (const command of ['save_file', 'close_file', 'new_document', 'update_settings', 'eval']) {
+      expect(automationRPCTimeout(command, 20_000)).toBe(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)
+    }
+    expect(automationRPCTimeout('tool', 20_000)).toBe(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)
+    expect(automationRPCTimeout('list_documents', 20_000)).toBe(20_000)
+    const call = receiveAutomationCall({}, 1_000)
+    expect(call.approval.deadline).toBe(1_000 + AUTOMATION_APPROVAL_DEADLINE_MS)
+  })
+
+  test("stopping the app's ACP chat withdraws its pending writes, not an outside client's", async () => {
+    const tab = createTab()
+    tab.store.createShape('RECTANGLE', 0, 0, 10, 10)
+    const exportCall = (kind: 'acp' | 'mcp', session: string) =>
+      request('tool', {
+        document_id: tab.id,
+        name: 'export_svg',
+        args: { path: `${session}.svg` },
+        agent: { session, kind }
+      })
+    const fromChat = exportCall('acp', 'chat-session')
+    const fromClient = exportCall('mcp', 'outside-session')
+    await nextWriteApproval()
+
+    restAgents('acp')
+    await expect(fromChat).rejects.toBeInstanceOf(WriteDeniedError)
+    expect((await answerNextWriteApproval(true)).target).toBe('outside-session.svg')
+    expect((await fromClient).result.svg).toEqual(expect.stringContaining('<svg'))
   })
 })

@@ -12,7 +12,7 @@ import type { RPCJSONObject } from '#mcp/json'
 import { MAX_RESULT_BYTES, fail, ok, resultTooLargeMessage } from '#mcp/result'
 import { createToolDescriptors, getMCPToolDefinitions } from '#mcp/tool/manifest'
 import type { ToolDescriptor, ToolEffect, ToolPolicy } from '#mcp/tool/metadata'
-import { resolveSafePath, writeToolOutput } from '#mcp/tool/output'
+import { FILE_OUTPUT_TOOLS, resolveSafePath, writeToolOutput } from '#mcp/tool/output'
 import { isToolEnabled } from '#mcp/tool/policy'
 import { SELECTION_SCOPE_FILE_OUTPUT_ERROR } from '#mcp/tool/scope'
 
@@ -128,12 +128,22 @@ export function registerTools(mcpServer: McpServer, options: RegisterToolsOption
           if (policy.scope === 'selection' && toolArgs.path !== undefined) {
             return fail(new Error(SELECTION_SCOPE_FILE_OUTPUT_ERROR))
           }
+          // The app asks the user before an export it would write; name the real file, resolved in
+          // the root, and drop a `path` this server would not write, so nothing asks about it.
+          const outputPath =
+            typeof toolArgs.path === 'string' && resolvedRoot && FILE_OUTPUT_TOOLS.has(def.name)
+              ? await resolveSafePath(toolArgs.path, resolvedRoot)
+              : null
+          const { path: _path, ...otherArgs } = toolArgs
+          const forwardedArgs = FILE_OUTPUT_TOOLS.has(def.name)
+            ? { ...otherArgs, ...(outputPath ? { path: outputPath.resolved } : {}) }
+            : toolArgs
           const result = await sendRPC({
             command: 'tool',
             args: {
               ...target,
               name: def.name,
-              args: toolArgs,
+              args: forwardedArgs,
               agent: agent(),
               // A client limited to the selection says so, whatever the server's own scope.
               ...(policy.scope === 'selection' ? { scope: policy.scope } : {})

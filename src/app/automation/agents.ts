@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import { isUnknownRecord } from '@/app/automation/bridge/target'
+import { denyWriteApprovals } from '@/app/automation/write-approval'
 import type { EditorStore } from '@/app/editor/active-store'
 import { addAgent, agentPlacement, type AgentHandle } from '@/app/presence/registry'
 import { MAX_NAME_LENGTH } from '@/app/presence/schema'
@@ -25,6 +26,17 @@ const agentSessionSchema = v.object({
 
 /** The MCP session a tool call came from, as the MCP server forwards it. */
 export type AgentSession = v.InferOutput<typeof agentSessionSchema>
+
+/** What the app's own ACP and Pi chats ask the user about, withdrawn when their reply ends. */
+const chatApprovalOwners = { acp: {}, harness: {} } as const
+
+/**
+ * Who a session's write approvals belong to: the app's ACP or Pi chat, whose Stop withdraws them,
+ * or nobody for an outside MCP client.
+ */
+export function agentApprovalOwner(session: AgentSession | null): object | undefined {
+  return session && session.kind !== 'mcp' ? chatApprovalOwners[session.kind] : undefined
+}
 
 export function readAgentSession(value: unknown): AgentSession | null {
   const result = v.safeParse(agentSessionSchema, value)
@@ -151,6 +163,8 @@ export function agentFinished(
  * (`src/app/integrations/mcp`), so no outside MCP client is touched.
  */
 export function restAgents(kind: Exclude<AgentSession['kind'], 'mcp'>): void {
+  // A write the chat's reply was waiting on is withdrawn with it.
+  denyWriteApprovals(chatApprovalOwners[kind])
   for (const agents of sessions.values()) {
     for (const agent of agents.values()) {
       if (agent.kind !== kind) continue

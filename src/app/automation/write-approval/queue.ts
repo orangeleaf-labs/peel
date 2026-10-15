@@ -4,19 +4,31 @@ import { WRITE_APPROVAL_TIMEOUT_MS } from '@/constants'
 
 import { writeDeniedMessage, type WriteRequest } from './requests'
 
+export interface WriteApprovalOptions {
+  /**
+   * Whoever asked, such as a chat reply or an agent chat, so its requests can be withdrawn when it
+   * stops. Compared by identity.
+   */
+  owner?: unknown
+  /**
+   * When the request is denied whatever the dialog shows, as `Date.now()` time. Automation calls
+   * set it from when the app received them, so an Allow never lands after the caller gave up.
+   * Without one, the request gets `WRITE_APPROVAL_TIMEOUT_MS` once it reaches the dialog.
+   */
+  deadline?: number
+}
+
 interface PendingApproval {
   request: WriteRequest
-  /** Whoever asked, such as a chat reply, so its requests can be withdrawn when it stops. */
-  owner: object | undefined
+  owner: unknown
+  deadline: number | undefined
   resolve: (allowed: boolean) => void
-  /** Set once the request is on screen, so each one gets the whole timeout in front of the user. */
   timer: ReturnType<typeof setTimeout> | undefined
 }
 
 /**
  * Agent calls waiting for the user to allow a write outside the document, oldest first. Each is
- * asked on its own: nothing is remembered between calls, and no answer within
- * `WRITE_APPROVAL_TIMEOUT_MS` of a request reaching the dialog counts as Deny.
+ * asked on its own: nothing is remembered between calls, and no answer in time counts as Deny.
  */
 const queue = shallowRef<PendingApproval[]>([])
 
@@ -37,31 +49,35 @@ function settle(entry: PendingApproval, allowed: boolean) {
   startHeadTimer()
 }
 
-/** Asks the user; resolves true only on Allow. */
-export function requestWriteApproval(request: WriteRequest, owner?: object): Promise<boolean> {
+/** Asks the user; resolves true only on Allow in time. */
+export function requestWriteApproval(
+  request: WriteRequest,
+  { owner, deadline }: WriteApprovalOptions = {}
+): Promise<boolean> {
   return new Promise((resolve) => {
-    const entry: PendingApproval = {
-      request,
-      owner,
-      resolve,
-      timer: undefined
+    const entry: PendingApproval = { request, owner, deadline, resolve, timer: undefined }
+    // A deadline holds wherever the request waits in the queue.
+    if (deadline !== undefined) {
+      entry.timer = setTimeout(() => settle(entry, false), Math.max(0, deadline - Date.now()))
     }
     queue.value = [...queue.value, entry]
     startHeadTimer()
   })
 }
 
-/** The user's answer to a request; a request already answered or timed out is left alone. */
+/** The user's answer to a request; one already answered, withdrawn or past its deadline is left alone. */
 export function answerWriteApproval(request: WriteRequest, allowed: boolean): void {
   const entry = queue.value.find((pending) => pending.request === request)
-  if (entry) settle(entry, allowed)
+  if (!entry) return
+  const late = entry.deadline !== undefined && Date.now() >= entry.deadline
+  settle(entry, allowed && !late)
 }
 
 /**
  * Denies the requests `owner` made, or every waiting request without one, so a stopped reply
  * leaves no dialog in front of the writes queued behind it.
  */
-export function denyWriteApprovals(owner?: object): void {
+export function denyWriteApprovals(owner?: unknown): void {
   for (const entry of queue.value) {
     if (owner === undefined || entry.owner === owner) settle(entry, false)
   }
@@ -75,6 +91,9 @@ export class WriteDeniedError extends Error {
 }
 
 /** Waits for the user to allow the write; throws `WriteDeniedError` otherwise. */
-export async function approveWrite(request: WriteRequest): Promise<void> {
-  if (!(await requestWriteApproval(request))) throw new WriteDeniedError(request)
+export async function approveWrite(
+  request: WriteRequest,
+  options?: WriteApprovalOptions
+): Promise<void> {
+  if (!(await requestWriteApproval(request, options))) throw new WriteDeniedError(request)
 }

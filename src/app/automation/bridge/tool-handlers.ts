@@ -15,6 +15,7 @@ import {
   readAgentSession,
   touchedNodeIds
 } from '@/app/automation/agents'
+import { receiveAutomationCall } from '@/app/automation/bridge/call'
 import { limitToSelection } from '@/app/automation/bridge/selection-scope'
 import type { AutomationTarget } from '@/app/automation/bridge/target'
 import {
@@ -30,7 +31,11 @@ import { useLibraryService } from '@/app/libraries'
 type FigmaFactory = (store: AutomationTarget['store'], pageId?: string) => FigmaAPI
 
 export function createAutomationToolHandler(makeFigma: FigmaFactory) {
-  return async function handleTool(target: AutomationTarget, args: unknown): Promise<unknown> {
+  return async function handleTool(
+    target: AutomationTarget,
+    args: unknown,
+    call = receiveAutomationCall(args)
+  ): Promise<unknown> {
     const toolName = (args as { name?: string }).name
     const requestedArgs = (args as { args?: Record<string, unknown> }).args ?? {}
     if (!toolName) throw new Error('Missing "name" in args')
@@ -42,7 +47,7 @@ export function createAutomationToolHandler(makeFigma: FigmaFactory) {
     const def = findTool(toolName)
     // The MCP server writes an export to its `path`; the user allows that before any data leaves.
     const write = toolWriteRequest(def, toolArgs, { writesOutputPath: true })
-    if (write) await approveWrite(write)
+    if (write) await approveWrite(write, call.approval)
 
     // A call from an MCP session shows as that session's agent, working where the call works.
     const session = readAgentSession((args as { agent?: unknown }).agent)

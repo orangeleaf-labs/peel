@@ -58,6 +58,12 @@ function request(command: string, args: Record<string, unknown> = {}) {
   }>
 }
 
+/** A script asks the user before it runs; these cases are about what it does once allowed. */
+async function allowed<T>(pending: Promise<T>): Promise<T> {
+  await answerNextWriteApproval(true)
+  return pending
+}
+
 beforeEach(() => {
   setupGlobals()
   vi.spyOn(layoutModule, 'computeAllLayouts').mockReturnValue(undefined)
@@ -228,9 +234,10 @@ describe('undo and redo', () => {
     const otherPage = graph.addPage('Other')
     const card = graph.createNode('FRAME', otherPage.id, { name: 'Card', width: 200, height: 200 })
     const pages = graph.getPages().map((page) => page.id)
-    await request('eval', {
-      document_id: tab.id,
-      code: `
+    await allowed(
+      request('eval', {
+        document_id: tab.id,
+        code: `
         const other = figma.root.children.find((page) => page.name === 'Other')
         other.findOne((node) => node.name === 'Card').name = 'Renamed'
         other.name = 'Renamed page'
@@ -238,7 +245,8 @@ describe('undo and redo', () => {
         const colors = figma.createVariableCollection('Colors')
         figma.createVariable('Brand', 'COLOR', colors.id)
       `
-    })
+      })
+    )
     expect(graph.getNode(card.id)?.name).toBe('Renamed')
     expect(graph.variables.size).toBe(1)
 
@@ -258,7 +266,7 @@ describe('undo and redo', () => {
 
   test('a read-only eval leaves the history unchanged', async () => {
     const tab = createTab()
-    await request('eval', { document_id: tab.id, code: 'return figma.currentPage.name' })
+    await allowed(request('eval', { document_id: tab.id, code: 'return figma.currentPage.name' }))
     expect(tab.store.undo.canUndo).toBe(false)
   })
 })

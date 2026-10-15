@@ -1,3 +1,4 @@
+import { receiveAutomationCall } from '@/app/automation/bridge/call'
 import type { AutomationTarget } from '@/app/automation/bridge/target'
 import { isAutomationUndoLabel } from '@/app/automation/execution/editor'
 import { approveWrite, settingsPatchPaths } from '@/app/automation/write-approval'
@@ -55,13 +56,19 @@ export function handleGetSettings(): unknown {
 }
 
 /** App settings outlive the document, so the user allows each change an agent asks for. */
-export async function handleUpdateSettings(args: unknown): Promise<unknown> {
+export async function handleUpdateSettings(
+  args: unknown,
+  call = receiveAutomationCall(args)
+): Promise<unknown> {
   const settings = (args as { settings?: unknown } | undefined)?.settings ?? {}
   // A patch that would be rejected anyway is rejected before the user is asked.
   const patch = parseAutomationSettingsPatch(settings)
   const changes = settingsPatchPaths(patch)
   if (changes.length > 0) {
-    await approveWrite({ tool: 'update_settings', kind: 'settings', target: changes.join(', ') })
+    await approveWrite(
+      { tool: 'update_settings', kind: 'settings', target: changes.join(', ') },
+      call.approval
+    )
   }
   return { ok: true, result: { settings: updateAutomationSettings(patch) } }
 }

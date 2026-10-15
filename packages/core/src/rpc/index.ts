@@ -1,3 +1,9 @@
+export {
+  AUTOMATION_APPROVAL_COMMANDS,
+  AUTOMATION_APPROVAL_DEADLINE_MS,
+  AUTOMATION_APPROVAL_RPC_TIMEOUT_MS,
+  automationRPCTimeout
+} from './approval'
 export { executeRPCCommand, ALL_RPC_COMMANDS } from './commands'
 export type {
   InfoResult,
