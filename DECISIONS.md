@@ -26,3 +26,6 @@ did not cover a case, the safer and more reversible option was taken.
 | The WebView's only app folder is `$APPLOCALDATA/cache` (read, write, mkdir, remove). | It is the only app folder the code uses; the other app folders hold the WebView2 profile (`EBWebView`) and WebKit data, which injected script must not rewrite. |
 | Automation open/save outside the user's grants fails rather than prompting to widen the scope, so an MCP or CLI client cannot `save_file` or `new_document` into the MCP root unless the user saved that exact file in the app. | Safer and reversible; the user opens or saves the file once in the app to grant it. |
 | `$APPCACHE/WebKit` and `$APPLOCALDATA/EBWebView` are denied globally. | WKWebView and WebView2 keep their data there; the deny keeps a later widening of the allow-list from reaching them. |
+| AI writes are approved per call; there is no "allow for this session". | Safer default; nothing is remembered that the user cannot see. |
+| No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
+| Network-only tools (icons, stock photos, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
