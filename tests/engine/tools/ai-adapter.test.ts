@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { tool } from 'ai'
 
 import { ALL_TOOLS, FigmaAPI, SceneGraph, toolsToAI } from '@open-pencil/core'
+import { isToolExposed } from '@open-pencil/core/tools'
 
 import { expectDefined, expectFills } from '#tests/helpers/assert'
 
@@ -62,9 +63,16 @@ describe('AI adapter', () => {
   test('generates tool for every definition', () => {
     const { tools } = setup()
     for (const def of ALL_TOOLS) {
+      if (!isToolExposed(def, 'ai')) {
+        expect(tools[def.name]).toBeUndefined()
+        continue
+      }
       expect(tools[def.name]).toBeDefined()
     }
-    expect(Object.keys(tools).length).toBe(ALL_TOOLS.length)
+    expect(Object.keys(tools).length).toBe(
+      ALL_TOOLS.filter((def) => isToolExposed(def, 'ai')).length
+    )
+    expect(tools.eval).toBeUndefined()
   })
 
   test('each tool has description and execute', () => {
@@ -187,9 +195,9 @@ describe('AI adapter', () => {
       { tool }
     )
 
-    const evalTool = adapterTool(tools, 'eval')
+    const failing = adapterTool(tools, 'set_fill')
     try {
-      await evalTool.execute({ code: 'throw new Error("test")' })
+      await failing.execute({ id: 'missing', color: '#ff0000' })
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
     }

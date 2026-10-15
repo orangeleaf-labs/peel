@@ -26,11 +26,16 @@ type StreamChunk =
     : never
 type Step = { toolName: string; input: unknown } | ((store: EditorStore) => Promise<void>)
 
-/** Run one message whose model calls `steps` in order: a tool call, or a user action first. */
-async function runMessage(store: EditorStore, steps: Step[]) {
+/**
+ * Run one message whose model calls `steps` in order: a tool call, or a user action first.
+ * Returns the names of the tools the model was offered on its first step.
+ */
+async function runMessage(store: EditorStore, steps: Step[]): Promise<string[]> {
   let call = 0
+  let offered: string[] | undefined
   const model = new MockLanguageModelV4({
-    doStream: async () => {
+    doStream: async (options) => {
+      offered ??= (options.tools ?? []).map((tool) => tool.name)
       let step = steps[call++]
       while (typeof step === 'function') {
         await step(store)
@@ -87,6 +92,7 @@ async function runMessage(store: EditorStore, steps: Step[]) {
   } finally {
     reader.releaseLock()
   }
+  return offered ?? []
 }
 
 async function withStore(
@@ -163,20 +169,18 @@ test("the agent's switch_page moves the run and the user's view", async () => {
 })
 
 test.each([{ followAgents: false }, { followAgents: true }])(
-  'the agent shows on the page a script edited, and only following takes the view there (%p)',
+  'the agent shows on the page an edit changed, and only following takes the view there (%p)',
   async ({ followAgents }) => {
     await withStore(async (store, { a, b }) => {
       appPreferences.value.chat.followAgents = followAgents
-      aiToolOverrides.value = { ...aiToolOverrides.value, eval: true }
       const card = store.graph.createNode('FRAME', b, { name: 'Card', x: 40, y: 20, width: 80 })
-      const title = store.graph.createNode('TEXT', card.id, { name: 'Title', text: 'Hi' })
       let during: ReturnType<typeof presenceOf>['agents']['value'] = []
       let followPage = presenceOf(store).followPage
       await runMessage(store, [
         {
-          toolName: 'eval',
+          toolName: 'batch_update',
           input: {
-            code: `const card = figma.getNodeById('${card.id}'); card.opacity = 0.5; figma.getNodeById('${title.id}').visible = false`
+            operations: JSON.stringify([{ id: card.id, props: { corner_radius: 8 } }])
           }
         },
         async (editor) => {
@@ -195,6 +199,23 @@ test.each([{ followAgents: false }, { followAgents: true }])(
     })
   }
 )
+
+test('chat never offers or runs eval, even when a saved override enables it', async () => {
+  await withStore(async (store, { b }) => {
+    aiToolOverrides.value = { ...aiToolOverrides.value, eval: true }
+    const card = store.graph.createNode('FRAME', b, { name: 'Card', x: 40, y: 20, width: 80 })
+    const offered = await runMessage(store, [
+      {
+        toolName: 'eval',
+        input: { code: `figma.getNodeById('${card.id}').name = 'Ran'` }
+      }
+    ])
+
+    expect(offered).toContain('render')
+    expect(offered).not.toContain('eval')
+    expect(store.graph.getNode(card.id)?.name).toBe('Card')
+  })
+})
 
 test('a run falls back to the page on screen when its page is deleted', async () => {
   await withStore(async (store, { a, b }) => {

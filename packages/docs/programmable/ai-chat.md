@@ -34,7 +34,7 @@ Preferences are saved locally and apply to the next message, including in an exi
 
 The **Local MCP** segment has independent settings for clients connected to OpenPencil's MCP server, including ACP and Pi agents. Restart the server and reconnect stdio clients after changing those settings. Remote MCP connections, WebMCP access, and Pi's shell/filesystem permissions remain separate.
 
-Tool toggles control which tools are offered, not which operations scripts may perform. An enabled `eval` or other script-capable tool can perform design operations whose dedicated tools are disabled; these switches are not a sandbox.
+Tool toggles control which tools are offered. The AI chat never offers `eval` or any other tool that runs model-written scripts; MCP clients get `eval` only when the server enables it.
 
 ## Saved Conversations
 

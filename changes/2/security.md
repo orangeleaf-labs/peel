@@ -1,0 +1,1 @@
+- The AI chat no longer offers `eval`, so it cannot run model-written JavaScript in the editor window.

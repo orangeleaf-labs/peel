@@ -149,8 +149,8 @@ export function markRunWork(store: EditorStore, nodeIds: string[]): void {
 }
 
 /**
- * Point the run's agent at the layers a call changed, on whichever page they are, for calls such
- * as `eval` whose result names none. Only the outermost of them are outlined.
+ * Point the run's agent at the layers a call changed, on whichever page they are, for calls whose
+ * result names no layers. Only the outermost of them are outlined.
  */
 export function markRunChange(store: EditorStore, change: DocumentChange): void {
   const { graph } = store
