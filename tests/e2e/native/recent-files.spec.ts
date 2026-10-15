@@ -17,7 +17,7 @@ describe('recent file thumbnails', () => {
     const appData = await invokeNative<string>('plugin:path|resolve_directory', {
       directory: APP_LOCAL_DATA
     })
-    const folder = join(appData, 'native-test-recent-files')
+    const folder = join(appData, 'cache', 'native-test-recent-files')
     const path = join(folder, 'gold-preview.fig')
     mkdirSync(folder, { recursive: true })
     copyFileSync(fixture, path)

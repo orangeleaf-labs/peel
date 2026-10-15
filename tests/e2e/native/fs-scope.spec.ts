@@ -21,7 +21,7 @@ function nativeError(command: string, args: Record<string, unknown>): Promise<st
 }
 
 describe('desktop file scope', () => {
-  it('writes in the app folders and deletes only in its cache', async () => {
+  it('writes and deletes only in the app cache', async () => {
     const appData = await appLocalDataDir()
     const cacheDir = join(appData, 'cache', 'native-test')
     const cached = join(cacheDir, NAME)
@@ -35,7 +35,8 @@ describe('desktop file scope', () => {
       assert.equal(await nativeError('plugin:fs|remove', { path: cached }), null)
       assert.equal(existsSync(cached), false, 'the cache file was not removed')
 
-      assert.equal(await writeNativeFile(outsideCache, 'data'), null)
+      const write = await writeNativeFile(outsideCache, 'data')
+      assert.match(write ?? '', REFUSED, `${outsideCache} was writable`)
       const removal = await nativeError('plugin:fs|remove', { path: outsideCache })
       assert.match(removal ?? '', REFUSED, `${outsideCache} was removable`)
     } finally {

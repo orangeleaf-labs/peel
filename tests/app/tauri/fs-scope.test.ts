@@ -21,8 +21,22 @@ const FsPermission = v.object({ identifier: v.string(), allow: ScopeEntries, den
 
 type FsGrant = v.InferOutput<typeof FsPermission>
 
-/** The folders Tauri gives the app itself; everything else must be granted by the user. */
-const APP_DIRECTORIES = ['$APPDATA', '$APPLOCALDATA', '$APPCONFIG', '$APPCACHE']
+/**
+ * The only app folder the WebView reaches: the cache. The rest of the app folders hold the
+ * webview's own profile (WebView2 keeps it in `$APPLOCALDATA/EBWebView`), so they stay closed;
+ * documents must be granted by the user.
+ */
+const APP_CACHE = '$APPLOCALDATA/cache'
+
+/** Single files outside the cache the app reads: Pi's settings and MCP server discovery. */
+const NAMED_FILES = new Set([
+  '$HOME/.pi/agent/settings.json',
+  '$HOME/.pi/agent/auth.json',
+  '$HOME/Library/Application Support/OpenPencil/mcp.json',
+  '$LOCALDATA/OpenPencil/mcp.json',
+  '$RUNTIME/openpencil/mcp.json',
+  '$HOME/.openpencil/mcp.json'
+])
 
 /** Commands that create, change, delete, or watch files, whose scope must stay in the app's folders. */
 const MUTATING = new Set([
@@ -83,13 +97,8 @@ function fsGrants(): { file: string; bare: string[]; scoped: FsGrant[] }[] {
   })
 }
 
-function insideAppDirectory(path: string): boolean {
-  return APP_DIRECTORIES.some((dir) => path.startsWith(`${dir}/`))
-}
-
-/** A single named file, with no wildcard that could reach beyond it. */
-function isExactFile(path: string): boolean {
-  return !/[*?[\]{}]/.test(path)
+function insideAppCache(path: string): boolean {
+  return path === APP_CACHE || path.startsWith(`${APP_CACHE}/`)
 }
 
 describe('desktop file system scope', () => {
@@ -100,24 +109,24 @@ describe('desktop file system scope', () => {
     expect(unexpected).toEqual([])
   })
 
-  test('allows reading only the app folders and named files', () => {
+  test('allows reading only the app cache and the named files', () => {
     const broad = fsGrants().flatMap(({ file, scoped }) =>
       scoped.flatMap((grant) =>
         (grant.allow ?? [])
-          .filter(({ path }) => !insideAppDirectory(path) && !isExactFile(path))
+          .filter(({ path }) => !insideAppCache(path) && !NAMED_FILES.has(path))
           .map(({ path }) => `${file}: ${grant.identifier} ${path}`)
       )
     )
     expect(broad).toEqual([])
   })
 
-  test('limits writing, deleting, creating folders and watching to the app folders', () => {
+  test('limits writing, deleting, creating folders and watching to the app cache', () => {
     const outside = fsGrants().flatMap(({ file, scoped }) =>
       scoped
         .filter((grant) => MUTATING.has(grant.identifier))
         .flatMap((grant) =>
           (grant.allow ?? [])
-            .filter(({ path }) => !insideAppDirectory(path))
+            .filter(({ path }) => !insideAppCache(path))
             .map(({ path }) => `${file}: ${grant.identifier} ${path}`)
         )
     )
@@ -146,7 +155,8 @@ describe('desktop file system scope', () => {
       '$DATA/Microsoft/Windows/Start Menu/Programs/Startup/**',
       '$DOCUMENT/PowerShell/**',
       '/usr/local/**',
-      '$APPCACHE/WebKit/**'
+      '$APPCACHE/WebKit/**',
+      '$APPLOCALDATA/EBWebView/**'
     ]) {
       expect(denied).toContain(path)
     }

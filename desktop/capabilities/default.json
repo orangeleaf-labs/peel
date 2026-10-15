@@ -53,34 +53,30 @@
         { "path": "$HOME/scoop" },
         { "path": "$HOME/scoop/**" },
         { "path": "$APPCACHE/WebKit" },
-        { "path": "$APPCACHE/WebKit/**" }
+        { "path": "$APPCACHE/WebKit/**" },
+        { "path": "$APPLOCALDATA/EBWebView" },
+        { "path": "$APPLOCALDATA/EBWebView/**" }
       ]
     },
     {
       "identifier": "fs:allow-read-file",
       "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" },
-        { "path": "$APPCONFIG/**" },
-        { "path": "$APPCACHE/**" }
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
       ]
     },
     {
       "identifier": "fs:allow-stat",
       "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" },
-        { "path": "$APPCONFIG/**" },
-        { "path": "$APPCACHE/**" }
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
       ]
     },
     {
       "identifier": "fs:allow-open",
       "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" },
-        { "path": "$APPCONFIG/**" },
-        { "path": "$APPCACHE/**" }
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
       ],
       "deny": [
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
@@ -105,10 +101,8 @@
     {
       "identifier": "fs:allow-write-file",
       "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" },
-        { "path": "$APPCONFIG/**" },
-        { "path": "$APPCACHE/**" }
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
       ],
       "deny": [
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
@@ -130,10 +124,8 @@
     {
       "identifier": "fs:allow-mkdir",
       "allow": [
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" },
-        { "path": "$APPCONFIG/**" },
-        { "path": "$APPCACHE/**" }
+        { "path": "$APPLOCALDATA/cache" },
+        { "path": "$APPLOCALDATA/cache/**" }
       ]
     },
     {
