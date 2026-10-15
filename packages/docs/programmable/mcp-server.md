@@ -155,7 +155,9 @@ Endpoints are available over both active transports:
 5. **Modify** — `set_fill`, `set_stroke`, `set_layout`, `update_node`, `set_effects`
 6. **Structure** — `reparent_node`, `group_nodes`, `clone_node`, `delete_node`
 7. **Save** — `save_file` to write back to `.fig`
-8. **Close** — `close_file` to close an open document tab. With unsaved changes it fails unless `unsaved` is `"save"` or `"discard"`; it never prompts in the app.
+8. **Close** — `close_file` to close an open document tab. With unsaved changes it fails unless `unsaved` is `"save"` or `"discard"`; it never opens the Save dialog.
+
+Calls that write outside the document wait until the person in the app allows them: `save_file`, `close_file` with `unsaved: "save"`, `new_document` with a `path`, `update_settings`, and an export (`export_svg`, `export_pdf`, `export_image`, `get_jsx`) with a `path`. The dialog names the tool and the file, format, or settings; Deny, or no answer within a minute, fails the call and nothing is written. Document edits, reads, and exports returned without a `path` never ask.
 
 `undo` and `redo` step back through the agent's own changes, and `activate_document` brings a tab to the front when the user should see it.
 

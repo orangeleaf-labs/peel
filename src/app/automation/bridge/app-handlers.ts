@@ -1,6 +1,11 @@
 import type { AutomationTarget } from '@/app/automation/bridge/target'
 import { isAutomationUndoLabel } from '@/app/automation/execution/editor'
-import { readAutomationSettings, updateAutomationSettings } from '@/app/settings/automation'
+import { approveWrite, settingsPatchPaths } from '@/app/automation/write-approval'
+import {
+  parseAutomationSettingsPatch,
+  readAutomationSettings,
+  updateAutomationSettings
+} from '@/app/settings/automation'
 import { switchTab } from '@/app/tabs'
 
 export async function handleActivateDocument(
@@ -49,7 +54,14 @@ export function handleGetSettings(): unknown {
   return { ok: true, result: { settings: readAutomationSettings() } }
 }
 
-export function handleUpdateSettings(args: unknown): unknown {
-  const settings = (args as { settings?: unknown } | undefined)?.settings
-  return { ok: true, result: { settings: updateAutomationSettings(settings ?? {}) } }
+/** App settings outlive the document, so the user allows each change an agent asks for. */
+export async function handleUpdateSettings(args: unknown): Promise<unknown> {
+  const settings = (args as { settings?: unknown } | undefined)?.settings ?? {}
+  // A patch that would be rejected anyway is rejected before the user is asked.
+  const patch = parseAutomationSettingsPatch(settings)
+  const changes = settingsPatchPaths(patch)
+  if (changes.length > 0) {
+    await approveWrite({ tool: 'update_settings', kind: 'settings', target: changes.join(', ') })
+  }
+  return { ok: true, result: { settings: updateAutomationSettings(patch) } }
 }

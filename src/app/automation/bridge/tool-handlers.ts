@@ -4,7 +4,8 @@ import {
   registerComponentCatalog,
   isAtomicTool,
   isToolExposed,
-  toolChangesDocument
+  toolChangesDocument,
+  type ToolDef
 } from '@open-pencil/core/tools'
 import type { JSONObject } from '@open-pencil/scene-graph/primitives'
 
@@ -22,6 +23,7 @@ import {
   executeAtomicEditorTool,
   executeWithDocumentUndo
 } from '@/app/automation/execution/editor'
+import { approveWrite, toolWriteRequest } from '@/app/automation/write-approval'
 import { ensureGraphFonts } from '@/app/editor/fonts'
 import { useLibraryService } from '@/app/libraries'
 
@@ -37,11 +39,15 @@ export function createAutomationToolHandler(makeFigma: FigmaFactory) {
       (args as { scope?: unknown }).scope === 'selection'
         ? limitToSelection(target.store, toolName, requestedArgs)
         : requestedArgs
+    const def = findTool(toolName)
+    // The MCP server writes an export to its `path`; the user allows that before any data leaves.
+    const write = toolWriteRequest(def, toolArgs, { writesOutputPath: true })
+    if (write) await approveWrite(write)
 
     // A call from an MCP session shows as that session's agent, working where the call works.
     const session = readAgentSession((args as { agent?: unknown }).agent)
     const reply = session ? agentStarted(target.store, session, target.pageId) : 0
-    const response = await runTool(target, toolName, toolArgs)
+    const response = await runTool(target, def, toolArgs)
     if (session) {
       agentFinished(target.store, session, {
         reply,
@@ -55,11 +61,9 @@ export function createAutomationToolHandler(makeFigma: FigmaFactory) {
 
   async function runTool(
     target: AutomationTarget,
-    toolName: string,
+    def: ToolDef,
     toolArgs: Record<string, unknown>
   ): Promise<{ result: unknown; edited: boolean }> {
-    const def = ALL_TOOLS.find((t) => t.name === toolName && isToolExposed(t, 'mcp'))
-    if (!def) throw new Error(`Unknown tool: ${toolName}`)
     const store = target.store
     const libraryService = useLibraryService()
     libraryService.bindEditor(store)
@@ -95,6 +99,12 @@ export function createAutomationToolHandler(makeFigma: FigmaFactory) {
     }
     return { result, edited: def.mutates }
   }
+}
+
+function findTool(toolName: string): ToolDef {
+  const def = ALL_TOOLS.find((t) => t.name === toolName && isToolExposed(t, 'mcp'))
+  if (!def) throw new Error(`Unknown tool: ${toolName}`)
+  return def
 }
 
 /**

@@ -1,9 +1,10 @@
-import { expect, jest, test } from 'bun:test'
+import { afterEach, expect, jest, test } from 'bun:test'
 
 import {
   answerWriteApproval,
   approveWrite,
   currentWriteApproval,
+  denyWriteApprovals,
   requestWriteApproval,
   WriteDeniedError
 } from '@/app/automation/write-approval'
@@ -13,6 +14,11 @@ import { answerNextWriteApproval } from '#tests/helpers/write-approval'
 
 const save = { tool: 'save_file', kind: 'save', target: '/tmp/a.fig' } as const
 const settings = { tool: 'update_settings', kind: 'settings', target: 'appearance.theme' } as const
+
+afterEach(() => {
+  // A request a failed test left waiting must not stand in front of the next test's.
+  denyWriteApprovals()
+})
 
 test('requests wait for an answer, one at a time, oldest first', async () => {
   const first = requestWriteApproval(save)
@@ -53,6 +59,40 @@ test('a request no one answers is denied once the timeout passes', async () => {
     expect(currentWriteApproval.value).toBe(save)
     jest.advanceTimersByTime(1)
     expect(await pending).toBe(false)
+    expect(currentWriteApproval.value).toBeNull()
+  } finally {
+    jest.useRealTimers()
+  }
+})
+
+test('denyWriteApprovals withdraws only the requests its owner made', async () => {
+  const reply = {}
+  const fromReply = requestWriteApproval(save, reply)
+  const fromAutomation = requestWriteApproval(settings)
+  denyWriteApprovals(reply)
+  expect(await fromReply).toBe(false)
+  expect(currentWriteApproval.value).toBe(settings)
+
+  denyWriteApprovals()
+  expect(await fromAutomation).toBe(false)
+  expect(currentWriteApproval.value).toBeNull()
+})
+
+test('a queued request gets the whole timeout once it reaches the dialog', async () => {
+  jest.useFakeTimers()
+  try {
+    const first = requestWriteApproval(save)
+    const second = requestWriteApproval(settings)
+    jest.advanceTimersByTime(WRITE_APPROVAL_TIMEOUT_MS - 1)
+    answerWriteApproval(save, true)
+    expect(await first).toBe(true)
+
+    // Waiting behind the first request did not use up the second one's time.
+    expect(currentWriteApproval.value).toBe(settings)
+    jest.advanceTimersByTime(WRITE_APPROVAL_TIMEOUT_MS - 1)
+    expect(currentWriteApproval.value).toBe(settings)
+    jest.advanceTimersByTime(1)
+    expect(await second).toBe(false)
     expect(currentWriteApproval.value).toBeNull()
   } finally {
     jest.useRealTimers()

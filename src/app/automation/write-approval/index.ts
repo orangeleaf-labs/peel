@@ -2,6 +2,7 @@ export {
   answerWriteApproval,
   approveWrite,
   currentWriteApproval,
+  denyWriteApprovals,
   requestWriteApproval,
   WriteDeniedError
 } from './queue'

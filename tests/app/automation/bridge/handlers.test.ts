@@ -5,9 +5,11 @@ import * as layoutModule from '@open-pencil/core/layout'
 
 import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
 import { createAutomationCommandHandlers } from '@/app/automation/bridge/handlers'
+import { denyWriteApprovals } from '@/app/automation/write-approval'
 import { createTab, getActiveStore, getActiveTabId, getTabById, getTabsSnapshot } from '@/app/tabs'
 
 import { asDouble } from '#tests/helpers/doubles'
+import { answerNextWriteApproval } from '#tests/helpers/write-approval'
 
 function setupGlobals() {
   globalThis.window = asDouble<Window & typeof globalThis>({
@@ -62,6 +64,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  // A request a failed test left waiting must not stand in front of the next file's.
+  denyWriteApprovals()
   vi.restoreAllMocks()
   Reflect.deleteProperty(globalThis, 'window')
   Reflect.deleteProperty(globalThis, 'document')
@@ -322,7 +326,7 @@ describe('render JSX', () => {
   })
 })
 
-describe('close_file and save_file never prompt', () => {
+describe('close_file and save_file never open the Save dialog', () => {
   function dirtyTab() {
     const tab = createTab()
     tab.store.createShape('RECTANGLE', 0, 0, 10, 10)
@@ -355,10 +359,10 @@ describe('close_file and save_file never prompt', () => {
 
   test('a failed save to a path keeps the document source it had', async () => {
     const tab = dirtyTab()
-    // Outside Tauri a path cannot be written, so the save fails.
-    await expect(
-      request('save_file', { document_id: tab.id, path: '/tmp/never-written.fig' })
-    ).rejects.toThrow('Could not save')
+    // Outside Tauri a path cannot be written, so the save the user allowed fails.
+    const saving = request('save_file', { document_id: tab.id, path: '/tmp/never-written.fig' })
+    await answerNextWriteApproval(true)
+    await expect(saving).rejects.toThrow('Could not save')
     expect(tab.store.state.documentName).toBe('Untitled')
     expect(tab.store.getDocumentFilePath()).toBeNull()
     expect(tab.store.hasWritableSource()).toBe(false)

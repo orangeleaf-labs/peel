@@ -104,14 +104,19 @@ export function readAutomationSettings(): AutomationSettings {
 }
 
 /** Validates a partial settings object, applies it through the owning stores, and returns the result. */
-export function updateAutomationSettings(input: unknown): AutomationSettings {
+/** The patch an automation client sent, or an error naming its first invalid setting. */
+export function parseAutomationSettingsPatch(input: unknown): AutomationSettingsPatch {
   const result = v.safeParse(automationSettingsPatchSchema, input)
   if (!result.success) {
     const issue = result.issues[0]
     const path = v.getDotPath(issue)
     throw new Error(`Invalid settings${path ? ` at "${path}"` : ''}: ${issue.message}`)
   }
-  const patch = result.output
+  return result.output
+}
+
+export function updateAutomationSettings(input: unknown): AutomationSettings {
+  const patch = parseAutomationSettingsPatch(input)
 
   const { theme, language, ...appearance } = patch.appearance ?? {}
   if (theme) setAppTheme(theme)
