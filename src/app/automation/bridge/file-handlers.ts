@@ -20,15 +20,47 @@ const closeArgsSchema = v.object({
   unsaved: v.optional(v.picklist(['error', 'save', 'discard']), 'error')
 })
 
+/** The fs plugin's refusal of a path outside the desktop capability and the files the user granted. */
+export function isFileScopeRefusal(error: unknown): boolean {
+  return /forbidden path/i.test(error instanceof Error ? error.message : String(error))
+}
+
+/**
+ * The desktop app reads and writes documents only where the user put them: files picked in an
+ * Open or Save dialog, or opened from the system file manager (`desktop/capabilities/default.json`).
+ * An automation client naming any other path is refused rather than given a wider scope.
+ */
+export function automationPathOutsideScope(action: 'open' | 'save', path: string): Error {
+  return new Error(
+    `The desktop app cannot ${action} "${path}" for automation: it only reads and writes files ` +
+      'the user opened or saved in the app, through a file dialog or the system file manager. ' +
+      `Have the user ${action} the file in the app once, then retry.`
+  )
+}
+
+async function withFileScope<T>(
+  action: 'open' | 'save',
+  path: string,
+  run: () => Promise<T>
+): Promise<T> {
+  try {
+    return await run()
+  } catch (error) {
+    if (isTauri() && isFileScopeRefusal(error)) throw automationPathOutsideScope(action, path)
+    throw error
+  }
+}
+
 // Automation never opens the Save dialog: nobody may be there to answer it.
 async function saveWithoutPrompt(store: AutomationTarget['store'], path?: string): Promise<void> {
   const name = store.state.documentName
   if (!path && !store.hasWritableSource()) {
     throw new Error(`"${name}" has not been saved to a file yet; pass a path to save it`)
   }
-  if (path) await ensureTauriParentDirectory(path)
   // A failed save to a new path leaves the document with the source it had.
-  const saved = path ? await store.saveFigFileToPath(path) : await store.saveFigFile()
+  const saved = path
+    ? await withFileScope('save', path, () => store.saveFigFileToPath(path))
+    : await store.saveFigFile()
   if (!saved) throw new Error(`Could not save "${name}"`)
 }
 
@@ -36,17 +68,6 @@ export async function handleSaveFile(target: AutomationTarget, args: unknown): P
   const { path } = parseToolArgs('save_file', saveArgsSchema, args)
   await saveWithoutPrompt(target.store, path)
   return { ok: true, result: { saved: true } }
-}
-
-export async function ensureTauriParentDirectory(path: string): Promise<void> {
-  if (!isTauri()) return
-  const [{ dirname }, { mkdir }] = await Promise.all([
-    import('@tauri-apps/api/path'),
-    import('@tauri-apps/plugin-fs')
-  ])
-  const dir = await dirname(path)
-  if (dir === path) return
-  await mkdir(dir, { recursive: true })
 }
 
 export async function handleCloseFile(target: AutomationTarget, args: unknown): Promise<unknown> {
@@ -87,7 +108,7 @@ export async function handleOpenFile(_target: AutomationTarget, args: unknown): 
   const path = (args as { path?: string }).path
   if (!path) throw new Error('Missing "path" in args')
   if (isTauri()) {
-    await openFileFromPath(path)
+    await withFileScope('open', path, () => openFileFromPath(path))
   } else {
     // Same fetch, cap and format check as every other browser open: an automation client
     // is not more trusted than a link.
