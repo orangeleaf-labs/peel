@@ -7,11 +7,9 @@ import {
   type SceneNode
 } from '@open-pencil/scene-graph'
 
+import { evaluateDesignJSXTree } from './evaluate'
 import type { JSXAttributeSource } from './export'
-import * as React from './mini-react'
-import { buildComponent } from './render'
 import { elementOverrides } from './renderer'
-import { resolveToTree } from './tree'
 
 export interface JSXNodeFields {
   /** Every field the attributes describe, with defaults for the ones they leave out. */
@@ -32,7 +30,7 @@ export function jsxNodeFields(
   parentId: string
 ): JSXNodeFields {
   const source = `<Frame ${attributes.map((attribute) => attribute.source).join(' ')} />`
-  const tree = resolveToTree(React.createElement(buildComponent(source), null))
+  const tree = evaluateDesignJSXTree(source)
   if (!tree) throw new Error(`Invalid JSX attributes: ${source}`)
   const { overrides, bindings } = elementOverrides(graph, nodeType, tree, parentId)
   const defaults = omit(

@@ -28,6 +28,7 @@ import {
   type UnknownRecord
 } from '@/app/automation/bridge/target'
 import { createAutomationToolHandler } from '@/app/automation/bridge/tool-handlers'
+import { installDesignJSXSandbox } from '@/app/code/sandbox/install'
 import type { EditorStore } from '@/app/editor/active-store'
 
 type FigmaFactory = (store: EditorStore, pageId?: string) => FigmaAPI
@@ -59,6 +60,7 @@ export function createAutomationCommandHandlers(makeFigma: FigmaFactory) {
     command: string,
     args: UnknownRecord
   ): Promise<unknown> {
+    await installDesignJSXSandbox()
     if (!(await target.store.preparePageNodes(target.pageId))) {
       throw new Error(`Page "${target.pageId}" was closed before it finished loading`)
     }

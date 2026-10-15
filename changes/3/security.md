@@ -1,0 +1,1 @@
+- The desktop app enforces a strict content security policy, and Design JSX from the AI chat and the Code panel runs in an isolated WebAssembly sandbox.

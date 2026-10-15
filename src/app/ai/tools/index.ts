@@ -13,6 +13,7 @@ import {
 
 import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
 import { executeAtomicEditorTool } from '@/app/automation/execution/editor'
+import { installDesignJSXSandbox } from '@/app/code/sandbox/install'
 import { recordToolCompleted, type AIDiagnosticContext } from '@/app/diagnostics/events/ai'
 import type { EditorStore } from '@/app/editor/active-store'
 import { ensureGraphFonts } from '@/app/editor/fonts'
@@ -68,6 +69,8 @@ export function createAITools(store: EditorStore, diagnosticContext?: AIDiagnost
     args: Record<string, unknown>,
     pageId: string
   ): Promise<unknown> {
+    // JSX the model writes runs only in the isolated engine.
+    await installDesignJSXSandbox()
     if (isAtomicTool(def)) {
       return executeAtomicEditorTool(store, figma, def, args, { label: 'AI' })
     }
