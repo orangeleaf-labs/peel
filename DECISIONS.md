@@ -29,3 +29,6 @@ did not cover a case, the safer and more reversible option was taken.
 | AI writes are approved per call; there is no "allow for this session". | Safer default; nothing is remembered that the user cannot see. |
 | No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, stock photos, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
+| Collaboration code and dependencies are deleted rather than feature-flagged. | Nothing bundled can reach signalling hosts; bringing it back means reverting one commit. |
+| The `/share/:roomId` route is removed with no redirect. | The desktop app has no address bar and refuses join deep links. |
+| The Vue SDK `collaboration` i18n namespace keeps the 14 keys agent presence and settings still use. | A smaller change; renaming the namespace can come later. |
