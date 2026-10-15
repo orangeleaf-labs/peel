@@ -1,15 +1,19 @@
 import type { DesignJSXValidationLimits } from '@/app/code/sandbox/types'
 
-const workerSource = String.raw`
-self.onmessage = ({ data }) => {
-  const { id, code, elements, helpers: helperNames, limits } = data
-  const blocked = () => { throw new Error('Network access is unavailable in Design JSX.') }
-  self.fetch = blocked
-  self.XMLHttpRequest = undefined
-  self.WebSocket = undefined
-  self.EventSource = undefined
-  self.importScripts = blocked
-
+/**
+ * The runtime a Design JSX program runs in, as plain JavaScript for the isolated engine. It
+ * builds inert element data, replaces helpers with descriptors the host replays, and checks
+ * the output against `limits` before it leaves the engine.
+ */
+const runtimeSource = String.raw`
+  const utf8Length = (text) => {
+    let bytes = 0
+    for (const char of text) {
+      const point = char.codePointAt(0)
+      bytes += point < 0x80 ? 1 : point < 0x800 ? 2 : point < 0x10000 ? 3 : 4
+    }
+    return bytes
+  }
   const normalizeChildren = (children) => children.flat(Infinity).filter((child) => child != null && child !== false)
   const __fragment = ''
   const __h = (type, props, ...children) => {
@@ -55,7 +59,7 @@ self.onmessage = ({ data }) => {
     }
     if (typeof value === 'string') {
       if (value.length > limits.stringLength) throw new Error('Design JSX output contains a string that is too long.')
-      state.bytes += new TextEncoder().encode(value).byteLength
+      state.bytes += utf8Length(value)
       if (state.bytes > limits.outputBytes) throw new Error('Design JSX output is too large.')
       return state
     }
@@ -80,50 +84,28 @@ self.onmessage = ({ data }) => {
     }
     return state
   }
-  try {
-    const argumentNames = ['__h', '__fragment', ...names, ...helperNames]
-    const argumentValues = [__h, __fragment, ...names.map((name) => tags[name]), ...helperNames.map((name) => helpers[name])]
-    const run = new Function(...argumentNames, code)
-    const value = run(...argumentValues)
-    validate(value)
-    self.postMessage({ id, ok: true, value })
-  } catch (error) {
-    self.postMessage({ id, ok: false, error: error instanceof Error ? error.message : String(error) })
-  }
-}
 `
 
-export type SandboxDocumentOptions = {
+export type ProgramScriptOptions = {
   elements: Record<string, string>
   helpers: string[]
   limits: DesignJSXValidationLimits
 }
 
-export function sandboxDocument({ elements, helpers, limits }: SandboxDocumentOptions): string {
-  const escapedWorkerSource = JSON.stringify(workerSource)
-  const escapedElements = JSON.stringify(elements)
-  const escapedHelpers = JSON.stringify(helpers)
-  const escapedLimits = JSON.stringify(limits)
-  return `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; connect-src 'none'; img-src 'none'; media-src 'none'; font-src 'none'; style-src 'none'; object-src 'none'; frame-src 'none'; worker-src blob:; base-uri 'none'; form-action 'none'"></head><body><script>
-  const workerURL = URL.createObjectURL(new Blob([${escapedWorkerSource}], { type: 'text/javascript' }))
-  const workers = new Map()
-  addEventListener('message', (event) => {
-    const message = event.data
-    if (!message || message.type !== 'open-pencil-design-jsx-run') return
-    const worker = new Worker(workerURL)
-    workers.set(message.id, worker)
-    worker.onmessage = ({ data }) => {
-      parent.postMessage({ type: 'open-pencil-design-jsx-result', ...data }, '*')
-      worker.terminate()
-      workers.delete(message.id)
-    }
-    worker.onerror = () => {
-      parent.postMessage({ type: 'open-pencil-design-jsx-result', id: message.id, ok: false, error: 'Design JSX execution failed.' }, '*')
-      worker.terminate()
-      workers.delete(message.id)
-    }
-    worker.postMessage({ id: message.id, code: message.code, elements: ${escapedElements}, helpers: ${escapedHelpers}, limits: ${escapedLimits} })
-  })
-  parent.postMessage({ type: 'open-pencil-design-jsx-ready' }, '*')
-  </script></body></html>`
+/**
+ * A script whose completion value is the program's output as JSON. `code` is a transformed
+ * Design JSX program body; it sees only the element tags, the helper descriptors, `__h`, and
+ * `__fragment`, because the engine that runs the script exposes no host objects.
+ */
+export function programScript(code: string, { elements, helpers, limits }: ProgramScriptOptions) {
+  return `(() => {
+  const elements = ${JSON.stringify(elements)}
+  const helperNames = ${JSON.stringify(helpers)}
+  const limits = ${JSON.stringify(limits)}
+${runtimeSource}
+  const run = new Function(...['__h', '__fragment', ...names, ...helperNames], ${JSON.stringify(code)})
+  const value = run(__h, __fragment, ...names.map((name) => tags[name]), ...helperNames.map((name) => helpers[name]))
+  validate(value)
+  return JSON.stringify(value)
+})()`
 }

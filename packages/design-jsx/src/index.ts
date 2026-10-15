@@ -85,7 +85,20 @@ export { defineVars, designVar, isVariable, type DesignVariable, type VarDef } f
 
 export { createElement } from './mini-react'
 
-export { buildComponent, createDesignJSXRenderer, type DesignJSXRenderer } from './render'
+export {
+  buildComponent,
+  compileDesignJSX,
+  explainSiblingError,
+  type CompiledDesignJSX
+} from './compile'
+export {
+  evaluateDesignJSXTree,
+  isolatedDesignJSXScript,
+  setDesignJSXEvaluator,
+  treeFromIsolatedDesignJSX,
+  type DesignJSXEvaluator
+} from './evaluate'
+export { createDesignJSXRenderer, type DesignJSXRenderer } from './render'
 export type { ArtworkPlacement, DesignJSXServices, SVGSource } from './services'
 export type { RenderOptions } from './types'
 export {

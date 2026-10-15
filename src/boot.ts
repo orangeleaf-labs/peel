@@ -4,6 +4,7 @@ import { createApp, nextTick } from 'vue'
 import { createRetainedScopePlugin } from '@open-pencil/vue'
 
 import './app.css'
+import { installDesignJSXSandbox } from '@/app/code/sandbox/install'
 import { recordRuntimeError } from '@/app/diagnostics'
 import { preloadFonts } from '@/app/editor/fonts'
 import { installBundledFonts } from '@/app/editor/fonts/bundled'
@@ -20,6 +21,7 @@ import router from './router'
  * evaluates the app bundle and can still show the gate's guidance.
  */
 export async function boot(): Promise<void> {
+  void installDesignJSXSandbox().catch((error: unknown) => recordRuntimeError(error, 'rejection'))
   installBundledFonts()
   preloadFonts()
   const head = createHead()

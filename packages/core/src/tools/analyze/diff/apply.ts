@@ -1,12 +1,10 @@
 import { difference, groupBy, isEqual, pickBy, uniq } from 'es-toolkit'
 
 import {
-  buildComponent,
-  createElement,
   DESIGN_JSX_SUPPORTED_PROPERTIES,
+  evaluateDesignJSXTree,
   jsxNodeFields,
   parseJSXAttributes,
-  resolveToTree,
   sceneNodeAttributes,
   type JSXAttributeSource
 } from '@open-pencil/design-jsx'
@@ -163,7 +161,7 @@ function planAdd(graph: SceneGraph, operation: Extract<DiffOperation, { kind: 'a
   if (!operation.jsx.trim()) return failed(operation, 'Added node has no JSX')
   try {
     // Evaluate now so invalid JSX fails before anything changes.
-    if (!resolveToTree(createElement(buildComponent(operation.jsx), null))) {
+    if (!evaluateDesignJSXTree(operation.jsx)) {
       return failed(operation, 'Added JSX renders nothing')
     }
   } catch (error) {
