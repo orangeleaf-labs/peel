@@ -22,3 +22,7 @@ did not cover a case, the safer and more reversible option was taken.
 | Zod's `new Function('')` capability probe is left to fail under the CSP. | Zod catches it and falls back to its non-JIT parser; the only effect is one CSP report at startup. |
 | The automation bridge `eval` command stays behind MCP `allowEval: false` and is inert under the CSP. | It ran in the window with `new Function`; making it work would need `unsafe-eval`. |
 | Remote branches are left for a person to delete when the agent environment's git proxy refuses `git push --delete`. | The GitHub API used here has no branch-delete call; merged PR branches are harmless and listed in HUMAN_TODO.md. |
+| Document access persists through `tauri-plugin-persisted-scope`. | It is Tauri v2's own way to keep dialog and OS-granted paths across restarts, so recent files, thumbnails and reopen work without a broad scope. |
+| File removal is allowed only under `$APPLOCALDATA/cache`. | The cache is the only place the app deletes files. |
+| Automation open/save outside the user's grants fails rather than prompting to widen the scope. | Safer and reversible; the user opens or saves the file once in the app to grant it. |
+| `$APPCACHE/WebKit` is denied globally. | On macOS WKWebView keeps its cache inside the app cache folder, which the allow-list otherwise covers. |

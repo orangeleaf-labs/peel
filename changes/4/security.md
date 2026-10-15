@@ -1,0 +1,1 @@
+- The desktop app can only read and write documents you open or save through it, plus its own data folders, instead of any file in your home folder.
