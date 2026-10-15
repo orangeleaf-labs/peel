@@ -36,3 +36,12 @@ Only Linux was exercised; the macOS-only native cases were skipped.
 2. On an installed build: open a `.fig` through the Open dialog, quit and relaunch, and check Recent Files reopens it with a thumbnail.
 3. Edit that file in another app and check Peel reloads it.
 4. Save As into a new folder, export a PNG, and double-click a `.fig` in Finder or Explorer; each must work.
+
+### Apply the pending workflow changes
+
+The agent's GitHub token has no `workflow` scope, so it cannot change files under `.github/workflows/`. Workflow edits are saved as patches in `.github/pending-workflows/` instead.
+
+1. From the repository root on `master`, run `git apply .github/pending-workflows/remove-telemetry.patch`. This deletes `feedback.yml`, drops the `feedback-tests` job from `ci.yml`, and removes `VITE_OPENPENCIL_FEEDBACK` from `app.yml` and `build.yml`.
+2. Delete the applied patch file, and remove the `.github/workflows` exclusion in `tests/app/shell/egress.test.ts`.
+3. Commit, open a PR, and confirm `bun test tests/app/shell/egress.test.ts` passes.
+4. To let future agent runs change workflows directly, reconnect GitHub with the `workflow` permission at https://claude.ai/connect-github.

@@ -32,3 +32,4 @@ did not cover a case, the safer and more reversible option was taken.
 | `packages/feedback` is deleted from the fork rather than only excluded from the workspace. | Upstream keeps it, so it can be restored at any time; deleting it means no build, CI job or deploy can bring it back by accident. |
 | The `sharing` preference is dropped, not migrated. | Nothing reads it any more; the preference parser drops the old key on load. |
 | The docs privacy page is reworded rather than deleted. | Its route stays and now says Peel sends no telemetry; the network table is finished with `EGRESS.md` later in Phase 2. |
+| Workflow edits are committed as patches under `.github/pending-workflows/` for a person to apply, and the telemetry egress test skips `.github/workflows` until then. | The agent's GitHub token lacks the `workflow` scope, so pushes touching `.github/workflows` are rejected. |

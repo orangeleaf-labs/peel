@@ -59,6 +59,9 @@ async function shippedFiles(): Promise<string[]> {
     SHIPPED_ROOTS.map(async (root) =>
       (await Array.fromAsync(SCANNED.scan({ cwd: repoPath(root), dot: true })))
         .filter((file) => !/(^|\/)(node_modules|dist|cache|target)\//.test(file))
+        // The agent's GitHub token cannot change `.github/workflows`; those edits wait in
+        // `.github/pending-workflows/` until a person applies them (HUMAN_TODO.md).
+        .filter((file) => !(root === '.github' && /^(workflows|pending-workflows)\//.test(file)))
         .map((file) => `${root}/${file}`)
     )
   )
