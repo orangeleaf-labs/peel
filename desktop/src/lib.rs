@@ -2,6 +2,7 @@ mod agents;
 mod credentials;
 mod deep_link;
 mod fig_container;
+mod folder_picker;
 mod fonts;
 mod http;
 mod menu;
@@ -15,6 +16,7 @@ use credentials::{
 };
 use deep_link::path_matches_suffix;
 use fig_container::build_fig_file;
+use folder_picker::pick_mcp_root_folder;
 use fonts::{list_system_fonts, load_system_font};
 use http::{cancel_http_request, proxy_http_request, ProxyHttpRequests};
 use menu::{install_app_menu, native_menu_checked, set_native_menu_checked};
@@ -373,6 +375,7 @@ pub fn run() {
             credential_write,
             mcp_lookup,
             path_matches_suffix,
+            pick_mcp_root_folder,
             list_system_fonts,
             load_system_font,
             proxy_http_request,
