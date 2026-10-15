@@ -9,7 +9,8 @@ did not cover a case, the safer and more reversible option was taken.
 | Collaboration: disabled entirely. | Default given in the brief; peer-to-peer sync needs signalling hosts and is out of scope for an internal desktop tool. |
 | Updater: disabled until an update URL and public key are configured. | No hosting exists yet; the code path stays behind config. |
 | The repository's default branch is `master`, and every "main" in the brief means `master`. | The fork kept upstream's branch name; renaming it would break upstream rebases. |
-| The `gh` CLI is unavailable in the agent environment, so PRs are opened, reviewed and merged with the GitHub API through the same account. | The CLI token is invalid; the API does the same operations. |
+| PRs are opened, reviewed and merged through the GitHub API rather than `gh`, from one account. | `gh` is not authenticated in the agent environment; the API performs the same operations. |
+| The orchestrator agent applies reviewer findings itself (the fixer role); the reviewer is always a fresh agent that did not write the code. | Independence matters for the review, not the fix; each re-review is still done by a separate agent. |
 | Reviewer verdicts are posted as PR reviews by a separate reviewer agent; when GitHub refuses a self-approval, the verdict is a `COMMENT` review whose first line is `Verdict: APPROVE` or `Verdict: REQUEST_CHANGES`. | One GitHub account opens and reviews the PRs, and GitHub does not let an author approve their own PR. |
 | While the fork has no GitHub Actions runs, "CI green" means `bun run check` and `bun run test:unit` passing locally on the PR head. | The fork had zero registered workflows at the start of the run; once checks report on PRs they are waited on as well. |
 | The first PR uses the branch `peel/phase1-setup-mukcuw`. | That branch was pre-created for this run and fits the `peel/<phase>-<topic>` naming. |
