@@ -1,0 +1,13 @@
+Peel by Orangeleaf
+Copyright (c) 2026 Orangeleaf
+
+Peel is a fork of OpenPencil (https://github.com/open-pencil/open-pencil),
+forked at upstream commit d9c0caa (v0.16.0).
+
+OpenPencil is Copyright (c) 2026 Danila Poyarkov and OpenPencil contributors,
+and is distributed under the MIT License, reproduced in LICENSE. That license
+and copyright notice apply to all code derived from OpenPencil and must be kept
+in every copy or substantial portion of this software.
+
+Orangeleaf thanks Danila Poyarkov and every OpenPencil contributor for the
+editor this product is built on.
