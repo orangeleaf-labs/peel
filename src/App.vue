@@ -16,6 +16,7 @@ import { useRestartApprovals } from '@/app/shell/updater/approvals'
 import { scheduleStartupUpdateCheck } from '@/app/shell/updater/check'
 import { kickSyncEngine } from '@/app/storage/sync'
 import { prepareForReload } from '@/app/tabs'
+import WriteApprovalDialog from '@/components/automation/WriteApprovalDialog.vue'
 import UnsavedChangesDialog from '@/components/document/UnsavedChangesDialog.vue'
 import PublishLibraryDialog from '@/components/libraries/PublishLibraryDialog.vue'
 import LibraryUpdateReviewDialog from '@/components/libraries/review/LibraryUpdateReviewDialog.vue'
@@ -62,6 +63,7 @@ onMounted(() => {
       <AISetupDialog />
       <RecoveryDialog />
       <UnsavedChangesDialog />
+      <WriteApprovalDialog />
       <PublishLibraryDialog />
       <LibraryUpdateReviewDialog />
       <UsageStatsPrompt />

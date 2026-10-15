@@ -155,5 +155,7 @@ export const DEFAULT_TEXT_WIDTH = 200
 export const DEFAULT_TEXT_HEIGHT = 24
 
 export const ACP_PERMISSION_TIMEOUT_MS = 60_000
+/** An agent's write outside the document is denied if the user has not answered by then. */
+export const WRITE_APPROVAL_TIMEOUT_MS = 60_000
 
 export { ACP_DESIGN_CONTEXT }

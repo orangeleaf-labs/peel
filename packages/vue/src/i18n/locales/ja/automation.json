@@ -91,5 +91,14 @@
   "mcpFailureUnknown": "MCP サーバーを起動できませんでした",
   "mcpFailureUnknownHint": "もう一度起動するか、以下の技術的な詳細を確認してください。",
   "mcpFailureDetails": "詳細",
-  "mcpFailureCopy": "詳細をコピー"
+  "mcpFailureCopy": "詳細をコピー",
+  "writeApprovalTitle": "ドキュメント外への書き込みを許可しますか？",
+  "writeApprovalSave": "エージェントが{tool}でドキュメントを{target}に保存しようとしています。",
+  "writeApprovalExport": "エージェントが{tool}で{format}を{target}に書き出そうとしています。",
+  "writeApprovalSettings": "エージェントが{tool}でアプリの設定を変更しようとしています：{target}",
+  "writeApprovalWrite": "エージェントが{tool}でファイルに書き込もうとしています：{target}",
+  "writeApprovalUnknownTarget": "エージェントが{tool}でドキュメント外に書き込もうとしています。",
+  "writeApprovalDenyHint": "拒否すると、エージェントにはエラーが返され、何も書き込まれません。",
+  "writeApprovalAllow": "許可",
+  "writeApprovalDeny": "拒否"
 }

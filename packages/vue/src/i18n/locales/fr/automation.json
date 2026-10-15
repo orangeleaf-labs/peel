@@ -91,5 +91,14 @@
   "mcpFailureUnknown": "Le serveur MCP n’a pas pu démarrer",
   "mcpFailureUnknownHint": "Relancez-le ou consultez les détails techniques ci-dessous.",
   "mcpFailureDetails": "Détails",
-  "mcpFailureCopy": "Copier les détails"
+  "mcpFailureCopy": "Copier les détails",
+  "writeApprovalTitle": "Autoriser une écriture hors du document ?",
+  "writeApprovalSave": "Un agent veut enregistrer un document avec {tool} dans {target}.",
+  "writeApprovalExport": "Un agent veut exporter en {format} avec {tool} vers {target}.",
+  "writeApprovalSettings": "Un agent veut modifier les réglages de l’app avec {tool} : {target}.",
+  "writeApprovalWrite": "Un agent veut écrire un fichier avec {tool} : {target}.",
+  "writeApprovalUnknownTarget": "Un agent veut écrire hors du document avec {tool}.",
+  "writeApprovalDenyHint": "Si vous refusez, l’agent reçoit une erreur et rien n’est écrit.",
+  "writeApprovalAllow": "Autoriser",
+  "writeApprovalDeny": "Refuser"
 }

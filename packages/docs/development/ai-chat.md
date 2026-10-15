@@ -24,6 +24,7 @@ The chat's agent is one presence entry per document (`presence/registry.ts`). It
 
 `tools/index.ts` runs every call through `executeCall`:
 
+- A call that would write outside the document, a tool declaring `filesystem:write` or `settings:write`, first waits for the user to allow it (`tools/approval.ts`, `automation/write-approval/`). Deny returns an error to the model and runs nothing. Document edits and reads never ask, and exports return their data to the model without writing a file.
 - Calls that change the document take a lock in turn, since whole-page snapshots must not interleave. A call that gets the lock after the reply ended changes nothing and returns an error.
 - The document change is captured, pushed as one undo step labelled `aiUndoLabel(tool)`, and recorded on the call's own run, the one it started in, even if a later reply has begun.
 - The change is recorded for the chat's change review, and the agent points at it.

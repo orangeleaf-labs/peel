@@ -91,5 +91,14 @@
   "mcpFailureUnknown": "MCP-Server konnte nicht gestartet werden",
   "mcpFailureUnknownHint": "Erneut starten oder die technischen Details unten prüfen.",
   "mcpFailureDetails": "Details",
-  "mcpFailureCopy": "Details kopieren"
+  "mcpFailureCopy": "Details kopieren",
+  "writeApprovalTitle": "Schreibzugriff außerhalb des Dokuments erlauben?",
+  "writeApprovalSave": "Ein Agent möchte mit {tool} ein Dokument unter {target} speichern.",
+  "writeApprovalExport": "Ein Agent möchte mit {tool} {format} nach {target} exportieren.",
+  "writeApprovalSettings": "Ein Agent möchte mit {tool} App-Einstellungen ändern: {target}.",
+  "writeApprovalWrite": "Ein Agent möchte mit {tool} eine Datei schreiben: {target}.",
+  "writeApprovalUnknownTarget": "Ein Agent möchte mit {tool} außerhalb des Dokuments schreiben.",
+  "writeApprovalDenyHint": "Wenn du ablehnst, erhält der Agent einen Fehler und es wird nichts geschrieben.",
+  "writeApprovalAllow": "Erlauben",
+  "writeApprovalDeny": "Ablehnen"
 }
