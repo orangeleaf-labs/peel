@@ -27,7 +27,7 @@ The chat's agent is one presence entry per document (`presence/registry.ts`). It
 - Calls that change the document take a lock in turn, since whole-page snapshots must not interleave. A call that gets the lock after the reply ended changes nothing and returns an error.
 - The document change is captured, pushed as one undo step labelled `aiUndoLabel(tool)`, and recorded on the call's own run, the one it started in, even if a later reply has begun.
 - The change is recorded for the chat's change review, and the agent points at it.
-- A call's result reaches the model as JSON. `eval` converts what a script returns, as MCP and the CLI print it.
+- A call's result reaches the model as JSON.
 - If you undid or redid the run's own edits since the model last heard, the result carries an `undoNote` saying so.
 
 ## A reply ends
