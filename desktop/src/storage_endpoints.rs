@@ -12,7 +12,7 @@ use tauri::{Manager, Runtime, Window};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use url::Url;
 
-use crate::egress::{authority, https_domain, Allowed, EgressError};
+use crate::egress::{authority, has_static_limits, https_domain, Allowed, EgressError};
 
 const APPROVALS_FILE: &str = "approved-storage-hosts.json";
 
@@ -30,9 +30,19 @@ pub fn storage_endpoint_authority(endpoint: &str) -> Result<String, EgressError>
     };
     let url = Url::parse(&with_scheme).map_err(|error| EgressError::Invalid(error.to_string()))?;
     let domain = https_domain(&url)?;
+    // `host.` names the same host as `host` but would be a second approval for it; refuse it.
+    if domain.ends_with('.') {
+        return Err(EgressError::Invalid(format!(
+            "{domain} ends with a dot; remove it"
+        )));
+    }
     // A single-label name resolves only on a local network or search domain.
-    if !domain.trim_end_matches('.').contains('.') {
+    if !domain.contains('.') {
         return Err(EgressError::Local(domain.to_owned()));
+    }
+    // Approving a host the static list limits would lift its limits.
+    if has_static_limits(domain) {
+        return Err(EgressError::Limited(domain.to_owned()));
     }
     Ok(authority(domain, url.port()))
 }
@@ -193,6 +203,14 @@ mod tests {
             ("https://localhost:9000", Local("localhost".into())),
             ("minio", Local("minio".into())),
             ("https://s3.example.com@evil.com", Userinfo),
+            ("https://localhost.", Local("localhost.".into())),
+            ("foo.localhost.", Local("foo.localhost.".into())),
+            ("cdn.jsdelivr.net", Limited("cdn.jsdelivr.net".into())),
+            (
+                "https://www.figma.com:8443",
+                Limited("www.figma.com".into()),
+            ),
+            ("WWW.FIGMA.COM", Limited("www.figma.com".into())),
         ] {
             assert_eq!(
                 storage_endpoint_authority(endpoint),
@@ -201,12 +219,18 @@ mod tests {
             );
         }
         assert!(storage_endpoint_authority(" ").is_err());
+        for endpoint in ["s3.example.com.", "https://minio.:9000", "minio."] {
+            assert!(
+                matches!(storage_endpoint_authority(endpoint), Err(Invalid(_))),
+                "{endpoint}"
+            );
+        }
     }
 
     #[test]
     fn saved_approvals_drop_entries_that_would_not_pass() {
         let approvals = parse_approvals(
-            r#"["s3.example.com", "minio.example.com:9000", "127.0.0.1", "http://x.example.com", "localhost", "S3.UPPER.com"]"#,
+            r#"["s3.example.com", "minio.example.com:9000", "127.0.0.1", "http://x.example.com", "localhost", "S3.UPPER.com", "cdn.jsdelivr.net", "www.figma.com", "www.figma.com:8443", "s3.example.com.", "localhost."]"#,
         );
         let mut entries: Vec<_> = approvals.into_iter().collect();
         entries.sort();
