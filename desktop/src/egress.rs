@@ -90,6 +90,8 @@ pub enum EgressError {
     Local(String),
     Port(String),
     NotAllowed(String),
+    /// A host the static list limits to a path or a request, which an approval may not widen.
+    Limited(String),
 }
 
 impl fmt::Display for EgressError {
@@ -109,6 +111,10 @@ impl fmt::Display for EgressError {
                 "Blocked request: {authority} uses a port that is not allowed"
             ),
             Self::NotAllowed(host) => write!(f, "Blocked request: {host} is not an allowed host"),
+            Self::Limited(host) => write!(
+                f,
+                "Blocked request: {host} is allowed only for specific requests and cannot be a storage endpoint"
+            ),
         }
     }
 }
@@ -127,7 +133,9 @@ pub(crate) fn https_domain(url: &Url) -> Result<&str, EgressError> {
         None => Err(EgressError::NoDomain),
         Some(Host::Ipv4(_)) | Some(Host::Ipv6(_)) => Err(EgressError::IpAddress),
         Some(Host::Domain(domain)) => {
-            if domain == "localhost" || domain.ends_with(".localhost") {
+            // `localhost.` is the same local name as `localhost`.
+            let name = domain.strip_suffix('.').unwrap_or(domain);
+            if name == "localhost" || name.ends_with(".localhost") {
                 Err(EgressError::Local(domain.to_owned()))
             } else {
                 Ok(domain)
@@ -142,6 +150,17 @@ pub(crate) fn authority(domain: &str, port: Option<u16>) -> String {
         Some(port) => format!("{domain}:{port}"),
         None => domain.to_owned(),
     }
+}
+
+/// Whether the static list allows `domain` only under a path prefix or for one request, so it
+/// may never be approved as a storage endpoint, at any port.
+pub(crate) fn has_static_limits(domain: &str) -> bool {
+    ALLOWED_PATH_PREFIXES
+        .iter()
+        .any(|(host, _)| *host == domain)
+        || ALLOWED_ENDPOINTS
+            .iter()
+            .any(|endpoint| endpoint.host == domain)
 }
 
 /// `method` is None for a redirect hop, whose method reqwest does not expose; hosts limited to
@@ -177,7 +196,8 @@ impl Allowed {
         let domain = https_domain(url)?;
         // `port()` is None for the default port, which the parser drops from `https://h:443`.
         let authority = authority(domain, url.port());
-        if self.approved.contains(&authority) {
+        // An approval never lifts the limits of a host the static list limits.
+        if self.approved.contains(&authority) && !has_static_limits(domain) {
             return Ok(());
         }
         if url.port().is_some() {
@@ -300,6 +320,12 @@ mod tests {
             ("https://2130706433/", Err(IpAddress)),
             ("https://0x7f.0.0.1/", Err(IpAddress)),
             ("https://localhost/", Err(Local("localhost".into()))),
+            // A trailing dot names the same local host.
+            ("https://localhost./", Err(Local("localhost.".into()))),
+            (
+                "https://foo.localhost./",
+                Err(Local("foo.localhost.".into())),
+            ),
             (
                 "https://api.anthropic.com.localhost/",
                 Err(Local("api.anthropic.com.localhost".into())),
@@ -433,6 +459,25 @@ mod tests {
         ] {
             assert_eq!(allowed.check_str(url, &Method::GET).is_ok(), ok, "{url}");
         }
+    }
+
+    #[test]
+    fn approvals_do_not_widen_limited_hosts() {
+        let approved = ["cdn.jsdelivr.net", "www.figma.com", "www.figma.com:8443"];
+        let allowed = Allowed::new(Arc::new(approved.iter().map(|h| (*h).into()).collect()));
+        for url in [
+            "https://cdn.jsdelivr.net/npm/some-package/index.js",
+            "https://www.figma.com/api/multiplayer/abc",
+            "https://www.figma.com:8443/file/abc/image/batch",
+        ] {
+            assert!(allowed.check_str(url, &Method::GET).is_err(), "{url}");
+        }
+        assert!(allowed
+            .check_str(
+                "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.woff2",
+                &Method::GET
+            )
+            .is_ok());
     }
 
     /// Serves one redirect on a loopback port and reports how many requests it answered.

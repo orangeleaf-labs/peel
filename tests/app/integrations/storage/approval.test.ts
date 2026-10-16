@@ -1,10 +1,14 @@
-import { describe, expect, test } from 'bun:test'
+import { afterEach, describe, expect, test } from 'bun:test'
 
 import { S3_STORAGE_PROVIDER } from '@/app/integrations/storage/providers'
 import {
   StorageEndpointNotApprovedError,
   approveStorageEndpoint
 } from '@/app/integrations/storage/s3/approval'
+
+import { clearTauriMocks, mockTauriIPC } from '#tests/helpers/tauri/mocks'
+
+afterEach(clearTauriMocks)
 
 function services(answer: boolean, desktop = true) {
   const requested: string[] = []
@@ -51,7 +55,19 @@ describe('approveStorageEndpoint', () => {
     expect(empty.requested).toEqual([])
   })
 
-  test('the S3 provider approves its endpoint preference', () => {
-    expect(S3_STORAGE_PROVIDER.approveEndpoint).toBeFunction()
+  test('the S3 provider asks the desktop shell to approve its endpoint preference', async () => {
+    const calls: Array<{ command: string; args: unknown }> = []
+    await mockTauriIPC((command, args) => {
+      calls.push({ command, args })
+      return true
+    })
+    await S3_STORAGE_PROVIDER.approveEndpoint?.({
+      endpoint: 'https://s3.example.com',
+      bucket: 'documents',
+      region: 'eu-west-1'
+    })
+    expect(calls).toEqual([
+      { command: 'approve_storage_endpoint', args: { endpoint: 'https://s3.example.com' } }
+    ])
   })
 })
