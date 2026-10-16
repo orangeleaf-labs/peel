@@ -1,9 +1,6 @@
 import { uniq } from 'es-toolkit'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
-
-import { useAgentSetup } from '@/app/ai/agents/setup'
 import { refreshAIProviderStatus } from '@/app/ai/chat/storage'
 import {
   aiModelSettings,
@@ -11,6 +8,7 @@ import {
   replaceAIModelSettings,
   setModelConnectionAPIKey
 } from '@/app/ai/models'
+import { belongsToProvider } from '@/app/ai/models/provider-name'
 import type { SettingsSaveResult } from '@/app/settings/save-result'
 
 import { applyOnboardingPlan, isUnconfiguredModelSettings } from './apply'
@@ -47,12 +45,7 @@ function initialAnswers(): OnboardingAnswers {
   }
 }
 
-interface AIOnboardingOptions {
-  /** Agents run as local processes, so only the desktop app offers them. */
-  agentsAvailable?: boolean
-}
-
-export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOptions = {}) {
+export function useAIOnboarding() {
   const answers = reactive<OnboardingAnswers>(initialAnswers())
   const current = currentOnboardingModels(aiModelSettings.value)
   const configured = [current.design, current.vision, current.review, current.fast].filter(
@@ -62,11 +55,11 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
   const busy = ref(false)
   const saveResult = ref<SettingsSaveResult | null>(null)
 
-  const recommended = computed(() => planOnboarding(answers, { agentsAvailable, current }))
+  const recommended = computed(() => planOnboarding(answers, { current }))
   const roles = useOnboardingRoles(recommended, configured)
   const { plan } = roles
   /** Requested goals nothing selected covers. */
-  const gaps = computed(() => uncoveredGoals(answers, { agentsAvailable, current }))
+  const gaps = computed(() => uncoveredGoals(answers, { current }))
   /** Setup can finish once there is a design model, planned or already configured. */
   const hasDesign = computed(() => recommended.value.design !== null || current.design !== null)
 
@@ -75,18 +68,13 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
     return (
       [design, vision, review, fast].find(
         (model): model is PlannedModel =>
-          model !== null && model !== 'design' && model.providerID === providerID
+          model !== null && model !== 'design' && belongsToProvider(model, providerID)
       ) ?? null
     )
   }
 
   const connections = useOnboardingConnections({ plannedModel })
   const { connection, ready, markKeySaved } = connections
-  const agents = useAgentSetup()
-  // Look for installed agents when they are about to be connected, and again on return.
-  watch(step, (current) => {
-    if (current === 'connect') void agents.refreshAgents()
-  })
 
   const canContinue = computed(() => {
     if (step.value === 'goals') return answers.goals.length > 0
@@ -154,7 +142,6 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
   }
 
   return {
-    agentsAvailable,
     answers,
     step,
     recommended,
@@ -167,7 +154,6 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
     canContinue,
     plannedModel,
     ...connections,
-    ...agents,
     setGoal,
     next,
     back,

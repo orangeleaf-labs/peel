@@ -3,10 +3,7 @@ import { readFileSync } from 'node:fs'
 
 import * as v from 'valibot'
 
-import { ACP_AGENTS } from '@open-pencil/core/constants'
-
 import { bunInstallArgs, npmInstallArgs } from '@/app/ai/agents/native'
-import { HARNESS_PACKAGE } from '@/app/ai/harness/companion'
 import { MCP_PACKAGE_NAME } from '@/app/automation/mcp/failure'
 import { resolvePlatformCommand } from '@/app/tauri/command'
 
@@ -19,23 +16,23 @@ const MAC_UA =
 
 describe('resolvePlatformCommand', () => {
   test('wraps a bare command in cmd /c through its own scope entry on Windows', () => {
-    expect(resolvePlatformCommand('claude-agent-acp', [], WINDOWS_UA)).toEqual({
-      command: 'cmd-claude-agent-acp',
-      args: ['/c', 'claude-agent-acp']
+    expect(resolvePlatformCommand('openpencil-mcp-http', [], WINDOWS_UA)).toEqual({
+      command: 'cmd-openpencil-mcp-http',
+      args: ['/c', 'openpencil-mcp-http']
     })
   })
 
   test('preserves extra args after the command on Windows', () => {
-    expect(resolvePlatformCommand('gemini', ['--acp'], WINDOWS_UA)).toEqual({
-      command: 'cmd-gemini',
-      args: ['/c', 'gemini', '--acp']
+    expect(resolvePlatformCommand('npm', ['install', '--global'], WINDOWS_UA)).toEqual({
+      command: 'cmd-npm',
+      args: ['/c', 'npm', 'install', '--global']
     })
   })
 
   test('passes the command through unchanged on non-Windows', () => {
-    expect(resolvePlatformCommand('claude-agent-acp', ['--acp'], MAC_UA)).toEqual({
-      command: 'claude-agent-acp',
-      args: ['--acp']
+    expect(resolvePlatformCommand('openpencil-mcp-http', ['--stdio'], MAC_UA)).toEqual({
+      command: 'openpencil-mcp-http',
+      args: ['--stdio']
     })
   })
 
@@ -102,23 +99,12 @@ const rootPackage = v.parse(
 
 describe('shell scope', () => {
   // Every program the app starts, with the arguments it starts it with.
-  // npm installs only these packages; a build pins the companions to the app's version, which
-  // tests stand in for with a placeholder the scope rightly refuses.
-  const installs = [
-    ...ACP_AGENTS.flatMap((agent) => (agent.adapterPackage ? [agent.adapterPackage] : [])),
-    `${MCP_PACKAGE_NAME}@${rootPackage.version}`,
-    `${HARNESS_PACKAGE}@${rootPackage.version}`
-  ]
+  // npm and Bun install only the MCP server, pinned to the app's version.
+  const mcpPackage = `${MCP_PACKAGE_NAME}@${rootPackage.version}`
   const spawns: [string, string[]][] = [
-    ...ACP_AGENTS.map((agent): [string, string[]] => [agent.command, agent.args]),
     ['openpencil-mcp-http', []],
-    ['openpencil-harness', []],
-    ...installs.map((target): [string, string[]] => ['npm', npmInstallArgs(target)]),
-    // Bun updates the companions it installed; agent adapters always come from npm.
-    ...[
-      `${MCP_PACKAGE_NAME}@${rootPackage.version}`,
-      `${HARNESS_PACKAGE}@${rootPackage.version}`
-    ].map((target): [string, string[]] => ['bun', bunInstallArgs(target)])
+    ['npm', npmInstallArgs(mcpPackage)],
+    ['bun', bunInstallArgs(mcpPackage)]
   ]
 
   for (const userAgent of [WINDOWS_UA, MAC_UA]) {
@@ -162,8 +148,38 @@ describe('shell scope', () => {
     }
   })
 
-  test('lets npm install companions pinned to a stable or beta app version', () => {
-    for (const target of ['@open-pencil/harness@0.16.0', '@open-pencil/mcp@0.16.0-beta.1']) {
+  test('starts no coding agent, agent adapter, or harness', () => {
+    const programs = spawnScope().flatMap((entry) => [
+      entry.name ?? '',
+      entry.cmd ?? '',
+      ...(Array.isArray(entry.args) ? entry.args.filter((arg) => typeof arg === 'string') : [])
+    ])
+    expect(
+      programs.filter((program) => /acp|claude|codex|gemini|harness|\bpi\b/i.test(program))
+    ).toEqual([])
+  })
+
+  test('lets npm and Bun install no agent adapter or harness', () => {
+    for (const [manager, installArgs] of [
+      ['npm', npmInstallArgs],
+      ['bun', bunInstallArgs]
+    ] as const) {
+      for (const target of [
+        '@open-pencil/harness@0.16.0',
+        '@agentclientprotocol/claude-agent-acp',
+        '@agentclientprotocol/codex-acp'
+      ]) {
+        for (const userAgent of [WINDOWS_UA, MAC_UA]) {
+          const resolved = resolvePlatformCommand(manager, installArgs(target), userAgent)
+          const entry = spawnScope().find((candidate) => candidate.name === resolved.command)
+          expect(allowedArgs(entry?.args, resolved.args)).not.toEqual(resolved.args)
+        }
+      }
+    }
+  })
+
+  test('lets npm install the MCP server pinned to a stable or beta app version', () => {
+    for (const target of ['@open-pencil/mcp@0.16.0', '@open-pencil/mcp@0.16.0-beta.1']) {
       for (const userAgent of [WINDOWS_UA, MAC_UA]) {
         const resolved = resolvePlatformCommand('npm', npmInstallArgs(target), userAgent)
         const entry = spawnScope().find((candidate) => candidate.name === resolved.command)
@@ -172,7 +188,7 @@ describe('shell scope', () => {
     }
   })
 
-  test('lets Bun install only the OpenPencil companions', () => {
+  test('lets Bun install only the MCP server', () => {
     for (const userAgent of [WINDOWS_UA, MAC_UA]) {
       const allowed = resolvePlatformCommand(
         'bun',

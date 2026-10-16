@@ -1,7 +1,6 @@
 import { AI_PROVIDERS } from '@open-pencil/core/constants'
 
 import { aiModelSettings, modelConnectionCredentialRef } from '@/app/ai/models'
-import { mcpConnectionSettings, mcpConnectionCredentialRef } from '@/app/integrations/mcp'
 import { storageCredentialRefs, storageProviderRegistry } from '@/app/integrations/storage'
 import {
   PEXELS_CREDENTIAL,
@@ -18,12 +17,8 @@ function uniqueCredentialRefs(references: CredentialRef[]): CredentialRef[] {
 }
 
 export function appCredentialRefs(): CredentialRef[] {
-  const legacyAIRefs = AI_PROVIDERS.filter((provider) => !provider.id.startsWith('acp:')).map(
-    (provider) => providerCredentialRef(provider.id)
-  )
-  const modelConnectionRefs = aiModelSettings.value.connections
-    .filter((connection) => !connection.providerID.startsWith('acp:'))
-    .map(modelConnectionCredentialRef)
+  const legacyAIRefs = AI_PROVIDERS.map((provider) => providerCredentialRef(provider.id))
+  const modelConnectionRefs = aiModelSettings.value.connections.map(modelConnectionCredentialRef)
   const storageCredentials = storageProviderRegistry
     .list()
     .flatMap((provider) => storageCredentialRefs(provider.id))
@@ -32,9 +27,6 @@ export function appCredentialRefs(): CredentialRef[] {
     ...modelConnectionRefs,
     PEXELS_CREDENTIAL,
     UNSPLASH_CREDENTIAL,
-    ...mcpConnectionSettings.value.connections.map((connection) =>
-      mcpConnectionCredentialRef(connection.id)
-    ),
     ...storageCredentials
   ])
 }

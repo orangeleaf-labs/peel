@@ -2,7 +2,6 @@
 import { tv } from 'tailwind-variants'
 import { computed, ref } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
 import { useI18n } from '@open-pencil/vue'
 
 import type { AISetupEntry } from '@/app/ai/models/settings/onboarding/dialog'
@@ -19,20 +18,15 @@ import AISetupConnection from './AISetupConnection.vue'
 import AISetupReview from './AISetupReview.vue'
 import AISetupRoles from './AISetupRoles.vue'
 
-const {
-  entry,
-  offersTour = true,
-  agentsAvailable = IS_TAURI
-} = defineProps<{
+const { entry, offersTour = true } = defineProps<{
   entry: AISetupEntry
   offersTour?: boolean
-  agentsAvailable?: boolean
 }>()
 const emit = defineEmits<{ close: []; advanced: []; tour: [] }>()
 const { ai, common } = useI18n()
 const styles = tv(theme)()
 
-const onboarding = useAIOnboarding({ agentsAvailable })
+const onboarding = useAIOnboarding()
 const { answers, step, recommended, plan, roles, gaps, hasDesign, busy, saveResult, canContinue } =
   onboarding
 const { isRecommended } = roles
@@ -134,7 +128,7 @@ async function finish(): Promise<void> {
 
       <template v-else-if="step === 'access'">
         <p :class="styles.help()">{{ ai.aiSetupAccessDescription }}</p>
-        <AISetupAccess v-model="answers.access" :agents-available="agentsAvailable" />
+        <AISetupAccess v-model="answers.access" />
       </template>
 
       <template v-else-if="step === 'connect'">
@@ -156,14 +150,9 @@ async function finish(): Promise<void> {
           :provider-i-d="providerID"
           :state="onboarding.connection(providerID)"
           :has-saved-key="onboarding.hasSavedKey(providerID)"
-          :agent-setup="onboarding.agentSetup(providerID)"
-          :pi-setup="onboarding.piSetup(providerID)"
           :disabled="busy"
           @update="onboarding.updateConnection(providerID, $event)"
           @test="onboarding.testConnection(providerID)"
-          @check-agent="onboarding.refreshAgents()"
-          @install-agent="onboarding.installAgent(providerID)"
-          @install-bridge="onboarding.setupCanvasBridge()"
         />
       </template>
 

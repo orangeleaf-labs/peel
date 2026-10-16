@@ -42,6 +42,5 @@ describe('model catalog', () => {
 
   test('knows no model it was not shipped with', () => {
     expect(catalogModel('anthropic', 'gpt-6.1-sol')).toBeNull()
-    expect(catalogModels('harness:pi')).toEqual([])
   })
 })

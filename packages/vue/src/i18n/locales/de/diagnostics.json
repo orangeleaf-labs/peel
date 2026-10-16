@@ -18,8 +18,6 @@
   "chatFailed": "KI-Chat fehlgeschlagen",
   "storageFailed": "Speichervorgang fehlgeschlagen",
   "documentFailed": "Dokumentvorgang fehlgeschlagen",
-  "acpFailed": "ACP-Transport fehlgeschlagen",
-  "mcpFailed": "MCP-Verbindung fehlgeschlagen",
   "retention": "Aufbewahrungsdauer der Diagnose",
   "retentionDescription": "Bis zu dieser Anzahl aktueller Ereignisse lokal speichern.",
   "description": "Technische Ereignisse lokal speichern, um OpenPencil zu unterstützen. Prompts, Designinhalte, Zugangsdaten und API-Schlüssel werden ausgeschlossen.",

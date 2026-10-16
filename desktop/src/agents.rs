@@ -4,25 +4,12 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
-// Only inspect known executables. Discovery never launches an agent or reads credentials;
-// it runs only OpenPencil's own companions, and only to ask their version.
-const EXECUTABLES: &[&str] = &[
-    "claude",
-    "claude-agent-acp",
-    "codex",
-    "codex-acp",
-    "gemini",
-    "openpencil-mcp-http",
-    "openpencil-harness",
-    "npm",
-    "bun",
-];
+// Only inspect known executables: OpenPencil's MCP server and the package managers that install
+// it. Discovery never reads credentials; it runs only the MCP server, and only to ask its version.
+const EXECUTABLES: &[&str] = &["openpencil-mcp-http", "npm", "bun"];
 
-// OpenPencil's own companions, whose installed version must match the app.
-const PACKAGES: &[(&str, &str)] = &[
-    ("openpencil-mcp-http", "@open-pencil/mcp"),
-    ("openpencil-harness", "@open-pencil/harness"),
-];
+// OpenPencil's own companion, whose installed version must match the app.
+const PACKAGES: &[(&str, &str)] = &[("openpencil-mcp-http", "@open-pencil/mcp")];
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -203,29 +190,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reports_the_adapter_missing_when_only_the_agent_cli_is_installed() {
+    fn looks_up_only_the_mcp_server_and_package_managers() {
         let result = lookup_with(
             "/agents/bin".to_owned(),
-            |command| match command {
-                "claude" | "npm" | "openpencil-mcp-http" => {
-                    Some(PathBuf::from("/agents/bin").join(command))
-                }
-                _ => None,
-            },
+            |command| Some(PathBuf::from("/agents/bin").join(command)),
             |_| Some("0.15.1".to_owned()),
             |_| Some(false),
         );
         assert_eq!(result.npm_global_writable, Some(false));
         assert_eq!(
-            result.executables["claude"],
-            Some("/agents/bin/claude".to_owned())
+            result.executables.keys().collect::<Vec<_>>(),
+            ["bun", "npm", "openpencil-mcp-http"]
         );
-        assert_eq!(result.executables["claude-agent-acp"], None);
         assert_eq!(
-            result.versions["@open-pencil/mcp"],
-            Some("0.15.1".to_owned())
+            result.versions,
+            BTreeMap::from([("@open-pencil/mcp".to_owned(), Some("0.15.1".to_owned()))])
         );
-        assert_eq!(result.versions["@open-pencil/harness"], None);
     }
 
     #[test]

@@ -42,54 +42,6 @@ test('storage settings keep secrets behind the credential manager', async ({ pag
   await expect(secret).not.toHaveAttribute('placeholder', /Key saved/)
 })
 
-test('MCP connections keep bearer tokens out of ordinary settings', async ({ page }) => {
-  await page.goto('/?test')
-  const canvas = new CanvasHelper(page)
-  await canvas.waitForInit()
-
-  await page.getByTestId('app-settings-trigger').click()
-  await page.getByTestId('settings-section-mcp').click()
-  const section = page.getByTestId('app-settings-dialog')
-  await section.getByRole('button', { name: 'Add connection' }).click()
-  await section.getByLabel('Connection name').fill('GitHub')
-  await section.getByLabel('MCP server URL').fill('http://example.com/mcp')
-  await section.getByRole('button', { name: 'Save' }).click()
-  await expect(section.getByLabel('MCP server URL')).toHaveAttribute('aria-invalid', 'true')
-
-  await section.getByLabel('MCP server URL').fill('https://example.com/mcp')
-  await section.getByRole('switch', { name: 'Enable for ACP agents' }).click()
-  await section.getByRole('switch', { name: 'Use bearer authentication' }).click()
-  await section.getByLabel('Bearer token').fill('secret-mcp-token')
-  await section.getByRole('button', { name: 'Save' }).click()
-
-  await expect(section).toContainText('GitHub')
-  await expect(section).toContainText('Enabled')
-  await expect(section).not.toContainText('secret-mcp-token')
-
-  await page.getByTestId('app-settings-done').click()
-  await page.reload()
-  await canvas.waitForInit()
-  await page.getByTestId('app-settings-trigger').click()
-  await page.getByTestId('settings-section-mcp').click()
-  await expect(section).toContainText('https://example.com/mcp')
-  await expect(section).toContainText('Enabled')
-  await section.getByRole('button', { name: /GitHub/ }).click()
-  await expect(section.getByPlaceholder(/Key saved/)).toBeVisible()
-  await section.getByRole('button', { name: 'Clear', exact: true }).click()
-  await section.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await section.getByRole('button', { name: /GitHub/ }).click()
-  await expect(section.getByPlaceholder(/Key saved/)).toBeVisible()
-  await section.getByRole('button', { name: 'Clear', exact: true }).click()
-  await section.getByRole('button', { name: 'Save', exact: true }).click()
-  await section.getByRole('button', { name: /GitHub/ }).click()
-  await expect(section.getByPlaceholder(/Key saved/)).toHaveCount(0)
-  await section.getByRole('button', { name: 'Delete connection' }).click()
-  const confirmation = page.getByRole('alertdialog')
-  await expect(confirmation).toContainText('remove its saved bearer token')
-  await confirmation.getByRole('button', { name: 'Delete connection' }).click()
-  await expect(section).toContainText('No external MCP connections configured')
-})
-
 test('MCP automation settings filter and persist tool availability', async ({ page }) => {
   await page.route('**/health', (route) =>
     route.fulfill({

@@ -1,9 +1,7 @@
 export {
-  recordACPTransportFailure,
   recordChatCompleted,
   recordChatFailed,
   recordDocumentFailure,
-  recordMCPConnectionFailure,
   recordModelStepCompleted,
   preparationDurationBucket,
   recordPreparationOutcome,

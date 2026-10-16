@@ -1,8 +1,5 @@
 import * as v from 'valibot'
 
-import type { ACPAgentDef } from '@open-pencil/core/constants'
-
-import { HARNESS_INSTALL_TARGET } from '@/app/ai/harness/companion'
 import { MCP_INSTALL_TARGET } from '@/app/automation/mcp/failure'
 import { resolvePlatformCommand } from '@/app/tauri/command'
 
@@ -26,23 +23,11 @@ export async function lookupAgents(): Promise<AgentLookup> {
 
 const INSTALL_TIMEOUT_MS = 120_000
 
-export async function installAgentAdapter(agent: ACPAgentDef, searchPath: string): Promise<void> {
-  if (!agent.adapterPackage) throw new Error('This agent does not need an adapter.')
-  return installPackage(agent.adapterPackage, searchPath)
-}
-
 export async function installCanvasBridge(
   searchPath: string,
   manager: PackageManager = 'npm'
 ): Promise<void> {
   await installPackage(MCP_INSTALL_TARGET, searchPath, manager)
-}
-
-export async function installHarnessCompanion(
-  searchPath: string,
-  manager: PackageManager = 'npm'
-): Promise<void> {
-  await installPackage(HARNESS_INSTALL_TARGET, searchPath, manager)
 }
 
 // These are public packages; a user's private project registry may not mirror them.
@@ -83,11 +68,11 @@ async function installPackage(
       command.on('close', ({ code }) => {
         closed = true
         if (code === 0) resolve()
-        else reject(new Error('Adapter installation failed.'))
+        else reject(new Error('Installation failed.'))
       })
-      command.on('error', () => reject(new Error('Adapter installation failed.')))
+      command.on('error', () => reject(new Error('Installation failed.')))
       timer = setTimeout(() => {
-        reject(new Error('Adapter installation timed out.'))
+        reject(new Error('Installation timed out.'))
       }, INSTALL_TIMEOUT_MS)
       void command.spawn().then((spawned) => {
         child = spawned

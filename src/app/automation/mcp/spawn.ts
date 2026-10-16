@@ -374,7 +374,7 @@ export async function getAutomationAuthToken(): Promise<string | null> {
   // actually exists. A missing file means the server hasn't finished starting
   // (discovery file is written after listeners are up). Without this check,
   // we'd return null (meaning "auth disabled") when the server isn't ready
-  // yet, causing ACP sessions to proceed without auth.
+  // yet, causing clients to proceed without auth.
   if (!token && !health.authRequired) {
     const fileExists = await discoveryFileExists(discoveryPath)
     if (!fileExists) {

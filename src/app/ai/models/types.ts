@@ -12,10 +12,8 @@ export const THINKING_LEVELS = [
   'high',
   'xhigh'
 ] as const
-export const HARNESS_PERMISSION_MODES = ['allow-reads', 'allow-edits', 'allow-all'] as const
 
 export type ThinkingLevel = (typeof THINKING_LEVELS)[number]
-export type HarnessPermissionMode = (typeof HARNESS_PERMISSION_MODES)[number]
 
 export type AIModelRole = (typeof AI_MODEL_ROLES)[number]
 export type AIModelProfileId = `model-${string}`
@@ -37,7 +35,6 @@ export type AIModelProfile = {
   customModelID: string
   maxOutputTokens: number
   thinkingLevel: ThinkingLevel
-  harnessPermissionMode?: HarnessPermissionMode
   capabilities: AIModelCapability[]
 }
 
@@ -64,7 +61,6 @@ export type AIModelProfileDraft = {
   customModelID: string
   maxOutputTokens: number
   thinkingLevel: ThinkingLevel
-  harnessPermissionMode: HarnessPermissionMode
   capabilities: AIModelCapability[]
 }
 

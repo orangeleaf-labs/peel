@@ -78,11 +78,6 @@ export const programmableSidebar = (
       { text: 'Design authoring reference', link: '/reference/design-authoring' },
       { text: labels.mcpServer, link: '/programmable/mcp-server' },
       { text: labels.aiChat, link: `${prefix}/programmable/ai-chat` },
-      ...(!prefix
-        ? [
-            { text: 'Coding agents', link: '/programmable/coding-agents' },
-          ]
-        : []),
       { text: labels.collaboration, link: `${prefix}/programmable/collaboration` },
     ],
   },

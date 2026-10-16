@@ -2,8 +2,8 @@
  * Resolve a CLI invocation into the form the Tauri process spawner can launch
  * on the current platform.
  *
- * On Windows, npm-installed global CLIs (e.g. `claude-agent-acp`,
- * `openpencil-mcp-http`) are `.cmd` shims. The Rust spawner behind
+ * On Windows, npm-installed global CLIs (e.g. `openpencil-mcp-http`,
+ * `npm`) are `.cmd` shims. The Rust spawner behind
  * `@tauri-apps/plugin-shell` only resolves real executables, so launching a
  * `.cmd` directly fails with ENOENT. Routing through `cmd /c` lets the shell
  * resolve the shim via PATHEXT.

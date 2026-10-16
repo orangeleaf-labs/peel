@@ -1,6 +1,7 @@
 import { DEFAULT_AI_PROVIDER, type AIProviderID } from '@open-pencil/core/constants'
 
 import { catalogModel } from '@/app/ai/models/catalog'
+import { belongsToProvider } from '@/app/ai/models/provider-name'
 import type {
   AIModelConnection,
   AIModelProfile,
@@ -10,7 +11,6 @@ import type {
 
 import {
   isOnboardingAccess,
-  isOnboardingAgent,
   type OnboardingAccess,
   type OnboardingPlan,
   type PlannedModel
@@ -58,18 +58,12 @@ export function isUnconfiguredModelSettings(settings: AIModelSettings): boolean 
   return settings.models.length === 1 && isPlaceholder(settings, settings.models[0])
 }
 
-function isAgentConnection(
-  settings: AIModelSettings,
-  profile: AIModelProfile | undefined
-): boolean {
-  const connection = settings.connections.find(
-    (candidate) => candidate.id === profile?.connectionId
-  )
-  return !connection || isOnboardingAgent(connection.providerID)
+function hasConnection(settings: AIModelSettings, profile: AIModelProfile): boolean {
+  return settings.connections.some((candidate) => candidate.id === profile.connectionId)
 }
 
 /**
- * Clears assignments the model settings would reject: agents only take the design role, and
+ * Clears assignments the model settings would reject: a profile needs its connection, and
  * vision needs a model that accepts images, whether assigned directly or through the design model.
  */
 function enforceRoleRules(settings: AIModelSettings): void {
@@ -81,7 +75,7 @@ function enforceRoleRules(settings: AIModelSettings): void {
     const profile = assignment === 'design' ? design : profileOf(assignment)
     if (!profile) continue
     if (
-      isAgentConnection(settings, profile) ||
+      !hasConnection(settings, profile) ||
       (role === 'vision' && !profile.capabilities.includes('vision'))
     ) {
       settings.assignments[role] = null
@@ -113,7 +107,9 @@ export function applyOnboardingPlan({
   const connectionIds: ApplyOnboardingResult['connectionIds'] = {}
 
   function connectionFor(providerID: OnboardingAccess): AIModelConnection {
-    const existing = settings.connections.find((connection) => connection.providerID === providerID)
+    const existing = settings.connections.find((connection) =>
+      belongsToProvider(connection, providerID)
+    )
     const connection = existing ?? {
       id: `connection-${createId()}`,
       providerID,

@@ -1,11 +1,19 @@
-import { ACP_AGENTS, AI_PROVIDERS, HARNESS_PROVIDER_ID } from '@open-pencil/core/constants'
+import { AI_PROVIDERS, type AIProviderDef } from '@open-pencil/core/constants'
 
-/** Display name for a provider, agent, or the Pi harness. */
+/**
+ * The definition of a provider, or `undefined` for one Peel does not offer, such as a provider
+ * read from settings saved by an older version.
+ */
+export function providerDefinition(providerID: string): AIProviderDef | undefined {
+  return AI_PROVIDERS.find((provider) => provider.id === providerID)
+}
+
+/** Display name for a provider. */
 export function modelProviderName(providerID: string): string {
-  if (providerID === HARNESS_PROVIDER_ID) return 'Pi'
-  if (providerID.startsWith('acp:')) {
-    const agentID = providerID.slice('acp:'.length)
-    return ACP_AGENTS.find((agent) => agent.id === agentID)?.name ?? providerID
-  }
-  return AI_PROVIDERS.find((provider) => provider.id === providerID)?.name ?? providerID
+  return providerDefinition(providerID)?.name ?? providerID
+}
+
+/** Whether a saved connection or planned model belongs to `providerID`. */
+export function belongsToProvider(owner: { providerID: string }, providerID: string): boolean {
+  return owner.providerID === providerID
 }

@@ -8,16 +8,10 @@ import { DIRECT_PROVIDER_IDS, modelProviderAdapter } from '@/app/ai/providers/re
 
 import { fetchStub } from '#tests/helpers/fetch'
 
-function isAgent(providerID: string): boolean {
-  return providerID.startsWith('acp:') || providerID.startsWith('harness:')
-}
-
 describe('model providers', () => {
-  test('offers the Anthropic API as the only API provider', () => {
+  test('offers the Anthropic API as the only provider, with no coding agent or harness', () => {
     expect(DIRECT_PROVIDER_IDS).toEqual(['anthropic'])
-    expect(
-      AI_PROVIDERS.map((provider) => provider.id).filter((providerID) => !isAgent(providerID))
-    ).toEqual(['anthropic'])
+    expect(AI_PROVIDERS.map((provider) => provider.id)).toEqual(['anthropic'])
   })
 
   test('sends model requests to api.anthropic.com only', async () => {
@@ -40,9 +34,5 @@ describe('model providers', () => {
 
     expect(hosts.length).toBeGreaterThan(0)
     expect(new Set(hosts)).toEqual(new Set(['api.anthropic.com']))
-  })
-
-  test('refuses providers that do not use a direct API model', () => {
-    expect(() => modelProviderAdapter('harness:pi')).toThrow()
   })
 })

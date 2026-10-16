@@ -18,8 +18,6 @@
   "chatFailed": "AI 聊天失败",
   "storageFailed": "存储操作失败",
   "documentFailed": "文档操作失败",
-  "acpFailed": "ACP 传输失败",
-  "mcpFailed": "MCP 连接失败",
   "retention": "诊断数据保留量",
   "retentionDescription": "在本地保留不超过此数量的最新事件。",
   "description": "在本地保存技术事件，帮助排查 OpenPencil 问题。不保存提示词、设计内容、凭据和 API 密钥。",

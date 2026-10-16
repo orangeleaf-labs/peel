@@ -18,8 +18,6 @@
   "chatFailed": "AIチャット失敗",
   "storageFailed": "ストレージ操作失敗",
   "documentFailed": "ドキュメント操作失敗",
-  "acpFailed": "ACPトランスポート失敗",
-  "mcpFailed": "MCP接続失敗",
   "retention": "診断データの保持数",
   "retentionDescription": "この数までの最新イベントを端末に保存します。",
   "description": "OpenPencilのトラブルシューティングに役立つ技術イベントを端末に保存します。プロンプト、デザイン内容、認証情報、APIキーは除外されます。",

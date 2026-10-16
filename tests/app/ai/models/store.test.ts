@@ -59,19 +59,27 @@ describe('parseAIModelSettings', () => {
     expect(parsed?.models.map((candidate) => candidate.id)).toEqual(['model-a'])
   })
 
-  test('drops connections to providers other than Anthropic, with their models', () => {
+  test('drops connections to providers and agents other than Anthropic, with their models', () => {
     const parsed = parseAIModelSettings(
       settings({
         connections: [
           connection,
-          ...['openrouter', 'openai', 'google', 'openai-compatible', 'anthropic-compatible'].map(
-            (providerID) => ({
-              ...connection,
-              id: `connection-${providerID}`,
-              providerID,
-              customBaseURL: 'https://proxy.example'
-            })
-          )
+          ...[
+            'openrouter',
+            'openai',
+            'google',
+            'openai-compatible',
+            'anthropic-compatible',
+            'acp:claude-code',
+            'acp:codex',
+            'acp:gemini-cli',
+            'harness:pi'
+          ].map((providerID) => ({
+            ...connection,
+            id: `connection-${providerID}`,
+            providerID,
+            customBaseURL: 'https://proxy.example'
+          }))
         ],
         models: [profile, { ...profile, id: 'model-b', connectionId: 'connection-openai' }],
         assignments: { design: 'model-b', review: 'model-b', fast: null, vision: null }
@@ -106,7 +114,6 @@ describe('parseAIModelSettings', () => {
       customModelID: '',
       maxOutputTokens: 128_000,
       thinkingLevel: 'default',
-      harnessPermissionMode: undefined,
       capabilities: ['vision', 'tools']
     })
   })

@@ -1,8 +1,6 @@
 import { isEqual } from 'es-toolkit'
 import { computed, ref, watch } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
-
 import {
   designCustomModelID,
   designMaxOutputTokens,
@@ -33,16 +31,7 @@ export const providerDef = designProviderDefinition
 export const apiKeyStatus = ref<CredentialStatus>('missing')
 const credentialRevision = ref(0)
 
-export const isACPProvider = computed(() => providerID.value.startsWith('acp:'))
-export const isHarnessProvider = computed(() => providerID.value === 'harness:pi')
-export const isAgentProvider = computed(() => isACPProvider.value || isHarnessProvider.value)
-
-export const isConfigured = computed(() => {
-  if (isACPProvider.value) return IS_TAURI
-  // Pi can use the CLI's own sign-in, so a key is optional.
-  if (isHarnessProvider.value) return IS_TAURI
-  return apiKeyStatus.value === 'configured'
-})
+export const isConfigured = computed(() => apiKeyStatus.value === 'configured')
 
 async function refreshStatus(reference: CredentialRef): Promise<CredentialStatus> {
   // A key the store cannot read is reported as unavailable rather than rejecting startup.
@@ -54,8 +43,7 @@ async function refreshStatus(reference: CredentialRef): Promise<CredentialStatus
 
 function designCredentialReference(): CredentialRef | null {
   const connection = designModelConnection.value
-  if (!connection || connection.providerID.startsWith('acp:')) return null
-  return modelConnectionCredentialRef(connection)
+  return connection ? modelConnectionCredentialRef(connection) : null
 }
 
 export async function refreshAIProviderStatus(): Promise<void> {

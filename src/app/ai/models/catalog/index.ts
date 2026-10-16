@@ -71,8 +71,8 @@ export const ANTHROPIC_MODELS: readonly ModelOption[] = [
   }
 ]
 
-/** The checked-in models of a provider; agents choose their own model and list none. */
-export function catalogModels(providerID: AIProviderID): readonly ModelOption[] {
+/** The checked-in models of a provider; a provider Peel does not offer lists none. */
+export function catalogModels(providerID: string): readonly ModelOption[] {
   return providerID === 'anthropic' ? ANTHROPIC_MODELS : []
 }
 

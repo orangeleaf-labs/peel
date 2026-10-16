@@ -49,7 +49,6 @@ const noMixedCaseAcronymIdentifiers = {
     const canonicalAcronym =
       /(?:Acp|Ai|Api|Cli|Cors|Css|Html|Ime|Json|Jsx|Mcp|Pdf|Png|Rgb|Rpc|Rtl|Svg|Ui|Url|Uri|Xml)/g
     const ignoredImports = new Set([
-      '@agentclientprotocol/sdk',
       '@realfavicongenerator/generate-favicon',
       '@tauri-apps/plugin-clipboard-manager',
       '@tauri-apps/plugin-opener',

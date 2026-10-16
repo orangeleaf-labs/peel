@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
 
-import { ACP_AGENTS } from '@open-pencil/core/constants'
 import { useI18n, useSelectionState } from '@open-pencil/vue'
 
 import { revokeImagePreviewURL } from '@/app/ai/attachment/image/prepare'
@@ -91,14 +90,6 @@ function dropFiles(files: File[]): void {
 
 defineExpose({ restoreDraft, dropFiles })
 
-const isAgentProvider = computed(
-  () => providerID.value.startsWith('acp:') || providerID.value === 'harness:pi'
-)
-const agentName = computed(() => {
-  if (providerID.value === 'harness:pi') return 'Pi'
-  const agentId = providerID.value.replace('acp:', '')
-  return ACP_AGENTS.find((a) => a.id === agentId)?.name ?? agentId
-})
 const customModelName = computed(() => customModelID.value.trim())
 const usesCustomModel = computed(
   () => !!providerDef.value.supportsCustomModel && !!customModelName.value
@@ -200,20 +191,12 @@ const selectedProfileName = computed(
     </template>
     <template #model>
       <div class="@container flex min-w-0 items-center">
-        <template v-if="isAgentProvider">
-          <div class="flex min-w-0 items-center gap-1 px-1.5 text-[10px] text-muted">
-            <icon-lucide-bot class="size-3 shrink-0" />
-            <span class="truncate">{{ agentName }}</span>
-          </div>
-        </template>
-        <template v-else>
-          <ChatProfileSelect>
-            <template #value>
-              <span class="min-w-0 truncate">{{ selectedProfileName }}</span>
-            </template>
-          </ChatProfileSelect>
-          <ChatThinkingSelect />
-        </template>
+        <ChatProfileSelect>
+          <template #value>
+            <span class="min-w-0 truncate">{{ selectedProfileName }}</span>
+          </template>
+        </ChatProfileSelect>
+        <ChatThinkingSelect />
       </div>
     </template>
   </ChatComposer>

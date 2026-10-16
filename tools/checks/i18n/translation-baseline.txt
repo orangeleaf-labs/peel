@@ -1,5 +1,4 @@
 de:ai.chatSettings
-de:ai.modelAgentConnection
 de:ai.modelCapabilityVisionShort
 de:ai.modelName
 de:ai.modelRoleVision
@@ -109,7 +108,6 @@ es:storage.providerAmazonS3
 es:storage.providerBackblaze
 es:storage.providerR2
 es:variableTypes.color
-fr:ai.modelAgentConnection
 fr:ai.modelCapabilityVisionShort
 fr:ai.modelRoleVision
 fr:ai.thinkingMinimal
@@ -254,7 +252,6 @@ ja:storage.providerBackblaze
 ja:storage.providerR2
 ja:storage.cloudTitle
 ja:storage.waitlistPlaceholder
-pl:ai.modelAgentConnection
 pl:ai.modelConfiguration
 pl:automation.port
 pl:code.editorDesignLabel

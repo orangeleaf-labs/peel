@@ -8,7 +8,7 @@ export const aiMessageDefaults = {
   maxAgentSteps: 'Maximum steps per message',
   maxAgentStepsCustom: 'Custom…',
   maxAgentStepsHint:
-    'For built-in AI only; ACP and Pi control their own limits. Saved on Enter or when you leave the field, and applied to the next message. Higher limits can increase cost.',
+    'Saved on Enter or when you leave the field, and applied to the next message. Higher limits can increase cost.',
   maxAgentStepsRange: params('Enter a whole number from {min} to {max}.'),
   reasoningDisplay: 'Reasoning display',
   reasoningCollapsed: 'Collapsed by default',
@@ -113,9 +113,6 @@ export const aiMessageDefaults = {
   changePreviewSmall: 'Small (240 px)',
   changePreviewMedium: 'Medium (480 px)',
   changePreviewLarge: 'Large (960 px)',
-  unknownTool: 'Unknown tool',
-  permissionRequestTitle: 'Permission request',
-  permissionRequest: params('{tool} is requesting permission.'),
   provider: 'AI Provider',
   providerSettings: 'Provider settings',
   openProviderSettings: 'Open provider settings',
@@ -136,7 +133,6 @@ export const aiMessageDefaults = {
   modelCapabilityVisionShort: 'Vision',
   selectDesignModel: 'Select design model',
   modelNeedsCredential: 'Needs key',
-  modelAgentConnection: 'Agent',
   thinkingLevel: 'Thinking level',
   thinkingLevelDescription:
     'How much the model reasons before answering. You can change it for each message in the chat.',
@@ -147,10 +143,6 @@ export const aiMessageDefaults = {
   thinkingMedium: 'Medium',
   thinkingHigh: 'High',
   thinkingExtraHigh: 'Extra high',
-  harnessToolPermissions: 'Tool permissions',
-  harnessPermissionReads: 'Ask before edits and commands',
-  harnessPermissionEdits: 'Ask before commands',
-  harnessPermissionAll: 'Allow all tools',
   saveModel: 'Save model',
   deleteModel: 'Delete model',
   deleteModelDescription: 'Delete this model and remove its role assignments?',
@@ -194,15 +186,6 @@ export const aiMessageDefaults = {
   chatRequestFailed: 'The model request failed. Check the provider settings and try again.',
   openProviderSettingsAction: 'Open settings',
   visionModelUnavailable: 'Choose a Vision model in Settings before attaching images.',
-  chatPiCompanionMissing: 'Pi needs the Harness companion. Run guided setup to install it.',
-  chatPiCompanionOutdated:
-    'The Harness companion doesn’t match this version of OpenPencil. Run guided setup to update it.',
-  chatMCPOutdated:
-    'OpenPencil’s MCP server doesn’t match this version of OpenPencil. Run guided setup to update it.',
-  chatPiSignIn:
-    'Pi isn’t signed in to a provider. Run pi in a terminal and type /login, or add an AI Gateway key.',
-  chatPiModel:
-    'Pi has no model to use. Run pi in a terminal and type /model, or choose one in Settings.',
   aiSetupWelcomeTitle: 'Welcome to OpenPencil',
   aiSetupWelcomeDescription:
     'Create and edit designs on an open canvas. Import Figma files and make them your own.',
@@ -226,35 +209,12 @@ export const aiMessageDefaults = {
     'Let AI look at your designs to check spacing, alignment, and hierarchy.',
   aiSetupAccessTitle: 'What do you already use?',
   aiSetupAccessDescription: 'Select everything you have. If you have nothing yet, continue.',
-  aiSetupAccessAgents: 'Coding agents on this computer',
-  aiSetupAccessAgentsDescription:
-    'Use your existing subscription. The agent chooses its own model.',
-  aiSetupAccessAgentsDesktop: 'Coding agents are available in the OpenPencil desktop app.',
   aiSetupAccessAPI: 'API accounts',
-  providerGroupAgents: 'Your agents',
-  providerGroupProviders: 'Providers',
   aiSetupConnectTitle: 'Connect your AI',
   aiSetupNothingDescription: 'Go back to choose other access, or set up AI in advanced settings.',
-  aiSetupAgentDescription: params(
-    'OpenPencil starts {agent} when you send a message. Sign in with its own command-line tool first.'
-  ),
-  aiSetupAgentInstall: 'If it is not installed yet, run:',
-  aiSetupAgentChecking: 'Checking this computer…',
-  aiSetupAgentInstalled: 'installed',
-  aiSetupAgentNotFound: 'not found',
-  aiSetupAgentMCP: 'OpenPencil MCP server',
-  aiSetupAgentMCPInstall:
-    'Coding agents reach the canvas through OpenPencil’s MCP server. Install it with:',
-  aiSetupAgentPromptHint: params(
-    'Already using {agent} or another coding agent? Copy the setup prompt and paste it there; it installs what OpenPencil needs.'
-  ),
-  aiSetupAgentNeedsAdapter: 'installed · OpenPencil adapter missing',
-  aiSetupAgentInstallAdapter: 'Install adapter',
   aiSetupAgentInstallMCP: 'Install MCP server',
   aiSetupAgentUpdateMCP: 'Update MCP server',
-  aiSetupAgentOutdated: 'update needed',
   aiSetupAgentInstalling: 'Installing…',
-  aiSetupAgentGetCLI: params('Install {agent}'),
   aiSetupAgentNeedsNpm:
     'Installing needs npm, which comes with Node.js. Install Node.js, then check again.',
   aiSetupAgentNeedsAdmin:
@@ -264,21 +224,9 @@ export const aiMessageDefaults = {
   aiSetupAgentMCPStartFailed:
     'The MCP server is installed but didn’t start. Restart OpenPencil, then check again.',
   aiSetupAgentLookupFailed: 'Couldn’t check this computer. Try again.',
-  aiSetupAgentCopyPrompt: 'Copy setup prompt',
   aiSetupAgentCheckAgain: 'Check again',
-  aiSetupPiDescription:
-    'OpenPencil runs Pi through its Harness companion and uses the providers you signed in to in Pi.',
-  aiSetupPiCompanion: 'Harness companion',
-  aiSetupPiInstallCompanion: 'Install companion',
-  aiSetupPiUpdateCompanion: 'Update companion',
-  aiSetupPiModel: params('Pi’s default model: {model}'),
-  aiSetupPiNoModel: 'No default model set in Pi',
-  piModelHint: 'A Pi model such as provider/model. Leave empty to use Pi’s default model.',
-  aiSetupPiSignIn:
-    'To sign in to a provider or pick a default model, run pi in a terminal and type /login or /model.',
   aiSetupGetDesktop: 'Get the desktop app',
   aiSetupReviewTitle: 'Review your setup',
-  aiSetupAgentModel: 'Model chosen by the agent',
   aiSetupFinish: 'Finish setup',
   aiSetupSavedTitle: 'AI is ready',
   aiSetupSavedDescription: 'You can change models and roles anytime in Settings.',
