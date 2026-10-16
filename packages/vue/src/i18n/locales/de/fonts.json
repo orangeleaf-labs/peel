@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} deaktiviert.",
   "fallbackDownloaded": "Fallback-Schriften heruntergeladen.",
   "fallbackDownloadFailed": "Fallback-Schriften konnten nicht heruntergeladen werden.",
-  "clearCache": "Cache leeren"
+  "clearCache": "Cache leeren",
+  "remoteFonts": "Online-Schriften laden",
+  "remoteFontsDescription": "Schriften, die ein Dokument verwendet, von Google Fonts, Fontsource und anderen Online-Anbietern herunterladen. Wenn aus, werden fehlende Schriften durch installierte oder mitgelieferte ersetzt."
 }

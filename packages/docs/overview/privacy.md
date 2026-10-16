@@ -19,6 +19,6 @@ OpenPencil is local-first, but some features reach the network. The desktop app 
 | AI chat and image tools | The provider you configure, with your own key; the model list comes from models.dev |
 | Collaboration rooms | Other people in the room directly; public brokers introduce peers, and a TURN relay carries traffic when a direct connection is not possible |
 | Cloud storage | The storage provider you configure |
-| Fonts | Google Fonts, which can supply a font a document uses that is not installed |
+| Fonts | Google Fonts and other font providers, only after you turn on Remote fonts in Settings → General, to supply a font a document uses that is not installed |
 | Icons | The Iconify API, when you search or insert icons |
 | Stock images | Unsplash or Pexels, when you search them |

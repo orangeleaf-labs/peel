@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} disabilitato.",
   "fallbackDownloaded": "Font di fallback scaricati.",
   "fallbackDownloadFailed": "Impossibile scaricare i font di fallback.",
-  "clearCache": "Svuota cache"
+  "clearCache": "Svuota cache",
+  "remoteFonts": "Font remoti",
+  "remoteFontsDescription": "Scarica i font usati da un documento da Google Fonts, Fontsource e altri provider online. Se disattivato, i font mancanti vengono sostituiti da font installati o inclusi."
 }

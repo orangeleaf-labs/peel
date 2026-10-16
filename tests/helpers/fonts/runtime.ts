@@ -9,3 +9,8 @@ export async function trackFontModuleResources(page: Page): Promise<void> {
     FONT_MODULE_RESOURCE_CAPACITY
   )
 }
+
+/** Turn remote fonts on before the app loads; they are off by default (`src/app/editor/fonts/remote.ts`). */
+export async function allowRemoteFonts(page: Page): Promise<void> {
+  await page.addInitScript(() => localStorage.setItem('peel:remote-fonts-enabled', 'true'))
+}
