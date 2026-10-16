@@ -1,0 +1,1 @@
+- The desktop app sends native HTTP requests only to the services it uses; cloud storage endpoints are not reachable from the desktop app for now.
