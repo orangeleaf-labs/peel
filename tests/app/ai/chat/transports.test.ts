@@ -74,24 +74,3 @@ test('each message uses the thinking level chosen when it is sent', async () => 
     store.dispose()
   }
 })
-
-test('OpenRouter receives the level as its own reasoning option', async () => {
-  const store = createEditorStore()
-  const model = replyModel()
-  try {
-    const transport = createToolLoopTransport({
-      store,
-      providerID: 'openrouter',
-      model,
-      effectiveModelID: 'openai/gpt-test',
-      maxOutputTokens: 100,
-      thinkingLevel: () => 'minimal'
-    })
-    await send(transport)
-    expect(model.doStreamCalls[0]?.providerOptions).toEqual({
-      openrouter: { reasoning: { effort: 'minimal' } }
-    })
-  } finally {
-    store.dispose()
-  }
-})

@@ -76,9 +76,7 @@ export function useProfileConnection({ draft, keyInput }: ConnectionOptions) {
         providerID: target.providerID,
         apiKey: replacement || existingKey || '',
         modelID: target.modelID,
-        customModelID: target.customModelID,
-        customBaseURL: target.customBaseURL,
-        customAPIType: target.customAPIType
+        customModelID: target.customModelID
       })
       if (!current(request)) return
       connectionTestStatus.value = result.ok ? 'success' : 'error'

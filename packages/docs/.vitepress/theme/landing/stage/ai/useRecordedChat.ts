@@ -101,7 +101,7 @@ export function useRecordedChat(store: EditorStore, copy: () => RecordedChatCopy
     chat.value = new Chat<UIMessage>({
       transport: createToolLoopTransport({
         store,
-        providerID: 'openai',
+        providerID: 'anthropic',
         model,
         effectiveModelID: model.modelId,
         maxOutputTokens: OUTPUT_TOKEN_LIMIT,

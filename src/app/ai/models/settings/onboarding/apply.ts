@@ -1,5 +1,6 @@
-import { AI_PROVIDERS } from '@open-pencil/core/constants'
+import { DEFAULT_AI_PROVIDER, type AIProviderID } from '@open-pencil/core/constants'
 
+import { catalogModel } from '@/app/ai/models/catalog'
 import type {
   AIModelConnection,
   AIModelProfile,
@@ -10,7 +11,6 @@ import type {
 import {
   isOnboardingAccess,
   isOnboardingAgent,
-  ONBOARDING_SERVER_PROVIDER,
   type OnboardingAccess,
   type OnboardingPlan,
   type PlannedModel
@@ -20,17 +20,10 @@ const DEFAULT_MAX_OUTPUT_TOKENS = 16_384
 /** The profile a fresh install starts with before anything is configured. */
 const PLACEHOLDER_PROFILE_ID = 'model-default'
 
-/** Details entered while connecting; only a server needs an address and its own model ID. */
-export interface OnboardingConnectionDetails {
-  customBaseURL: string
-  customModelID: string
-}
-
 export interface ApplyOnboardingInput {
   settings: AIModelSettings
   /** The final model for every role; a `null` design keeps the current design model. */
   plan: OnboardingPlan
-  details: Partial<Record<OnboardingAccess, OnboardingConnectionDetails>>
   createId: () => string
 }
 
@@ -44,16 +37,14 @@ function effectiveModelID(profile: Pick<AIModelProfile, 'modelID' | 'customModel
   return profile.customModelID || profile.modelID
 }
 
-function recommendedMaxOutputTokens(providerID: string, modelID: string): number {
-  const provider = AI_PROVIDERS.find((definition) => definition.id === providerID)
-  const model = provider?.models.find((candidate) => candidate.id === modelID)
-  return model?.recommendedMaxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS
+function recommendedMaxOutputTokens(providerID: AIProviderID, modelID: string): number {
+  return catalogModel(providerID, modelID)?.recommendedMaxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS
 }
 
 function isPlaceholder(settings: AIModelSettings, profile: AIModelProfile): boolean {
   if (profile.id !== PLACEHOLDER_PROFILE_ID || effectiveModelID(profile)) return false
   const connection = settings.connections.find((candidate) => candidate.id === profile.connectionId)
-  return connection?.providerID === ONBOARDING_SERVER_PROVIDER && !connection.customBaseURL
+  return connection?.providerID === DEFAULT_AI_PROVIDER
 }
 
 function isUnusedPlaceholder(settings: AIModelSettings, profile: AIModelProfile): boolean {
@@ -116,23 +107,16 @@ function removeUnusedPlaceholder(settings: AIModelSettings): void {
 export function applyOnboardingPlan({
   settings: current,
   plan,
-  details,
   createId
 }: ApplyOnboardingInput): ApplyOnboardingResult {
   const settings = structuredClone(current)
   const connectionIds: ApplyOnboardingResult['connectionIds'] = {}
 
   function connectionFor(providerID: OnboardingAccess): AIModelConnection {
-    const customBaseURL = details[providerID]?.customBaseURL.trim() ?? ''
-    const existing = settings.connections.find(
-      (connection) =>
-        connection.providerID === providerID && connection.customBaseURL === customBaseURL
-    )
+    const existing = settings.connections.find((connection) => connection.providerID === providerID)
     const connection = existing ?? {
       id: `connection-${createId()}`,
       providerID,
-      customBaseURL,
-      customAPIType: 'completions' as const,
       credentialProfileId: ''
     }
     if (!existing) {
@@ -151,8 +135,7 @@ export function applyOnboardingPlan({
     }
     if (!isOnboardingAccess(model.providerID)) return null
     const connection = connectionFor(model.providerID)
-    const customModelID = details[model.providerID]?.customModelID.trim() ?? ''
-    const wanted = customModelID || model.modelID
+    const wanted = model.modelID
     // Reuse only a profile that can do everything the plan relies on.
     const existing = settings.models.find(
       (profile) =>
@@ -163,10 +146,10 @@ export function applyOnboardingPlan({
     if (existing) return existing.id
     const profile: AIModelProfile = {
       id: `model-${createId()}`,
-      name: customModelID || model.name,
+      name: model.name,
       connectionId: connection.id,
       modelID: model.modelID,
-      customModelID,
+      customModelID: '',
       maxOutputTokens: recommendedMaxOutputTokens(model.providerID, model.modelID),
       thinkingLevel: 'default',
       capabilities: [...model.capabilities]

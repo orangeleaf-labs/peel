@@ -9,7 +9,7 @@ Appuyez sur <kbd>⌘</kbd><kbd>J</kbd> ou <kbd>Ctrl</kbd><kbd>J</kbd>. L’assis
 
 ## Configurer les modèles
 
-Au premier lancement, la configuration guidée demande pour quoi l’IA doit vous aider et ce que vous utilisez déjà : un agent de code comme Claude Code, Codex ou Gemini CLI dans l’application de bureau, un compte API, ou un serveur local ou d’entreprise. Elle connecte cet accès et l’attribue aux rôles **Design agent** et **Vision**, sans toucher à ce que vous avez configuré à la main. Avec OpenRouter, il suffit de se connecter au lieu de coller une clé API. Vous pouvez la passer et la relancer depuis **Réglages → IA et agents → Lancer la configuration guidée**. Pour configurer les modèles à la main :
+Au premier lancement, la configuration guidée demande pour quoi l’IA doit vous aider et ce que vous utilisez déjà : un agent de code comme Claude Code, Codex ou Gemini CLI dans l’application de bureau ou une clé d’API Anthropic. Elle connecte cet accès et l’attribue aux rôles **Design agent** et **Vision**, sans toucher à ce que vous avez configuré à la main. Vous pouvez la passer et la relancer depuis **Réglages → IA et agents → Lancer la configuration guidée**. Pour configurer les modèles à la main :
 
 1. Ouvrez le chat.
 2. Sélectionnez l’icône des réglages.
@@ -19,9 +19,7 @@ Plusieurs profils peuvent être enregistrés et attribués séparément au desig
 
 ## Fournisseurs
 
-OpenPencil prend en charge les connexions compatibles avec OpenAI et Anthropic, ainsi qu’OpenRouter, Google, Z.ai et des fournisseurs locaux.
-
-Aucun serveur intermédiaire n’est utilisé. Les requêtes sont envoyées directement au fournisseur ; dans le navigateur, ses règles CORS s’appliquent. La fiabilité des appels d’outils en diffusion continue peut varier selon les déploiements. Consultez la [compatibilité BYOK](/programmable/byok-provider-compatibility).
+Peel utilise uniquement l’API Anthropic. Obtenez une clé sur [console.anthropic.com](https://console.anthropic.com) et choisissez un modèle Claude dans la liste intégrée à l’application : choisir un modèle ne contacte aucun autre service. Les requêtes vont directement à `api.anthropic.com` ; aucune adresse de base personnalisée n’est possible. Dans l’application de bureau, la clé est conservée dans le magasin d’identifiants du système d’exploitation.
 
 ## Agents ACP et MCP distant
 

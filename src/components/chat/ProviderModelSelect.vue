@@ -4,16 +4,17 @@ import { computed } from 'vue'
 import { useI18n } from '@open-pencil/vue'
 
 import { useAIChat } from '@/app/ai/chat/use'
-import { useProviderModelCatalog } from '@/app/ai/models/catalog/use'
+import { catalogModels } from '@/app/ai/models/catalog'
 import { modelPickerOptions } from '@/app/ai/models/picker/options'
 import AppCombobox from '@/components/ui/select/AppCombobox.vue'
 
-const { modelID, providerDef, providerID } = useAIChat()
+const { modelID, providerID } = useAIChat()
 const { ai, common } = useI18n()
-const fallbackModels = computed(() => providerDef.value.models)
-const { models } = useProviderModelCatalog(providerID, fallbackModels)
 
-const options = computed(() => modelPickerOptions(models.value, providerDef.value.models, ai.value))
+const options = computed(() => {
+  const models = catalogModels(providerID.value)
+  return modelPickerOptions(models, models, ai.value)
+})
 </script>
 
 <template>

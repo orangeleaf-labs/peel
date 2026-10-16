@@ -1,10 +1,8 @@
 de:ai.chatSettings
-de:ai.completions
 de:ai.modelAgentConnection
 de:ai.modelCapabilityVisionShort
 de:ai.modelName
 de:ai.modelRoleVision
-de:ai.responses
 de:ai.thinkingMinimal
 de:automation.mcpFailureDetails
 de:automation.port
@@ -74,8 +72,6 @@ de:tools.text
 de:variableTypes.boolean
 de:variableTypes.text
 es:ai.chatSettings
-es:ai.completions
-es:ai.responses
 es:ai.toolError
 es:automation.statusError
 es:code.editorDesignLabel
@@ -113,11 +109,9 @@ es:storage.providerAmazonS3
 es:storage.providerBackblaze
 es:storage.providerR2
 es:variableTypes.color
-fr:ai.completions
 fr:ai.modelAgentConnection
 fr:ai.modelCapabilityVisionShort
 fr:ai.modelRoleVision
-fr:ai.responses
 fr:ai.thinkingMinimal
 fr:automation.port
 fr:automation.version
@@ -196,8 +190,6 @@ fr:tools.rectangle
 fr:tools.section
 fr:variables.modes
 it:ai.chatSettings
-it:ai.completions
-it:ai.responses
 it:code.editorDesignLabel
 it:code.sourceDesignJSX
 it:code.sourceHTML
@@ -258,10 +250,8 @@ ja:settings.mcp
 ja:storage.providerAmazonS3
 ja:storage.providerBackblaze
 ja:storage.providerR2
-pl:ai.completions
 pl:ai.modelAgentConnection
 pl:ai.modelConfiguration
-pl:ai.responses
 pl:automation.port
 pl:code.editorDesignLabel
 pl:code.sourceDesignJSX
@@ -294,8 +284,6 @@ pl:storage.providerAmazonS3
 pl:storage.providerBackblaze
 pl:storage.providerR2
 pl:storage.region
-ru:ai.completions
-ru:ai.responses
 ru:code.editorDesignLabel
 ru:code.sourceDesignJSX
 ru:code.sourceHTML
@@ -314,8 +302,6 @@ ru:settings.mcp
 ru:storage.providerAmazonS3
 ru:storage.providerBackblaze
 ru:storage.providerR2
-zh-cn:ai.completions
-zh-cn:ai.responses
 zh-cn:code.editorDesignLabel
 zh-cn:code.sourceDesignJSX
 zh-cn:code.sourceHTML

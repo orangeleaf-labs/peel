@@ -13,7 +13,7 @@ import {
 } from '@/app/ai/models'
 import type { SettingsSaveResult } from '@/app/settings/save-result'
 
-import { applyOnboardingPlan } from './apply'
+import { applyOnboardingPlan, isUnconfiguredModelSettings } from './apply'
 import { existingOnboardingConnection, useOnboardingConnections } from './connections'
 import { currentOnboardingModels } from './current'
 import {
@@ -27,21 +27,23 @@ import {
   uncoveredGoals
 } from './plan'
 import { useOnboardingRoles } from './roles'
-import { useOnboardingSignIn } from './sign-in'
 
 export const AI_SETUP_STEPS = ['goals', 'access', 'connect', 'review'] as const
 export type AISetupStep = (typeof AI_SETUP_STEPS)[number]
 
 /** Starts from what is already configured, so running setup again adjusts instead of resets. */
 function initialAnswers(): OnboardingAnswers {
-  const access = aiModelSettings.value.connections
+  // A fresh install's placeholder Anthropic connection is not access the person chose.
+  const connections = isUnconfiguredModelSettings(aiModelSettings.value)
+    ? []
+    : aiModelSettings.value.connections
+  const access = connections
     .map((connection) => connection.providerID)
     .filter(isOnboardingAccess)
     .filter((providerID) => existingOnboardingConnection(providerID))
   return {
     goals: aiModelSettings.value.assignments.vision === null ? ['design'] : ['design', 'vision'],
-    access: uniq(access),
-    spending: 'existing'
+    access: uniq(access)
   }
 }
 
@@ -63,7 +65,7 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
   const recommended = computed(() => planOnboarding(answers, { agentsAvailable, current }))
   const roles = useOnboardingRoles(recommended, configured)
   const { plan } = roles
-  /** Requested goals nothing selected covers; setup offers OpenRouter for them. */
+  /** Requested goals nothing selected covers. */
   const gaps = computed(() => uncoveredGoals(answers, { agentsAvailable, current }))
   /** Setup can finish once there is a design model, planned or already configured. */
   const hasDesign = computed(() => recommended.value.design !== null || current.design !== null)
@@ -80,7 +82,6 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
 
   const connections = useOnboardingConnections({ plannedModel })
   const { connection, ready, markKeySaved } = connections
-  const signIn = useOnboardingSignIn(connections)
   const agents = useAgentSetup()
   // Look for installed agents when they are about to be connected, and again on return.
   watch(step, (current) => {
@@ -127,16 +128,9 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
       const keys = plan.value.connections.map(
         (providerID) => [providerID, connection(providerID).apiKey.trim()] as const
       )
-      const details = Object.fromEntries(
-        plan.value.connections.map((providerID) => {
-          const { customBaseURL, customModelID } = connection(providerID)
-          return [providerID, { customBaseURL, customModelID }]
-        })
-      )
       const { settings, connectionIds } = applyOnboardingPlan({
         settings: modelSettingsSnapshot(),
         plan: plan.value,
-        details,
         createId: () => crypto.randomUUID()
       })
       replaceAIModelSettings(settings)
@@ -173,7 +167,6 @@ export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOpti
     canContinue,
     plannedModel,
     ...connections,
-    ...signIn,
     ...agents,
     setGoal,
     next,

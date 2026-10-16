@@ -4,8 +4,6 @@ import { computed, ref, watch } from 'vue'
 import { IS_TAURI } from '@open-pencil/core/constants'
 
 import {
-  designCustomAPIType,
-  designCustomBaseURL,
   designCustomModelID,
   designMaxOutputTokens,
   designModelConnection,
@@ -25,9 +23,7 @@ import type { CredentialRef, CredentialStatus } from '@/app/settings/credentials
 
 export const providerID = designProviderID
 export const modelID = designModelID
-export const customBaseURL = designCustomBaseURL
 export const customModelID = designCustomModelID
-export const customAPIType = designCustomAPIType
 export const maxOutputTokens = designMaxOutputTokens
 export const providerDef = designProviderDefinition
 
@@ -42,10 +38,7 @@ export const isConfigured = computed(() => {
   if (isACPProvider.value) return IS_TAURI
   // Pi can use the CLI's own sign-in, so a key is optional.
   if (isHarnessProvider.value) return IS_TAURI
-  if (apiKeyStatus.value !== 'configured') return false
-  const needsBaseURL =
-    providerID.value === 'openai-compatible' || providerID.value === 'anthropic-compatible'
-  return !needsBaseURL || Boolean(customBaseURL.value)
+  return apiKeyStatus.value === 'configured'
 })
 
 async function refreshStatus(reference: CredentialRef): Promise<CredentialStatus> {
@@ -103,8 +96,6 @@ export function registerAIChatEffects(markTransportDirty: () => void) {
   )
   watch(modelID, markTransportDirty)
   watch(customModelID, markTransportDirty)
-  watch(customAPIType, markTransportDirty)
-  watch(customBaseURL, markTransportDirty)
   watch(maxOutputTokens, markTransportDirty)
   watch(credentialPersistenceRevision, () => {
     void refreshAIProviderStatus()

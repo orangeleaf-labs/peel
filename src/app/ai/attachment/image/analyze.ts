@@ -70,10 +70,7 @@ export async function analyzeAttachedImages(
   const result = await dependencies.inspect({
     model: runtime.model,
     maxOutputTokens: Math.min(runtime.role.profile.maxOutputTokens, MAX_IMAGE_ANALYSIS_TOKENS),
-    ...reasoningCallSettings(
-      runtime.role.connection.providerID,
-      runtime.role.profile.thinkingLevel
-    ),
+    ...reasoningCallSettings(runtime.role.profile.thinkingLevel),
     messages: [{ role: 'user', content }]
   })
 

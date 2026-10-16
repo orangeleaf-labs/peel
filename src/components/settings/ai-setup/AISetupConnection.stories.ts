@@ -9,19 +9,10 @@ import type { AgentSetupState, PiSetupState } from '@/app/ai/agents/setup'
 import AISetupConnection from './AISetupConnection.vue'
 
 interface Args {
-  providerID:
-    | 'openrouter'
-    | 'anthropic'
-    | 'openai-compatible'
-    | 'acp:claude-code'
-    | 'acp:codex'
-    | 'harness:pi'
-  signInStatus: 'idle' | 'waiting' | 'verifying' | 'blocked' | 'cancelled' | 'expired' | 'failed'
-  account: { label: string; freeTier: boolean } | null
+  providerID: 'anthropic' | 'acp:claude-code' | 'acp:codex' | 'harness:pi'
   agentSetup?: AgentSetupState
   piSetup?: PiSetupState
   hasSavedKey: boolean
-  recommended: boolean
 }
 
 function detected(id: ACPAgentID, status: DetectedAgent['status']): DetectedAgent {
@@ -69,24 +60,14 @@ function piSetup(overrides: Partial<PiSetupState>): PiSetupState {
 const meta = {
   title: 'App/Settings/AI Setup/Connection',
   args: {
-    providerID: 'openrouter',
-    signInStatus: 'idle',
-    hasSavedKey: false,
-    recommended: true,
-    account: null
+    providerID: 'anthropic',
+    hasSavedKey: false
   },
   render: (args) => ({
     components: { AISetupConnection },
     setup: () => ({
       args,
-      state: {
-        apiKey: args.account ? 'sk-or-story' : '',
-        customBaseURL: '',
-        customModelID: '',
-        test: 'idle',
-        reason: null,
-        account: args.account
-      }
+      state: { apiKey: '', test: 'idle', reason: null }
     }),
     template:
       '<div class="w-[30rem] max-w-full"><AISetupConnection v-bind="args" :state="state" /></div>'
@@ -96,59 +77,31 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const OpenRouterSignIn: Story = {
+export const APIKey: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('button', { name: 'Sign in with OpenRouter' })).toBeVisible()
     await expect(canvas.getByLabelText('API Key')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Test connection' })).toBeVisible()
   }
 }
-export const OpenRouterWaiting: Story = {
-  args: { signInStatus: 'waiting' },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByRole('status')).toBeVisible()
-    await expect(canvas.queryByRole('button', { name: 'Sign in with OpenRouter' })).toBeNull()
-  }
-}
-export const OpenRouterVerifying: Story = { args: { signInStatus: 'verifying' } }
-export const OpenRouterSignedIn: Story = {
-  args: { account: { label: 'OpenPencil', freeTier: false } },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByRole('status')).toHaveTextContent('Signed in to OpenRouter')
-    await expect(canvas.queryByLabelText('API Key')).toBeNull()
-    await expect(canvas.queryByRole('button', { name: 'Test connection' })).toBeNull()
-  }
-}
-export const OpenRouterSignedInWithoutCredits: Story = {
-  args: { account: { label: 'OpenPencil', freeTier: true } }
-}
-export const OpenRouterPopupBlocked: Story = { args: { signInStatus: 'blocked' } }
-export const OpenRouterFailed: Story = { args: { signInStatus: 'failed' } }
-export const OpenRouterExpired: Story = { args: { signInStatus: 'expired' } }
 export const SavedAPIKey: Story = {
-  args: { providerID: 'anthropic', hasSavedKey: true, recommended: false }
+  args: { hasSavedKey: true }
 }
-export const LocalServer: Story = { args: { providerID: 'openai-compatible', recommended: false } }
 export const CodingAgentInBrowser: Story = {
   args: {
     providerID: 'acp:claude-code',
-    recommended: false,
     agentSetup: agentSetup({ supported: false })
   }
 }
 export const CodingAgentChecking: Story = {
   args: {
     providerID: 'acp:codex',
-    recommended: false,
     agentSetup: agentSetup({ scanning: true, checked: false })
   }
 }
 export const CodingAgentInstalled: Story = {
   args: {
     providerID: 'acp:claude-code',
-    recommended: false,
     agentSetup: agentSetup({ detected: detected('claude-code', 'available'), bridge: true })
   },
   play: async ({ canvasElement }) => {
@@ -161,7 +114,6 @@ export const CodingAgentInstalled: Story = {
 export const CodingAgentNeedsAdapter: Story = {
   args: {
     providerID: 'acp:codex',
-    recommended: false,
     agentSetup: agentSetup({ detected: detected('codex', 'needs-adapter') })
   },
   play: async ({ canvasElement }) => {
@@ -177,7 +129,6 @@ export const CodingAgentNeedsAdapter: Story = {
 export const CodingAgentNeedsNpm: Story = {
   args: {
     providerID: 'acp:claude-code',
-    recommended: false,
     agentSetup: agentSetup({ detected: detected('claude-code', 'needs-adapter'), npm: false })
   },
   play: async ({ canvasElement }) => {
@@ -190,7 +141,6 @@ export const CodingAgentNeedsNpm: Story = {
 export const PiNeedsCompanion: Story = {
   args: {
     providerID: 'harness:pi',
-    recommended: false,
     piSetup: piSetup({ defaultModel: 'openai-codex/gpt-5.6' })
   },
   play: async ({ canvasElement }) => {
@@ -203,7 +153,6 @@ export const PiNeedsCompanion: Story = {
 export const PiReady: Story = {
   args: {
     providerID: 'harness:pi',
-    recommended: false,
     piSetup: piSetup({ companion: true, bridge: true, defaultModel: 'openai-codex/gpt-5.6' })
   },
   play: async ({ canvasElement }) => {
@@ -213,7 +162,7 @@ export const PiReady: Story = {
   }
 }
 export const PiNeedsNpm: Story = {
-  args: { providerID: 'harness:pi', recommended: false, piSetup: piSetup({ npm: false }) },
+  args: { providerID: 'harness:pi', piSetup: piSetup({ npm: false }) },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByText(/npm i -g @open-pencil\/harness@/)).toBeVisible()
@@ -222,7 +171,6 @@ export const PiNeedsNpm: Story = {
 export const PiOutdatedMCPFromBun: Story = {
   args: {
     providerID: 'harness:pi',
-    recommended: false,
     piSetup: piSetup({
       companion: true,
       bridge: true,

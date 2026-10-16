@@ -9,8 +9,6 @@ export type ModelConfig = {
   apiKey: string
   modelID: string
   customModelID: string
-  customBaseURL: string
-  customAPIType: 'completions' | 'responses'
 }
 
 export type ModelProviderRuntime = {

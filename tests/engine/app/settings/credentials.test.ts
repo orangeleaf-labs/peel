@@ -16,7 +16,7 @@ import type {
   CredentialStoreAvailability
 } from '@/app/settings/credentials/types'
 
-const API_KEY = credentialRef('openai-compatible', 'api-key')
+const API_KEY = credentialRef('anthropic', 'api-key')
 const MEDIA_KEY = credentialRef('vectorize-recraft', 'api-key')
 
 class TestCredentialStore implements CredentialStore {
@@ -55,7 +55,7 @@ class TestCredentialStore implements CredentialStore {
 
 describe('credential references', () => {
   test('creates stable versioned keys', () => {
-    expect(credentialKey(API_KEY)).toBe('v1:openai-compatible:default:api-key')
+    expect(credentialKey(API_KEY)).toBe('v1:anthropic:default:api-key')
   })
 
   test('rejects account-path injection', () => {

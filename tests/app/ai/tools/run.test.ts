@@ -73,7 +73,7 @@ async function runMessage(store: EditorStore, steps: Step[]): Promise<string[]> 
   })
   const transport = createToolLoopTransport({
     store,
-    providerID: 'openai',
+    providerID: 'anthropic',
     model,
     effectiveModelID: 'test',
     maxOutputTokens: 100,
@@ -303,7 +303,7 @@ async function startMessage(store: EditorStore, calls: StreamChunk[], signal: Ab
   })
   const transport = createToolLoopTransport({
     store,
-    providerID: 'openai',
+    providerID: 'anthropic',
     model,
     effectiveModelID: 'test',
     maxOutputTokens: 100,

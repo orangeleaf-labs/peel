@@ -31,16 +31,12 @@ function settingsFixture(): AIModelSettings {
       {
         id: 'connection-anthropic',
         providerID: 'anthropic',
-        customBaseURL: '',
-        customAPIType: 'completions',
         credentialProfileId: 'anthropic-main'
       },
       {
-        id: 'connection-google',
-        providerID: 'google',
-        customBaseURL: '',
-        customAPIType: 'completions',
-        credentialProfileId: 'google-main'
+        id: 'connection-second',
+        providerID: 'anthropic',
+        credentialProfileId: 'second-main'
       }
     ],
     models: [
@@ -57,8 +53,8 @@ function settingsFixture(): AIModelSettings {
       {
         id: 'model-fast',
         name: 'Fast model',
-        connectionId: 'connection-google',
-        modelID: 'gemini-3-flash-preview',
+        connectionId: 'connection-second',
+        modelID: 'claude-test-fast',
         customModelID: '',
         maxOutputTokens: 8192,
         thinkingLevel: 'default',
@@ -93,7 +89,7 @@ describe('AI model profiles and role assignments', () => {
     expect(resolveAIModelRole('fast')).toMatchObject({
       requestedRole: 'fast',
       profile: { id: 'model-fast' },
-      connection: { id: 'connection-google' }
+      connection: { id: 'connection-second' }
     })
   })
 
@@ -114,7 +110,7 @@ describe('AI model profiles and role assignments', () => {
 
     setModelRoleAssignment('design', 'model-fast')
     expect(resolveAIModelRole('design')?.profile.id).toBe('model-fast')
-    expect(resolveAIModelRole('design')?.connection.id).toBe('connection-google')
+    expect(resolveAIModelRole('design')?.connection.id).toBe('connection-second')
 
     setModelRoleAssignment('design', 'model-design')
     expect(resolveAIModelRole('design')?.profile.id).toBe('model-design')
@@ -124,7 +120,7 @@ describe('AI model profiles and role assignments', () => {
     aiModelSettings.value.models.push({
       id: 'model-textonly',
       name: 'Text only',
-      connectionId: 'connection-google',
+      connectionId: 'connection-second',
       modelID: 'text-only',
       customModelID: '',
       maxOutputTokens: 4096,
@@ -183,8 +179,6 @@ describe('AI model profiles and role assignments', () => {
     settings.connections.push({
       id: 'connection-acp',
       providerID: 'acp:claude-code',
-      customBaseURL: '',
-      customAPIType: 'completions',
       credentialProfileId: 'connection-acp'
     })
     settings.models.push({
@@ -242,13 +236,10 @@ describe('AI model profiles and role assignments', () => {
   })
 
   test('maps thinking levels to the AI SDK reasoning option', () => {
-    expect(reasoningCallSettings('anthropic', 'high')).toEqual({ reasoning: 'high' })
-    expect(reasoningCallSettings('google', 'off')).toEqual({ reasoning: 'none' })
-    expect(reasoningCallSettings('openai-compatible', 'xhigh')).toEqual({ reasoning: 'xhigh' })
-    expect(reasoningCallSettings('openrouter', 'low')).toEqual({
-      providerOptions: { openrouter: { reasoning: { effort: 'low' } } }
-    })
-    expect(reasoningCallSettings('anthropic', 'default')).toEqual({})
+    expect(reasoningCallSettings('high')).toEqual({ reasoning: 'high' })
+    expect(reasoningCallSettings('off')).toEqual({ reasoning: 'none' })
+    expect(reasoningCallSettings('xhigh')).toEqual({ reasoning: 'xhigh' })
+    expect(reasoningCallSettings('default')).toEqual({})
   })
 
   test('repairs assignments when removing a model', () => {
@@ -257,7 +248,7 @@ describe('AI model profiles and role assignments', () => {
     const settings = modelSettingsSnapshot()
     expect(settings.assignments.design).toBe('model-fast')
     expect(settings.assignments.vision).toBeNull()
-    expect(settings.connections.map((connection) => connection.id)).toEqual(['connection-google'])
+    expect(settings.connections.map((connection) => connection.id)).toEqual(['connection-second'])
   })
 
   test('keeps the assigned design profile when no capable fallback exists', () => {
@@ -267,7 +258,7 @@ describe('AI model profiles and role assignments', () => {
       {
         id: 'model-text-only',
         name: 'Text-only model',
-        connectionId: 'connection-google',
+        connectionId: 'connection-second',
         modelID: 'text-only',
         customModelID: '',
         maxOutputTokens: 4096,
@@ -292,7 +283,7 @@ describe('AI model profiles and role assignments', () => {
   test('includes configured connection credentials in persistence changes', () => {
     const keys = appCredentialRefs().map(credentialKey)
     expect(keys).toContain('v1:anthropic:anthropic-main:api-key')
-    expect(keys).toContain('v1:google:google-main:api-key')
+    expect(keys).toContain('v1:anthropic:second-main:api-key')
   })
 
   test('creates a role runtime without exposing its resolved credential', async () => {

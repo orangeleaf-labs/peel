@@ -35,7 +35,7 @@ test('a reused AI transport refreshes actual request tools for each message', as
     aiToolOverrides.value = {}
     const transport = createToolLoopTransport({
       store,
-      providerID: 'openai',
+      providerID: 'anthropic',
       model,
       effectiveModelID: 'test',
       maxOutputTokens: 100,

@@ -1,15 +1,10 @@
 import * as v from 'valibot'
 
-import {
-  requiredSetting,
-  requiredSettingsURL,
-  type SettingsValidationMessages
-} from '@/app/settings/validation/schema'
+import { requiredSetting, type SettingsValidationMessages } from '@/app/settings/validation/schema'
 
 export interface ModelProfileValidationContext {
   customModel: boolean
   providerKind: 'api' | 'acp' | 'harness'
-  supportsCustomBaseURL: boolean
   design: boolean
   intent: 'save' | 'test'
 }
@@ -35,8 +30,6 @@ export function modelProfileSchema(
           : v.string(),
       customModelID:
         requiresModel && context.customModel ? requiredSetting(messages.requiredField) : v.string(),
-      baseURL:
-        requiresAPI && context.supportsCustomBaseURL ? requiredSettingsURL(messages) : v.string(),
       credential:
         requiresAPI && context.intent === 'test'
           ? v.pipe(

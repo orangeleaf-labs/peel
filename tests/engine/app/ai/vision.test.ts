@@ -36,7 +36,7 @@ describe('isolated visual inspection', () => {
           role: {
             requestedRole: 'vision',
             profile: { maxOutputTokens: 8000, thinkingLevel: 'low' },
-            connection: { providerID: 'openrouter' }
+            connection: { providerID: 'anthropic' }
           }
         }) as never,
       inspect: async (options) => {
@@ -55,11 +55,11 @@ describe('isolated visual inspection', () => {
     })
     const request = inspections[0] as {
       maxOutputTokens: number
-      providerOptions?: unknown
+      reasoning?: unknown
       messages: Array<{ content: Array<{ type: string; data?: Uint8Array }> }>
     }
     expect(request.maxOutputTokens).toBe(1200)
-    expect(request.providerOptions).toEqual({ openrouter: { reasoning: { effort: 'low' } } })
+    expect(request.reasoning).toBe('low')
     expect(request.messages[0]?.content[1]?.type).toBe('file')
     expect(request.messages[0]?.content[1]?.data).toEqual(new Uint8Array([1, 2, 3]))
     expect(result).not.toHaveProperty('base64')

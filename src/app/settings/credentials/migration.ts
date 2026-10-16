@@ -8,7 +8,9 @@ import type { CredentialRef, CredentialStore } from '@/app/settings/credentials/
 const STORAGE_PREFIX = 'open-pencil:'
 const MIGRATION_VERSION_KEY = `${STORAGE_PREFIX}credential-migration`
 const MIGRATION_VERSION = '1'
-const LEGACY_OPENROUTER_KEY = `${STORAGE_PREFIX}openrouter-api-key`
+const AI_KEY_PREFIX = `${STORAGE_PREFIX}ai-key:`
+/** Plaintext keys for providers Peel removed: deleted, never migrated, so no secret outlives them. */
+const REMOVED_PROVIDER_KEYS = [`${STORAGE_PREFIX}openrouter-api-key`]
 
 export function providerCredentialRef(
   providerId: AIProviderID,
@@ -26,21 +28,25 @@ type LegacyCredential = {
   reference: CredentialRef
 }
 
-function legacyCredentials(storage: Storage): LegacyCredential[] {
-  const credentials: LegacyCredential[] = [
-    { storageKey: LEGACY_OPENROUTER_KEY, reference: providerCredentialRef('openrouter') }
-  ]
+type LegacyScan = {
+  credentials: LegacyCredential[]
+  removedProviderKeys: string[]
+}
+
+function scanLegacyCredentials(storage: Storage): LegacyScan {
+  const credentials: LegacyCredential[] = []
+  const removedProviderKeys = REMOVED_PROVIDER_KEYS.filter((key) => storage.getItem(key) !== null)
 
   for (let index = 0; index < storage.length; index++) {
     const storageKey = storage.key(index)
-    if (!storageKey?.startsWith(`${STORAGE_PREFIX}ai-key:`)) continue
-    const legacyProviderId = storageKey.slice(`${STORAGE_PREFIX}ai-key:`.length)
+    if (!storageKey?.startsWith(AI_KEY_PREFIX)) continue
+    const legacyProviderId = storageKey.slice(AI_KEY_PREFIX.length)
     const providerId = AI_PROVIDERS.find((provider) => provider.id === legacyProviderId)?.id
-    if (!providerId) continue
-    credentials.push({ storageKey, reference: providerCredentialRef(providerId) })
+    if (providerId) credentials.push({ storageKey, reference: providerCredentialRef(providerId) })
+    else removedProviderKeys.push(storageKey)
   }
 
-  return credentials
+  return { credentials, removedProviderKeys }
 }
 
 export function hasLegacyCredential(
@@ -48,7 +54,7 @@ export function hasLegacyCredential(
   storage = browserCredentialStorage()
 ): boolean {
   if (!storage || storage.getItem(MIGRATION_VERSION_KEY) === MIGRATION_VERSION) return false
-  return legacyCredentials(storage).some(
+  return scanLegacyCredentials(storage).credentials.some(
     (entry) =>
       credentialKey(entry.reference) === credentialKey(reference) &&
       Boolean(storage.getItem(entry.storageKey)?.trim())
@@ -59,10 +65,11 @@ export async function migrateLegacyCredentials(
   storage: Storage,
   store: CredentialStore
 ): Promise<boolean> {
+  const { credentials, removedProviderKeys } = scanLegacyCredentials(storage)
+  for (const storageKey of removedProviderKeys) storage.removeItem(storageKey)
   if (storage.getItem(MIGRATION_VERSION_KEY) === MIGRATION_VERSION) return true
   if ((await store.availability()) !== 'available') return false
 
-  const credentials = legacyCredentials(storage)
   for (const { storageKey, reference } of credentials) {
     const legacyValue = storage.getItem(storageKey)?.trim()
     if (!legacyValue) continue

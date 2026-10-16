@@ -8,8 +8,7 @@ import {
 } from '@open-pencil/core/constants'
 
 import type { AIModelProfileDraft, AIModelCapability } from '@/app/ai/models'
-import { resolveModelsDevModel } from '@/app/ai/models/catalog'
-import { useProviderModelCatalog } from '@/app/ai/models/catalog/use'
+import { catalogModel as findCatalogModel, catalogModels } from '@/app/ai/models/catalog'
 import { modelPickerOptions, type ModelPickerLabels } from '@/app/ai/models/picker/options'
 import { supportsThinkingLevel } from '@/app/ai/models/thinking'
 
@@ -27,9 +26,7 @@ export function useProfileModelSelection(
   const providerDef = computed(
     () => AI_PROVIDERS.find((provider) => provider.id === draft.providerID) ?? AI_PROVIDERS[0]
   )
-  const catalogProviderID = computed(() => draft.providerID)
-  const fallbackModels = computed(() => providerDef.value.models)
-  const { models: availableModels } = useProviderModelCatalog(catalogProviderID, fallbackModels)
+  const availableModels = computed(() => catalogModels(draft.providerID))
   const isACP = computed(() => draft.providerID.startsWith('acp:'))
   const isHarness = computed(() => draft.providerID === 'harness:pi')
   const supportsThinking = computed(() => supportsThinkingLevel(draft.providerID))
@@ -40,7 +37,7 @@ export function useProfileModelSelection(
     return ACP_AGENTS.find((agent) => agent.id === agentID)?.name ?? draft.providerID
   })
   const modelOptions = computed(() => {
-    const options = modelPickerOptions(availableModels.value, providerDef.value.models, ai.value)
+    const options = modelPickerOptions(availableModels.value, availableModels.value, ai.value)
     if (!providerDef.value.supportsCustomModel) return options
     // Keep the custom entry after the curated picks and ahead of the long tail, so it stays
     // reachable in the picker's capped result list.
@@ -97,18 +94,8 @@ export function useProfileModelSelection(
     return customModelSelected.value ? draft.customModelID.trim() : draft.modelID.trim()
   }
 
-  async function refreshCatalogModel(): Promise<void> {
-    if (isACP.value) {
-      catalogModel.value = null
-      return
-    }
-    const providerID = draft.providerID
-    const modelID = effectiveModelID()
-    const resolved = await resolveModelsDevModel(providerID, modelID)
-    if (providerID !== draft.providerID || modelID !== effectiveModelID()) return
-
-    catalogModel.value = resolved
-    applyKnownModelMetadata()
+  function refreshCatalogModel(): void {
+    catalogModel.value = isACP.value ? null : findCatalogModel(draft.providerID, effectiveModelID())
   }
 
   function applyKnownModelMetadata(): void {
@@ -124,19 +111,15 @@ export function useProfileModelSelection(
     draft.sourceConnectionId = null
     const provider = AI_PROVIDERS.find((definition) => definition.id === providerID)
     draft.modelID = provider?.defaultModel ?? ''
-    catalogModel.value = provider?.models.find((model) => model.id === draft.modelID) ?? null
+    catalogModel.value = findCatalogModel(providerID, draft.modelID)
     draft.customModelID = ''
     customModelSelected.value = providerID === 'harness:pi'
-    draft.customBaseURL = ''
-    draft.customAPIType = 'completions'
     if (providerID.startsWith('acp:')) {
       draft.capabilities = ['tools']
       if (!draft.name.trim()) draft.name = providerDisplayName.value
     } else {
       applyKnownModelMetadata()
     }
-
-    void refreshCatalogModel()
   }
 
   function updateModel(modelID: string): void {
@@ -152,18 +135,25 @@ export function useProfileModelSelection(
     customModelSelected.value = false
     draft.customModelID = ''
     applyKnownModelMetadata()
-    void refreshCatalogModel()
     if (!draft.name.trim()) draft.name = modelDisplayName.value
   }
 
   watch(
     () => draft.customModelID,
     () => {
-      if (customModelSelected.value) void refreshCatalogModel()
+      if (!customModelSelected.value) return
+      refreshCatalogModel()
+      applyKnownModelMetadata()
     }
   )
 
-  void refreshCatalogModel()
+  refreshCatalogModel()
+  // A profile that names no model yet, such as the fresh-install placeholder, starts on the
+  // provider's recommended model; reselecting the provider it already has changes nothing.
+  const defaultModel = providerDef.value.defaultModel
+  if (!isACP.value && !isHarness.value && defaultModel && !effectiveModelID()) {
+    updateModel(defaultModel)
+  }
 
   return {
     providerDef,

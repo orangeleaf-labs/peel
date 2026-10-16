@@ -22,9 +22,7 @@ const freshInstall: AIModelSettings = {
   connections: [
     {
       id: 'connection-default',
-      providerID: 'openai-compatible',
-      customBaseURL: '',
-      customAPIType: 'completions',
+      providerID: 'anthropic',
       credentialProfileId: 'default'
     }
   ],
@@ -87,7 +85,7 @@ export const Goals: Story = {}
 export const AccessInBrowser: Story = {
   play: async () => {
     await next()
-    await expect(page().getByRole('checkbox', { name: 'OpenRouter' })).toBeVisible()
+    await expect(page().getByRole('checkbox', { name: 'Anthropic' })).toBeVisible()
     await expect(page().queryByRole('checkbox', { name: 'Claude Code' })).toBeNull()
   }
 }
@@ -116,13 +114,12 @@ export const ConnectAgentAndFinish: Story = {
   }
 }
 
-export const RecommendOpenRouter: Story = {
+export const ConnectAnthropic: Story = {
   play: async () => {
-    await choose(/Review designs visually/)
     await next()
+    await choose('Anthropic')
     await next()
-    await userEvent.click(page().getByRole('button', { name: 'Add OpenRouter (pay as you go)' }))
-    await expect(page().getByRole('button', { name: 'Sign in with OpenRouter' })).toBeVisible()
+    await expect(page().getByLabelText('API Key')).toBeVisible()
     await expect(page().getByRole('button', { name: 'Continue' })).toBeDisabled()
   }
 }
@@ -132,22 +129,5 @@ export const NothingCovered: Story = {
     await next()
     await next()
     await expect(page().getByRole('button', { name: 'Continue' })).toBeDisabled()
-    await expect(
-      page().getByRole('button', { name: 'Add OpenRouter (pay as you go)' })
-    ).toBeVisible()
-  }
-}
-
-export const ServerWithoutVision: Story = {
-  play: async () => {
-    await choose(/Review designs visually/)
-    await next()
-    await choose('Local model or company server')
-    await next()
-    const addOpenRouter = () =>
-      page().queryByRole('button', { name: 'Add OpenRouter (pay as you go)' })
-    await expect(addOpenRouter()).toBeVisible()
-    await choose('This model can read images')
-    await expect(addOpenRouter()).toBeNull()
   }
 }

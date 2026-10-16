@@ -14,13 +14,7 @@ function freshInstall(): AIModelSettings {
   return {
     version: 1,
     connections: [
-      {
-        id: 'connection-default',
-        providerID: 'openai-compatible',
-        customBaseURL: '',
-        customAPIType: 'completions',
-        credentialProfileId: 'default'
-      }
+      { id: 'connection-default', providerID: 'anthropic', credentialProfileId: 'default' }
     ],
     models: [
       {
@@ -45,8 +39,6 @@ function configured(): AIModelSettings {
       {
         id: 'connection-anthropic',
         providerID: 'anthropic',
-        customBaseURL: '',
-        customAPIType: 'completions',
         credentialProfileId: 'connection-anthropic'
       }
     ],
@@ -71,18 +63,13 @@ function sequentialIds() {
   return () => `id-${++next}`
 }
 
-function apply(
-  settings: AIModelSettings,
-  answers: OnboardingAnswers,
-  details: Parameters<typeof applyOnboardingPlan>[0]['details'] = {}
-) {
+function apply(settings: AIModelSettings, answers: OnboardingAnswers) {
   return applyOnboardingPlan({
     settings,
     plan: planOnboarding(answers, {
       agentsAvailable: true,
       current: currentOnboardingModels(settings)
     }),
-    details,
     createId: sequentialIds()
   })
 }
@@ -91,44 +78,38 @@ describe('applyOnboardingPlan', () => {
   test('replaces the empty fresh-install profile with the planned models', () => {
     const { settings, connectionIds } = apply(freshInstall(), {
       goals: ['design', 'vision'],
-      access: ['openrouter'],
-      spending: 'existing'
+      access: ['anthropic']
     })
     expect(settings.models).toEqual([
       expect.objectContaining({
-        id: 'model-id-2',
-        connectionId: 'connection-id-1',
-        modelID: defaultModel('openrouter'),
+        id: 'model-id-1',
+        connectionId: 'connection-default',
+        modelID: defaultModel('anthropic'),
         capabilities: ['tools', 'vision']
       }),
-      expect.objectContaining({ id: 'model-id-3', connectionId: 'connection-id-1' })
+      expect.objectContaining({ id: 'model-id-2', connectionId: 'connection-default' })
     ])
-    expect(isFastToolModel('openrouter', settings.models[1]?.modelID ?? '')).toBe(true)
-    expect(settings.connections.map((connection) => connection.id)).toEqual(['connection-id-1'])
+    expect(isFastToolModel('anthropic', settings.models[1]?.modelID ?? '')).toBe(true)
+    expect(settings.connections.map((connection) => connection.id)).toEqual(['connection-default'])
     expect(settings.assignments).toEqual({
-      design: 'model-id-2',
+      design: 'model-id-1',
       review: 'design',
-      fast: 'model-id-3',
+      fast: 'model-id-2',
       vision: 'design'
     })
-    expect(connectionIds).toEqual({ openrouter: 'connection-id-1' })
+    expect(connectionIds).toEqual({ anthropic: 'connection-default' })
   })
 
   test('produces settings the store accepts unchanged', () => {
     const { settings } = apply(freshInstall(), {
       goals: ['design', 'vision'],
-      access: ['acp:claude-code', 'google'],
-      spending: 'existing'
+      access: ['acp:claude-code', 'anthropic']
     })
     expect(parseAIModelSettings(settings)).toEqual(settings)
   })
 
   test('clears roles an agent cannot take when design moves to an agent', () => {
-    const { settings } = apply(freshInstall(), {
-      goals: ['design'],
-      access: ['acp:codex'],
-      spending: 'existing'
-    })
+    const { settings } = apply(freshInstall(), { goals: ['design'], access: ['acp:codex'] })
     expect(settings.assignments).toMatchObject({ review: null, fast: null, vision: null })
     expect(parseAIModelSettings(settings)?.assignments).toEqual(settings.assignments)
   })
@@ -146,88 +127,43 @@ describe('applyOnboardingPlan', () => {
       capabilities: ['tools', 'vision']
     })
     before.assignments = { design: 'model-sonnet', review: 'model-opus', fast: null, vision: null }
-    const { settings, connectionIds } = apply(before, {
-      goals: ['design'],
-      access: ['anthropic'],
-      spending: 'existing'
-    })
+    const { settings, connectionIds } = apply(before, { goals: ['design'], access: ['anthropic'] })
     expect(settings.connections).toEqual(before.connections)
     expect(settings.models).toEqual(before.models)
     // Review and fast work are never asked about, so an explicit none stays none.
     expect(settings.assignments).toEqual(before.assignments)
     expect(connectionIds).toEqual({})
 
-    const again = apply(settings, {
-      goals: ['design'],
-      access: ['anthropic'],
-      spending: 'existing'
-    })
+    const again = apply(settings, { goals: ['design'], access: ['anthropic'] })
     expect(again.settings).toEqual(settings)
   })
 
   test('reuses a catalog profile it would otherwise create', () => {
     const before = freshInstall()
-    before.connections.push({
-      id: 'connection-anthropic',
-      providerID: 'anthropic',
-      customBaseURL: '',
-      customAPIType: 'completions',
-      credentialProfileId: 'connection-anthropic'
-    })
     before.models.push({
       id: 'model-sonnet',
       name: 'Sonnet',
-      connectionId: 'connection-anthropic',
+      connectionId: 'connection-default',
       modelID: defaultModel('anthropic'),
       customModelID: '',
       maxOutputTokens: 64_000,
       thinkingLevel: 'low',
       capabilities: ['tools', 'vision']
     })
-    const { settings, connectionIds } = apply(before, {
-      goals: ['design'],
-      access: ['anthropic'],
-      spending: 'existing'
-    })
+    const { settings, connectionIds } = apply(before, { goals: ['design'], access: ['anthropic'] })
     expect(settings.assignments.design).toBe('model-sonnet')
     expect(settings.models.find((profile) => profile.id === 'model-sonnet')).toMatchObject({
       maxOutputTokens: 64_000,
       thinkingLevel: 'low'
     })
-    expect(connectionIds).toEqual({ anthropic: 'connection-anthropic' })
+    expect(connectionIds).toEqual({ anthropic: 'connection-default' })
   })
 
   test('keeps a working vision route for roles that were not asked about', () => {
     const before = configured()
-    const { settings } = apply(before, {
-      goals: ['vision'],
-      access: ['openai'],
-      spending: 'existing'
-    })
+    const { settings } = apply(before, { goals: ['vision'], access: ['anthropic'] })
     expect(settings.assignments).toEqual(before.assignments)
     expect(settings.models).toEqual(before.models)
-  })
-
-  test('stores the server address and model the person entered', () => {
-    const { settings } = apply(
-      freshInstall(),
-      { goals: ['design'], access: ['openai-compatible'], spending: 'existing' },
-      {
-        'openai-compatible': {
-          customBaseURL: ' http://localhost:11434/v1 ',
-          customModelID: 'qwen3-coder:30b'
-        }
-      }
-    )
-    expect(settings.connections).toEqual([
-      expect.objectContaining({
-        providerID: 'openai-compatible',
-        customBaseURL: 'http://localhost:11434/v1'
-      })
-    ])
-    expect(settings.models).toEqual([
-      expect.objectContaining({ name: 'qwen3-coder:30b', customModelID: 'qwen3-coder:30b' })
-    ])
   })
 })
 
@@ -235,52 +171,37 @@ describe('isUnconfiguredModelSettings', () => {
   test('recognizes only the empty fresh-install settings', () => {
     expect(isUnconfiguredModelSettings(freshInstall())).toBe(true)
     expect(isUnconfiguredModelSettings(configured())).toBe(false)
-    const server = freshInstall()
-    server.connections[0].customBaseURL = 'http://localhost:11434/v1'
-    expect(isUnconfiguredModelSettings(server)).toBe(false)
+    const named = freshInstall()
+    named.models[0].customModelID = 'claude-sonnet-5'
+    expect(isUnconfiguredModelSettings(named)).toBe(false)
   })
 })
 
 describe('applyOnboardingPlan with configured models', () => {
   test('keeps a configured profile with its own settings', () => {
     const before = configured()
-    const { settings } = apply(before, {
-      goals: ['design'],
-      access: ['anthropic'],
-      spending: 'existing'
-    })
+    const { settings } = apply(before, { goals: ['design'], access: ['anthropic'] })
     expect(settings).toEqual(before)
   })
 
   test('does not give the vision role to a matching profile without image input', () => {
     const before = configured()
     before.models.push({
-      id: 'model-gpt-text',
-      name: 'GPT-5.6 text',
-      connectionId: 'connection-openai',
-      modelID: '',
-      customModelID: 'gpt-5.6',
+      id: 'model-sonnet-text',
+      name: 'Sonnet text',
+      connectionId: 'connection-anthropic',
+      modelID: defaultModel('anthropic'),
+      customModelID: '',
       maxOutputTokens: 16_384,
       thinkingLevel: 'default',
       capabilities: ['tools']
     })
-    before.connections.push({
-      id: 'connection-openai',
-      providerID: 'openai',
-      customBaseURL: '',
-      customAPIType: 'completions',
-      credentialProfileId: 'connection-openai'
-    })
-    // Opus cannot review images here, so vision has to come from OpenAI.
+    // Opus cannot review images here, so vision needs a new image-capable profile.
     before.models[0].capabilities = ['tools']
     before.assignments.vision = null
-    const { settings } = apply(before, {
-      goals: ['vision'],
-      access: ['openai'],
-      spending: 'existing'
-    })
+    const { settings } = apply(before, { goals: ['vision'], access: ['anthropic'] })
     const vision = settings.models.find((profile) => profile.id === settings.assignments.vision)
-    expect(vision?.id).not.toBe('model-gpt-text')
+    expect(vision?.id).not.toBe('model-sonnet-text')
     expect(vision?.capabilities).toContain('vision')
   })
 
@@ -288,7 +209,7 @@ describe('applyOnboardingPlan with configured models', () => {
     const before = configured()
     before.models[0].capabilities = ['tools']
     before.assignments.vision = 'model-opus'
-    const { settings } = apply(before, { goals: ['design'], access: [], spending: 'existing' })
+    const { settings } = apply(before, { goals: ['design'], access: [] })
     expect(settings.assignments.vision).toBeNull()
   })
 })

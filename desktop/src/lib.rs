@@ -261,13 +261,6 @@ fn queue_deep_links<R: tauri::Runtime>(app: &tauri::AppHandle<R>, urls: Vec<url:
                 node: open.node,
                 deep_link: true,
             }),
-            // The sign-in that opened the browser is waiting; it checks the state itself.
-            Ok(deep_link::DeepLink::OAuth(callback)) => {
-                let _ = app.emit("oauth-callback", callback);
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.set_focus();
-                }
-            }
             Err(error) => eprintln!("[deep-link] refused {url}: {error:?}"),
         }
     }

@@ -7,9 +7,7 @@ export function openPencilPwaPlugin() {
     workbox: {
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       globPatterns: ['**/*.{js,css,html,wasm,png,svg,ico,ttf,webmanifest}'],
-      navigateFallback: '/index.html',
-      // OAuth callbacks are standalone pages that relay a redirect, not app routes.
-      navigateFallbackDenylist: [/^\/oauth\//]
+      navigateFallback: '/index.html'
     },
     manifest: {
       name: 'OpenPencil',

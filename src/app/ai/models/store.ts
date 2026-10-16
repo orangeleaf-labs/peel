@@ -2,13 +2,9 @@ import { uniq } from 'es-toolkit'
 import * as v from 'valibot'
 import { computed, ref, watch } from 'vue'
 
-import {
-  AI_PROVIDERS,
-  DEFAULT_AI_MODEL,
-  DEFAULT_AI_PROVIDER,
-  type AIProviderID
-} from '@open-pencil/core/constants'
+import { AI_PROVIDERS, DEFAULT_AI_PROVIDER, type AIProviderID } from '@open-pencil/core/constants'
 
+import { catalogModel } from '@/app/ai/models/catalog'
 import {
   readAIModelSettingsStorage,
   readLegacyAIModelStorage,
@@ -44,8 +40,6 @@ function isProviderID(value: unknown): value is AIProviderID {
 const connectionSchema = v.object({
   id: v.pipe(v.string(), v.minLength(1)),
   providerID: v.custom<AIProviderID>(isProviderID),
-  customBaseURL: v.fallback(v.string(), ''),
-  customAPIType: v.fallback(v.picklist(['completions', 'responses']), 'completions'),
   credentialProfileId: v.pipe(v.string(), v.minLength(1))
 })
 
@@ -128,9 +122,7 @@ function curatedModelCapabilities(
   providerID: AIProviderID,
   modelID: string
 ): AIModelCapability[] | null {
-  const model = AI_PROVIDERS.find((provider) => provider.id === providerID)?.models.find(
-    (candidate) => candidate.id === modelID
-  )
+  const model = catalogModel(providerID, modelID)
   return model?.capabilities ? [...model.capabilities] : null
 }
 
@@ -192,15 +184,22 @@ export function parseAIModelSettings(value: unknown): AIModelSettings | null {
   return { version: 1, connections, models, assignments }
 }
 
+/**
+ * Settings from before model profiles, or the empty placeholder a fresh install starts with.
+ * A provider Peel no longer offers starts over with the placeholder rather than its model.
+ */
 function legacySettings(): AIModelSettings {
   const storedProvider = readLegacyAIModelStorage('ai-provider')
-  const providerID = isProviderID(storedProvider) ? storedProvider : DEFAULT_AI_PROVIDER
+  const legacyProvider = isProviderID(storedProvider) ? storedProvider : null
+  const providerID = legacyProvider ?? DEFAULT_AI_PROVIDER
   const provider = AI_PROVIDERS.find((definition) => definition.id === providerID)
-  const modelID = readLegacyAIModelStorage('ai-model') ?? provider?.defaultModel ?? DEFAULT_AI_MODEL
-  const customModelID = readLegacyAIModelStorage('ai-custom-model') ?? ''
+  const modelID = legacyProvider
+    ? (readLegacyAIModelStorage('ai-model') ?? provider?.defaultModel ?? '')
+    : ''
+  const customModelID = legacyProvider ? (readLegacyAIModelStorage('ai-custom-model') ?? '') : ''
   const displayModel = customModelID || modelID
   const name = displayModel
-    ? provider?.models.find((model) => model.id === displayModel)?.name || displayModel
+    ? catalogModel(providerID, displayModel)?.name || displayModel
     : 'Design model'
   const maxOutputTokens = Number(readLegacyAIModelStorage('ai-max-output-tokens'))
   const curatedCapabilities = customModelID ? null : curatedModelCapabilities(providerID, modelID)
@@ -210,9 +209,6 @@ function legacySettings(): AIModelSettings {
       {
         id: LEGACY_CONNECTION_ID,
         providerID,
-        customBaseURL: readLegacyAIModelStorage('ai-base-url') ?? '',
-        customAPIType:
-          readLegacyAIModelStorage('ai-api-type') === 'responses' ? 'responses' : 'completions',
         credentialProfileId: 'default'
       }
     ],
@@ -298,11 +294,7 @@ function connectionMatchesDraft(
   connection: AIModelConnection,
   draft: AIModelProfileDraft
 ): boolean {
-  return (
-    connection.providerID === draft.providerID &&
-    connection.customBaseURL === draft.customBaseURL.trim() &&
-    connection.customAPIType === draft.customAPIType
-  )
+  return connection.providerID === draft.providerID
 }
 
 export function findModelConnectionForDraft(draft: AIModelProfileDraft): AIModelConnection | null {
@@ -322,8 +314,6 @@ function connectionForDraft(draft: AIModelProfileDraft): AIModelConnection {
   const connection: AIModelConnection = {
     id,
     providerID: draft.providerID,
-    customBaseURL: draft.customBaseURL.trim(),
-    customAPIType: draft.customAPIType,
     credentialProfileId: id
   }
   aiModelSettings.value.connections.push(connection)
@@ -341,8 +331,6 @@ function draftForProfile(
     providerID: connection.providerID,
     modelID: profile.modelID,
     customModelID: profile.customModelID,
-    customBaseURL: connection.customBaseURL,
-    customAPIType: connection.customAPIType,
     maxOutputTokens: profile.maxOutputTokens,
     thinkingLevel: profile.thinkingLevel,
     harnessPermissionMode: profile.harnessPermissionMode ?? 'allow-edits',
@@ -360,8 +348,6 @@ function newProfileDraft(connection: AIModelConnection | null): AIModelProfileDr
     providerID,
     modelID: provider?.defaultModel ?? '',
     customModelID: '',
-    customBaseURL: connection?.customBaseURL ?? '',
-    customAPIType: connection?.customAPIType ?? 'completions',
     maxOutputTokens: DEFAULT_MAX_OUTPUT_TOKENS,
     thinkingLevel: 'default',
     harnessPermissionMode: 'allow-edits',
@@ -528,10 +514,6 @@ export const designCustomModelID = computed({
     if (profile) profile.customModelID = modelID
   }
 })
-export const designCustomBaseURL = computed(() => designModelConnection.value?.customBaseURL ?? '')
-export const designCustomAPIType = computed(
-  () => designModelConnection.value?.customAPIType ?? 'completions'
-)
 export const designMaxOutputTokens = computed(
   () => designModelProfile.value?.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS
 )

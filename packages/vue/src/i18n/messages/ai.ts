@@ -47,23 +47,17 @@ export const aiMessageDefaults = {
   connectProvider: 'Connect an AI provider to start chatting.',
   connectionTestSuccess: 'Connected successfully. Model is reachable.',
   connectionTestMissingAPIKey: 'Enter an API key before testing.',
-  connectionTestMissingBaseURL: 'Enter a base URL before testing.',
   connectionTestMissingModel: 'Enter a model ID before testing.',
-  connectionTestInvalidBaseURL:
-    'Base URL is invalid. Use a full URL like https://api.example.com/v1.',
   connectionTestAuthFailed: 'Authentication failed. Check your API key.',
   connectionTestInsufficientCredit:
     'The provider account has insufficient credit or quota. Top it up and try again.',
   connectionTestModelNotFound: 'Model not found. Check the model ID.',
-  connectionTestAPITypeMismatch:
-    'This endpoint does not appear to support the selected API type. Try Completions or Responses.',
   connectionTestBrowserNetworkFailed:
     'Could not reach this endpoint from the browser. Try the desktop app or use an endpoint with CORS enabled.',
   connectionTestNetworkFailed:
     'Could not reach the endpoint. Check the URL and your network connection.',
   connectionTestUnknownFailed: 'Connection test failed. Check the provider settings and try again.',
   getProviderAPIKey: params('Get an {provider} API key →'),
-  oneKeyManyModels: 'One key for 100+ models from all providers.',
   describeChange: 'Describe a change…',
   describeCreateOrChange: 'Describe what you want to create or change.',
   stopGenerating: 'Stop generating',
@@ -122,8 +116,6 @@ export const aiMessageDefaults = {
   unknownTool: 'Unknown tool',
   permissionRequestTitle: 'Permission request',
   permissionRequest: params('{tool} is requesting permission.'),
-  baseURLPlaceholder: 'Base URL (e.g. http://localhost:11434/v1)',
-  modelIDPlaceholder: 'Model ID (e.g. llama-3.3-70b)',
   provider: 'AI Provider',
   providerSettings: 'Provider settings',
   openProviderSettings: 'Open provider settings',
@@ -176,8 +168,6 @@ export const aiMessageDefaults = {
   modelRoleUseDesign: 'Same as Design',
   noModel: 'None',
   apiKey: 'API Key',
-  apiType: 'API Type',
-  baseURL: 'Base URL',
   modelID: 'Model ID',
   selectModel: 'Select a model',
   searchModels: 'Search models…',
@@ -213,8 +203,6 @@ export const aiMessageDefaults = {
     'Pi isn’t signed in to a provider. Run pi in a terminal and type /login, or add an AI Gateway key.',
   chatPiModel:
     'Pi has no model to use. Run pi in a terminal and type /model, or choose one in Settings.',
-  completions: 'Completions',
-  responses: 'Responses',
   aiSetupWelcomeTitle: 'Welcome to OpenPencil',
   aiSetupWelcomeDescription:
     'Create and edit designs on an open canvas. Import Figma files and make them your own.',
@@ -243,13 +231,8 @@ export const aiMessageDefaults = {
     'Use your existing subscription. The agent chooses its own model.',
   aiSetupAccessAgentsDesktop: 'Coding agents are available in the OpenPencil desktop app.',
   aiSetupAccessAPI: 'API accounts',
-  aiSetupAccessServer: 'Local model or company server',
-  aiSetupAccessMore: 'More providers',
   providerGroupAgents: 'Your agents',
   providerGroupProviders: 'Providers',
-  aiSetupServerOther: 'Other server',
-  aiSetupAccessServerDescription:
-    'Any server that speaks the OpenAI API, such as Ollama or LM Studio.',
   aiSetupConnectTitle: 'Connect your AI',
   aiSetupNothingDescription: 'Go back to choose other access, or set up AI in advanced settings.',
   aiSetupAgentDescription: params(
@@ -294,40 +277,17 @@ export const aiMessageDefaults = {
   aiSetupPiSignIn:
     'To sign in to a provider or pick a default model, run pi in a terminal and type /login or /model.',
   aiSetupGetDesktop: 'Get the desktop app',
-  aiSetupMeteredNote:
-    'OpenRouter gives you models from several vendors with one account and one key.',
   aiSetupReviewTitle: 'Review your setup',
   aiSetupAgentModel: 'Model chosen by the agent',
   aiSetupFinish: 'Finish setup',
   aiSetupSavedTitle: 'AI is ready',
   aiSetupSavedDescription: 'You can change models and roles anytime in Settings.',
   aiSetupRun: 'Run guided setup',
-  aiSetupServerKeyHint: 'If your server does not check keys, enter any value.',
   aiSetupGapDesign: 'Nothing you selected can create and edit designs.',
   aiSetupGapVision: 'Nothing you selected can review images, so visual review would stay off.',
   aiSetupGapContinue: 'You can continue without it and add it later in Settings.',
-  aiSetupGapAddOpenRouter: 'Add OpenRouter (pay as you go)',
-  aiSetupGapRemoveOpenRouter: 'Don’t use OpenRouter',
-  aiSetupGapCoveredByOpenRouter:
-    'OpenRouter will cover what your other choices can’t, billed per request.',
-  aiSetupServerVision: 'This model can read images',
   aiSetupSavedKeyHint: 'Leave blank to keep the saved key.',
   aiSetupAlreadyConnected: 'Everything you selected is already connected.',
-  aiSetupOpenRouterSignIn: 'Sign in with OpenRouter',
-  aiSetupOpenRouterWaiting: 'Finish signing in to OpenRouter in your browser.',
-  aiSetupOpenRouterReopen: 'Open again',
-  aiSetupOpenRouterOrKey: 'Or paste an API key',
-  aiSetupOpenRouterBlocked:
-    'Your browser blocked the sign-in window. Allow pop-ups for OpenPencil and try again.',
-  aiSetupOpenRouterCancelled: 'Sign-in was cancelled.',
-  aiSetupOpenRouterExpired: 'Sign-in took too long. Try again.',
-  aiSetupOpenRouterFailed: 'Couldn’t sign in to OpenRouter. Try again or paste an API key.',
-  aiSetupOpenRouterSignedInTitle: 'Signed in to OpenRouter',
-  aiSetupOpenRouterKeyLabel: params('· key “{label}”'),
-  aiSetupOpenRouterVerifying: 'Checking your OpenRouter key…',
-  aiSetupOpenRouterNoCredits:
-    'This OpenRouter account has no credits yet. Add credits on OpenRouter to use paid models such as the recommended one.',
-  aiSetupOpenRouterChange: 'Use a different account',
   aiSetupUseRecommended: 'Use recommended setup',
   aiSetupRolesDescription:
     'Choose a model for each kind of work. We picked recommended ones from what you connected; anything else you configured stays as it is.'

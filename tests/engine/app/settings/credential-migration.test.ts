@@ -78,15 +78,14 @@ class CountingStorage extends TestStorage {
 describe('legacy credential migration', () => {
   test('recognizes pending credentials without migrating or removing them', () => {
     const storage = new TestStorage()
-    storage.setItem('open-pencil:ai-key:openrouter', 'pending-key')
-    expect(hasLegacyCredential(providerCredentialRef('openrouter'), storage)).toBe(true)
-    expect(hasLegacyCredential(providerCredentialRef('anthropic'), storage)).toBe(false)
+    storage.setItem('open-pencil:ai-key:anthropic', 'pending-key')
+    expect(hasLegacyCredential(providerCredentialRef('anthropic'), storage)).toBe(true)
     expect(
-      hasLegacyCredential(providerCredentialRef('openrouter', 'another-profile'), storage)
+      hasLegacyCredential(providerCredentialRef('anthropic', 'another-profile'), storage)
     ).toBe(false)
-    expect(storage.getItem('open-pencil:ai-key:openrouter')).toBe('pending-key')
+    expect(storage.getItem('open-pencil:ai-key:anthropic')).toBe('pending-key')
     storage.setItem('open-pencil:credential-migration', '1')
-    expect(hasLegacyCredential(providerCredentialRef('openrouter'), storage)).toBe(false)
+    expect(hasLegacyCredential(providerCredentialRef('anthropic'), storage)).toBe(false)
   })
 
   test('concurrent migrations share one in-flight run', async () => {
@@ -121,33 +120,48 @@ describe('legacy credential migration', () => {
   test('verifies encrypted destinations before removing plaintext keys', async () => {
     const storage = new TestStorage()
     const store = new MemoryCredentialStore()
-    storage.setItem('open-pencil:openrouter-api-key', 'old-openrouter-key')
     storage.setItem('open-pencil:ai-key:anthropic', 'anthropic-key')
 
     expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
-    expect(await store.read(providerCredentialRef('openrouter'))).toBe('old-openrouter-key')
     expect(await store.read(providerCredentialRef('anthropic'))).toBe('anthropic-key')
-    expect(storage.getItem('open-pencil:openrouter-api-key')).toBeNull()
     expect(storage.getItem('open-pencil:ai-key:anthropic')).toBeNull()
+  })
+
+  test('deletes plaintext keys for removed providers without migrating them', async () => {
+    for (const migrated of [false, true]) {
+      const storage = new TestStorage()
+      const store = new MemoryCredentialStore()
+      if (migrated) storage.setItem('open-pencil:credential-migration', '1')
+      storage.setItem('open-pencil:openrouter-api-key', 'openrouter-key')
+      storage.setItem('open-pencil:ai-key:openai', 'openai-key')
+      storage.setItem('open-pencil:ai-key:anthropic', 'anthropic-key')
+
+      expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
+      expect(storage.getItem('open-pencil:openrouter-api-key')).toBeNull()
+      expect(storage.getItem('open-pencil:ai-key:openai')).toBeNull()
+      expect(await store.read(providerCredentialRef('anthropic'))).toBe(
+        migrated ? null : 'anthropic-key'
+      )
+    }
   })
 
   test('retains plaintext when the destination is unavailable', async () => {
     const storage = new TestStorage()
-    storage.setItem('open-pencil:ai-key:openrouter', 'keep-me')
+    storage.setItem('open-pencil:ai-key:anthropic', 'keep-me')
 
     expect(await migrateLegacyCredentials(storage, new UnavailableCredentialStore())).toBeFalse()
-    expect(storage.getItem('open-pencil:ai-key:openrouter')).toBe('keep-me')
+    expect(storage.getItem('open-pencil:ai-key:anthropic')).toBe('keep-me')
   })
 
   test('clearing after migration removes a legacy-only credential for good', async () => {
     const storage = new TestStorage()
     const store = new MemoryCredentialStore()
-    storage.setItem('open-pencil:openrouter-api-key', 'legacy-openrouter-key')
+    storage.setItem('open-pencil:ai-key:anthropic', 'legacy-anthropic-key')
 
     expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
-    await store.remove(providerCredentialRef('openrouter'))
+    await store.remove(providerCredentialRef('anthropic'))
 
-    expect(hasLegacyCredential(providerCredentialRef('openrouter'), storage)).toBeFalse()
-    expect(await store.read(providerCredentialRef('openrouter'))).toBeNull()
+    expect(hasLegacyCredential(providerCredentialRef('anthropic'), storage)).toBeFalse()
+    expect(await store.read(providerCredentialRef('anthropic'))).toBeNull()
   })
 })

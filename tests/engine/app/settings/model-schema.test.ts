@@ -15,7 +15,6 @@ const messages = {
 const context: ModelProfileValidationContext = {
   customModel: false,
   providerKind: 'api',
-  supportsCustomBaseURL: false,
   design: true,
   intent: 'save'
 }
@@ -23,7 +22,6 @@ const values = {
   name: 'Design',
   modelID: 'known-model',
   customModelID: '',
-  baseURL: '',
   credential: false,
   tools: true
 }
