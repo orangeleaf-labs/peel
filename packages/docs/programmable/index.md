@@ -24,12 +24,6 @@ The built-in assistant has access to 90+ tools that cover the full surface of th
 
 [AI Chat →](./ai-chat)
 
-## Collaboration
-
-Real-time multiplayer editing over peer-to-peer WebRTC. No server, no account. Share a room link and edit together with live cursors and follow mode. Document state syncs via CRDT, so edits merge automatically even on flaky connections.
-
-[Collaboration →](./collaboration)
-
 ## Vue SDK
 
 Build OpenPencil-powered editors with the same Vue SDK the app uses internally. The SDK exposes editor context, canvas wiring, selection state, command models, property-panel composables, and headless primitives.
@@ -78,7 +72,7 @@ The web app takes the same link from its own address bar:
 https://app.openpencil.dev/?file=https://raw.githubusercontent.com/open-pencil/open-pencil/master/tests/fixtures/pencil_button.pen&node=Button/Large/Default
 ```
 
-Here `file` is an absolute `https:` URL ending in `.pen` or `.fig` — the web app has no filesystem, so a relative path, an `http:` URL or any other extension is refused with a console warning and nothing else. The extension is read off the URL's path, so a query string on the linked file changes nothing. A fragment is dropped before the fetch: it never reaches the server, so `…/hikyo.pen#a` and `…/hikyo.pen#b` open one tab, not two. `node` behaves exactly as above: the same exact-name selection and zoom, the same notice when no layer carries the name. Both values are URL-encoded, a literal `+` must be sent as `%2B`, and a repeated key takes its last value, as on the desktop. The link is handled on any route, so `/share/<room>?file=…` and `/demo?file=…` work like `/?file=…`.
+Here `file` is an absolute `https:` URL ending in `.pen` or `.fig` — the web app has no filesystem, so a relative path, an `http:` URL or any other extension is refused with a console warning and nothing else. The extension is read off the URL's path, so a query string on the linked file changes nothing. A fragment is dropped before the fetch: it never reaches the server, so `…/hikyo.pen#a` and `…/hikyo.pen#b` open one tab, not two. `node` behaves exactly as above: the same exact-name selection and zoom, the same notice when no layer carries the name. Both values are URL-encoded, a literal `+` must be sent as `%2B`, and a repeated key takes its last value, as on the desktop. The link is handled on any route, so `/demo?file=…` works like `/?file=…`.
 
 The browser fetches the file cross-origin, so the host must allow it: `raw.githubusercontent.com` sends `Access-Control-Allow-Origin: *` and works. The request carries no credentials and refuses to follow redirects, which keeps an `https:` link from being bounced to a plaintext one — a `https://github.com/<owner>/<repo>/raw/...` URL redirects to `raw.githubusercontent.com` and is therefore refused, so link to the raw host directly. `file` and `node` are stripped from the address bar through the router as soon as they are read — before the fetch, and also when the link was refused — so a reload does not re-open the document, and neither a copied URL nor a later in-app navigation carries the link payload. A linked document is capped at 64 MiB: the body is counted as it streams in, not trusted from `Content-Length`, and the request is aborted the moment it goes over, with the link reporting that the file exceeds 64 MiB. A deployment that serves the app under a Content-Security-Policy must allow the linked host in `connect-src`, otherwise the fetch is blocked and the link reports that it could not open the file.
 

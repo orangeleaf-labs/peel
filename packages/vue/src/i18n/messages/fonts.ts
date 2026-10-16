@@ -43,7 +43,10 @@ export const fontsMessageDefaults = {
   fallbackDownloadFailed: 'Could not download fallback fonts.',
   downloadedFontCacheCleared: 'Downloaded font cache cleared.',
   downloadedFontCacheClearFailed: 'Could not clear downloaded font cache.',
-  clearCache: 'Clear cache'
+  clearCache: 'Clear cache',
+  remoteFonts: 'Remote fonts',
+  remoteFontsDescription:
+    'Download fonts a document uses from Google Fonts, Fontsource, and other online providers. While off, missing fonts use installed or bundled substitutes.'
 } as const
 
 export const fontsMessages = i18n('fonts', fontsMessageDefaults)

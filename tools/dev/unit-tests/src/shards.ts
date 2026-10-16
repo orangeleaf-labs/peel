@@ -20,13 +20,7 @@ const REPO_ROOT = await resolveWorkspaceRoot(import.meta.dir)
  * sharded separately because canvas suites parse large fixtures.
  */
 export const UNIT_TEST_GROUPS = {
-  app: [
-    'tests/app',
-    'tests/integration',
-    'tests/engine/app',
-    'tests/engine/collab',
-    'tests/engine/tauri'
-  ],
+  app: ['tests/app', 'tests/integration', 'tests/engine/app', 'tests/engine/tauri'],
   cli: ['packages/cli/tests', 'tests/engine/cli'],
   core: [
     'packages/core/tests',

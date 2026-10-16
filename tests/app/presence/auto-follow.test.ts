@@ -2,13 +2,7 @@ import 'fake-indexeddb/auto'
 import { afterEach, expect, test } from 'bun:test'
 
 import { createEditorStore } from '@/app/editor/session/create'
-import {
-  addAgent,
-  follow,
-  followWorkingAgents,
-  presenceOf,
-  setPeers
-} from '@/app/presence/registry'
+import { addAgent, follow, followWorkingAgents, presenceOf } from '@/app/presence/registry'
 import { appPreferences } from '@/app/settings/preferences/store'
 
 const stores: ReturnType<typeof createEditorStore>[] = []
@@ -55,22 +49,6 @@ test('when the followed agent rests, the view moves on to one still at work', ()
   expect(following(store)).toEqual({ kind: 'agent', agentId: first.id })
   first.update({ status: 'idle', cursor: undefined })
   expect(following(store)).toEqual({ kind: 'agent', agentId: second.id })
-})
-
-test('following a person is never taken over by an agent', () => {
-  const { store, pageId } = setup()
-  setPeers(store, [
-    {
-      clientId: 7,
-      name: 'Ana',
-      color: { r: 1, g: 0, b: 0, a: 1 },
-      agents: [],
-      cursor: { x: 0, y: 0, pageId }
-    }
-  ])
-  follow(store, { kind: 'person', clientId: 7 })
-  addAgent(store, 'chat').update({ status: 'editing', cursor: { x: 5, y: 5, pageId } })
-  expect(following(store)).toEqual({ kind: 'person', clientId: 7 })
 })
 
 test('with Follow agents off, agents are followed only by clicking Follow', () => {

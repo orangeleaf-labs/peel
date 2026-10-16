@@ -7,7 +7,6 @@ export const FEATURE_KINDS = [
   'shaders',
   'linting',
   'ai',
-  'collab',
   'code',
   'script',
   'sdk'

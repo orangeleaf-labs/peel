@@ -40,7 +40,6 @@ export interface ProgrammableLabels {
   jsxRenderer: string
   mcpServer: string
   aiChat: string
-  collaboration: string
 }
 
 export interface NavLabels {
@@ -64,8 +63,7 @@ export const EN_PROG: ProgrammableLabels = {
   scripting: 'Scripting',
   jsxRenderer: 'JSX Renderer',
   mcpServer: 'MCP Server',
-  aiChat: 'AI Chat',
-  collaboration: 'Collaboration'
+  aiChat: 'AI Chat'
 }
 export const DE_PROG: ProgrammableLabels = {
   overview: 'Überblick',
@@ -78,8 +76,7 @@ export const DE_PROG: ProgrammableLabels = {
   scripting: 'Skripte',
   jsxRenderer: 'JSX-Renderer',
   mcpServer: 'MCP-Server',
-  aiChat: 'KI-Chat',
-  collaboration: 'Zusammenarbeit'
+  aiChat: 'KI-Chat'
 }
 export const IT_PROG: ProgrammableLabels = {
   overview: 'Panoramica',
@@ -92,8 +89,7 @@ export const IT_PROG: ProgrammableLabels = {
   scripting: 'Scripting',
   jsxRenderer: 'Renderer JSX',
   mcpServer: 'Server MCP',
-  aiChat: 'Chat IA',
-  collaboration: 'Collaborazione'
+  aiChat: 'Chat IA'
 }
 export const FR_PROG: ProgrammableLabels = {
   overview: 'Vue d’ensemble',
@@ -106,8 +102,7 @@ export const FR_PROG: ProgrammableLabels = {
   scripting: 'Scripts',
   jsxRenderer: 'Moteur JSX',
   mcpServer: 'Serveur MCP',
-  aiChat: 'Chat IA',
-  collaboration: 'Collaboration'
+  aiChat: 'Chat IA'
 }
 export const ES_PROG: ProgrammableLabels = {
   overview: 'Resumen',
@@ -120,8 +115,7 @@ export const ES_PROG: ProgrammableLabels = {
   scripting: 'Scripts',
   jsxRenderer: 'Renderizador JSX',
   mcpServer: 'Servidor MCP',
-  aiChat: 'Chat IA',
-  collaboration: 'Colaboración'
+  aiChat: 'Chat IA'
 }
 export const PL_PROG: ProgrammableLabels = {
   overview: 'Przegląd',
@@ -134,8 +128,7 @@ export const PL_PROG: ProgrammableLabels = {
   scripting: 'Skrypty',
   jsxRenderer: 'Renderer JSX',
   mcpServer: 'Serwer MCP',
-  aiChat: 'Czat AI',
-  collaboration: 'Współpraca'
+  aiChat: 'Czat AI'
 }
 export const RU_PROG: ProgrammableLabels = {
   overview: 'Обзор',
@@ -148,8 +141,7 @@ export const RU_PROG: ProgrammableLabels = {
   scripting: 'Скрипты',
   jsxRenderer: 'JSX-рендерер',
   mcpServer: 'MCP-сервер',
-  aiChat: 'ИИ-чат',
-  collaboration: 'Совместная работа'
+  aiChat: 'ИИ-чат'
 }
 
 export const EN: SidebarLabels = {

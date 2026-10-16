@@ -198,7 +198,7 @@ Conexiones, activadores, acciones, animaciones, transiciones, superposiciones, d
 | Función | Estado | Notas |
 |---------|--------|-------|
 | Comentarios | 🔲 | Sin marcadores, hilos o resolución |
-| Multijugador | ✅ | P2P con Trystero y Yjs CRDT, cursores y seguimiento de vista; sin servidor |
+| Multijugador | — | No disponible: la colaboración está desactivada |
 | Chat de cursor | 🔲 | No hay burbujas en el lienzo |
 | Ramas y fusiones | 🔲 | No hay ramas de versión |
 | Modo de desarrollo | 🟡 | La pestaña Código muestra JSX; sin propiedades CSS ni especificaciones de entrega |

@@ -120,7 +120,6 @@ fr:code.sourceVue
 fr:code.sourceReact
 fr:code.stylingCSS
 fr:code.stylingTailwind
-fr:collaboration.microphone
 fr:common.ok
 fr:diagnostics.categoryDocument
 fr:diagnostics.categoryMCP
@@ -223,7 +222,6 @@ it:panels.variableModeAuto
 it:panels.variableModeAutoMixed
 it:rendering.settingsTitle
 it:settings.mcp
-it:settings.media
 it:storage.bucket
 it:storage.endpoint
 it:storage.providerAmazonS3
@@ -277,7 +275,6 @@ pl:panels.kerning
 pl:panels.behaviourMin
 pl:panels.shader
 pl:settings.mcp
-pl:settings.media
 pl:storage.providerAmazonS3
 pl:storage.providerBackblaze
 pl:storage.providerR2

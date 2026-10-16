@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 import AvatarStack from './AvatarStack.vue'
-import { room } from './examples/room'
+import { people } from './examples/people'
 import type { PresencePersonRow } from './rows'
 
 type Args = {
@@ -12,10 +12,10 @@ type Args = {
 }
 
 const meta = {
-  title: 'App/Collaboration/Avatar Stack',
+  title: 'App/Presence/Avatar Stack',
   component: AvatarStack,
   tags: ['autodocs'],
-  args: { people: room, max: 3, size: 'sm', label: 'In this room: Dana, Ana, Ben' },
+  args: { people, max: 3, size: 'sm', label: 'Dana, Ana, Ben' },
   render: (args) => ({
     components: { AvatarStack },
     setup: () => ({ args }),
@@ -26,7 +26,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Room: Story = {}
+export const People: Story = {}
 
 export const Large: Story = {
   args: { size: 'md' }
@@ -37,5 +37,5 @@ export const MoreThanFit: Story = {
 }
 
 export const Alone: Story = {
-  args: { people: room.slice(0, 1), label: 'In this room: Dana' }
+  args: { people: people.slice(0, 1), label: 'Dana' }
 }

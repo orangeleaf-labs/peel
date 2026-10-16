@@ -1,7 +1,10 @@
 import type { Page, Route } from '@playwright/test'
 
-/** Route-owned counts live in the runner, not on window or in a patched fetch. */
+import { allowRemoteFonts } from './runtime'
+
+/** Turn remote fonts on and serve Google Fonts locally; route-owned counts live in the runner. */
 export async function mockGoogleFonts(page: Page, families = ['Inter', 'OpenPencil Google Font']) {
+  await allowRemoteFonts(page)
   const counts = { metadata: 0, previews: 0 }
   const pattern =
     /^https:\/\/(fonts\.openpencil\.test\/|fonts\.google\.com\/metadata\/fonts|fonts\.googleapis\.com\/css2)/

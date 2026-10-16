@@ -1,6 +1,5 @@
 {
   "chatInitializationFailed": "Chat konnte nicht initialisiert werden: {error}",
-  "linkCopied": "Link in die Zwischenablage kopiert.",
   "clipboardMissingDesignData": "Die Zwischenablage enthält keine Designdaten.",
   "clipboardAccessBlocked": "Der Zugriff auf die Zwischenablage ist in diesem Browserkontext blockiert.",
   "copiedAs": "Als {format} kopiert.",

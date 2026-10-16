@@ -52,7 +52,7 @@ function followLabel(name: string, target: FollowTarget): string {
 </script>
 
 <template>
-  <ul data-test-id="collab-presence-list" :class="ui.root()">
+  <ul data-test-id="presence-list" :class="ui.root()">
     <li v-for="person in rows" :key="person.clientId ?? 'self'">
       <div data-slot="person" :class="ui.person()">
         <div :class="avatar()" :style="{ background: colorToCSS(person.color) }">
@@ -65,14 +65,6 @@ function followLabel(name: string, target: FollowTarget): string {
               : person.name
           }}
         </span>
-        <IconButton
-          v-if="person.clientId !== undefined"
-          :label="followLabel(person.name, { kind: 'person', clientId: person.clientId })"
-          :active="isFollowing(following, { kind: 'person', clientId: person.clientId })"
-          @click="toggle({ kind: 'person', clientId: person.clientId })"
-        >
-          <icon-lucide-locate-fixed class="size-3.5" />
-        </IconButton>
       </div>
       <ul v-if="person.agents.length > 0">
         <li v-for="agent in person.agents" :key="agent.id" data-slot="agent" :class="ui.agent()">

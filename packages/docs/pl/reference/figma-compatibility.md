@@ -176,7 +176,7 @@ Połączenia, wyzwalacze, działania, animacje, nakładki, przewijanie, przepły
 |---------|------|-------|
 | `eval` | ✅ | JavaScript bez interfejsu z globalnym `figma` |
 | Komentarze | 🔲 | Brak |
-| Współpraca | ✅ | P2P przez Trystero i Yjs CRDT, kursory i tryb śledzenia |
+| Współpraca | — | Niedostępne: współpraca jest wyłączona |
 | Tryb programisty | 🟡 | JSX; brak właściwości CSS i specyfikacji przekazania |
 | Tailwind CSS v4 | ✅ | HTML z klasami przez panel Kod, CLI lub API |
 | Serwer MCP | ✅ | stdio i HTTP; 90 narzędzi |

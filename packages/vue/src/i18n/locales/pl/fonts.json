@@ -35,5 +35,7 @@
   "providerDisabled": "Wyłączono {provider}.",
   "fallbackDownloaded": "Pobrano czcionki zapasowe.",
   "fallbackDownloadFailed": "Nie udało się pobrać czcionek zapasowych.",
-  "clearCache": "Wyczyść pamięć podręczną"
+  "clearCache": "Wyczyść pamięć podręczną",
+  "remoteFonts": "Zdalne czcionki",
+  "remoteFontsDescription": "Pobieraj czcionki używane w dokumencie z Google Fonts, Fontsource i innych dostawców online. Gdy wyłączone, brakujące czcionki są zastępowane zainstalowanymi lub dołączonymi."
 }

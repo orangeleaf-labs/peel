@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} désactivé.",
   "fallbackDownloaded": "Polices de secours téléchargées.",
   "fallbackDownloadFailed": "Impossible de télécharger les polices de secours.",
-  "clearCache": "Vider le cache"
+  "clearCache": "Vider le cache",
+  "remoteFonts": "Polices distantes",
+  "remoteFontsDescription": "Télécharge les polices utilisées par un document depuis Google Fonts, Fontsource et d’autres fournisseurs en ligne. Désactivé, les polices manquantes sont remplacées par des polices installées ou fournies."
 }
