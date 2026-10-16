@@ -47,7 +47,6 @@ export const settingsMessageDefaults = {
   aiAndAgents: 'AI & agents',
   usage: 'Usage',
   diagnostics: 'Diagnostics',
-  privacy: 'Privacy',
   media: 'Media',
   mcp: 'MCP',
   toolAccess: 'Tool access',

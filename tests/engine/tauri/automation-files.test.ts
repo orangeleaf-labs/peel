@@ -3,9 +3,11 @@ import { afterEach, describe, expect, test } from 'bun:test'
 
 import { handleOpenFile, handleSaveFile } from '@/app/automation/bridge/file-handlers'
 import type { AutomationTarget } from '@/app/automation/bridge/target'
+import { denyWriteApprovals } from '@/app/automation/write-approval'
 import { createEditorStore, type EditorStore } from '@/app/editor/session/create'
 
 import { clearTauriMocks, mockTauriIPC } from '#tests/helpers/tauri/mocks'
+import { answerNextWriteApproval } from '#tests/helpers/write-approval'
 
 // What the fs plugin rejects with for a path outside the capability and the user's grants.
 const OUTSIDE = '/Users/someone/elsewhere/design.fig'
@@ -24,6 +26,8 @@ async function rejection(promise: Promise<unknown>): Promise<string> {
 let stores: EditorStore[] = []
 
 afterEach(async () => {
+  // A request a failed test left waiting must not stand in front of the next file's.
+  denyWriteApprovals()
   for (const store of stores) store.dispose()
   stores = []
   await clearTauriMocks()
@@ -53,7 +57,10 @@ describe('Tauri automation file handling', () => {
     })
     const target = automationTarget()
 
-    const message = await rejection(handleSaveFile(target, { path: OUTSIDE }))
+    // The scope is only known when the write is tried, so the user is asked first.
+    const saving = handleSaveFile(target, { path: OUTSIDE })
+    expect((await answerNextWriteApproval(true)).target).toBe(OUTSIDE)
+    const message = await rejection(saving)
     expect(message).toContain(OUTSIDE)
     expect(message).not.toContain(REFUSAL)
     // No directory is created on the way: the scope would refuse it, and it is not the app's to make.

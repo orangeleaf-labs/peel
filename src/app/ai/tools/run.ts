@@ -5,6 +5,7 @@ import type { UndoEntry } from '@open-pencil/scene-graph/undo'
 import { describeUndoneCalls, type CallRef } from '@/app/ai/chat/context'
 import { DEFAULT_AGENT_STEPS, resolveAgentStepLimit } from '@/app/ai/chat/step-limit'
 import type { PreviewFocus } from '@/app/ai/preview/canvas'
+import { denyWriteApprovals } from '@/app/automation/write-approval'
 import { getActiveEditorStore } from '@/app/editor/active-store'
 import type { EditorStore } from '@/app/editor/active-store'
 import { addAgent, agentPlacement, type AgentHandle } from '@/app/presence/registry'
@@ -107,6 +108,8 @@ export function endRun(store: EditorStore, run = currentRun(store)): void {
   const state = getRunState(store)
   if (!run.active) return
   run.active = false
+  // A write the reply asked the user about is withdrawn with it.
+  denyWriteApprovals(run)
   if (state.run !== run) return
   state.agent?.update({
     status: 'idle',

@@ -223,20 +223,6 @@ export const fr: LandingMessages = {
       }
     ]
   },
-  waitlist: {
-    label: 'Adresse e-mail',
-    placeholder: 'vous@exemple.fr',
-    submit: "Rejoindre la liste d'attente",
-    confirmHuman: 'Confirmez que vous êtes humain',
-    invalid: 'Saisissez une adresse e-mail valide.',
-    joined: 'Consultez votre boîte de réception',
-    joinedDetail: 'Ouvrez le lien que nous vous avons envoyé pour confirmer votre adresse.',
-    failed: 'Impossible de joindre la liste d’attente. Vérifiez votre connexion et réessayez.',
-    privacy: "Nous ne vous écrirons qu'au sujet d'OpenPencil Cloud.",
-    refused: 'Nous n’avons pas pu confirmer que vous n’êtes pas un robot. Réessayez.',
-    limited: 'Trop de tentatives. Réessayez dans une minute.',
-    unavailable: 'Vous ne pouvez pas vous inscrire d’ici. Inscrivez-vous sur openpencil.dev.'
-  },
   closing: {
     title: 'Emportez vos designs avec vous.',
     download: 'Télécharger OpenPencil',

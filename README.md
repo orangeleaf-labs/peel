@@ -192,7 +192,7 @@ Figma is a closed platform that actively fights programmatic access. Their MCP s
 
 OpenPencil is the alternative: open source (MIT), local-first, reads .fig files natively, and every operation is scriptable.
 
-Official builds send one anonymous ping a day and, only if you agree, usage stats; the [privacy page](https://openpencil.dev/overview/privacy) lists every field and how to turn it off.
+This build sends no telemetry, usage stats, or pings; the [privacy page](packages/docs/overview/privacy.md) lists every network request the app can make.
 
 See the [roadmap](https://openpencil.dev/development/roadmap) for product direction and current Figma compatibility gaps.
 
