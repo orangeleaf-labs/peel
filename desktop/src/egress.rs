@@ -194,7 +194,8 @@ impl Allowed {
     /// a redirect hop.
     pub fn check(&self, url: &Url, method: Option<&Method>) -> Result<(), EgressError> {
         let domain = https_domain(url)?;
-        // `port()` is None for the default port, which the parser drops from `https://h:443`.
+        // `port()` is None for the default port, which the parser drops from
+        // `https://example.com:443`.
         let authority = authority(domain, url.port());
         // An approval never lifts the limits of a host the static list limits.
         if self.approved.contains(&authority) && !has_static_limits(domain) {
