@@ -5,6 +5,7 @@ import * as v from 'valibot'
 
 import { ALLOWED_HOSTS } from '#tests/helpers/egress/hosts'
 import { shippedFiles } from '#tests/helpers/egress/shipped'
+import { hostOf, urlHostsIn } from '#tests/helpers/egress/urls'
 import { repoPath } from '#tests/helpers/paths'
 
 const HOW_TO_ADD =
@@ -13,20 +14,10 @@ const HOW_TO_ADD =
 /** Test files, stories, and fixtures name hosts that never ship. */
 const NOT_SHIPPED = /(^|\/)(tests?|fixtures|__fixtures__)\/|\.(test|spec|stories)\.[cm]?[jt]sx?$/
 
-/** The authority of an absolute HTTP(S) or WebSocket URL, up to its path, query, or fragment. */
-const URL_AUTHORITY = /\b(?:https?|wss?):\/\/([^\s/?#'"`<>()[\]{}\\,;|]+)/g
-
-/** A host name, IPv4 address, or wildcard origin pattern such as `*.example.com`. */
-const HOST_NAME = /^[a-z0-9*]([a-z0-9*.-]*[a-z0-9])?$/
-
-/** The host a URL names, or null for a templated or elided one such as `https://${host}`. */
-function hostOf(authority: string): string | null {
-  const host = (authority.split('@').at(-1) ?? '').replace(/:[^:]*$/, '').toLowerCase()
-  const name = host.replace(/\.$/, '')
-  return HOST_NAME.test(name) ? name : null
-}
-
-/** Rust unit tests share the file with the code; only what precedes them ships. */
+/**
+ * Rust unit tests share the file with the code; only what precedes them ships. This assumes the
+ * first `#[cfg(test)]` is the trailing `mod tests`, as in every file under `desktop/src`.
+ */
 function shippedText(file: string, text: string): string {
   return file.endsWith('.rs') ? text.split('#[cfg(test)]')[0] : text
 }
@@ -36,10 +27,7 @@ async function hardCodedHosts(): Promise<Map<string, string[]>> {
   for (const file of await shippedFiles()) {
     if (NOT_SHIPPED.test(file)) continue
     const text = shippedText(file, await readFile(repoPath(file), 'utf8'))
-    for (const [, authority] of text.matchAll(URL_AUTHORITY)) {
-      const host = hostOf(authority)
-      if (host) found.set(host, [...(found.get(host) ?? []), file])
-    }
+    for (const host of urlHostsIn(text)) found.set(host, [...(found.get(host) ?? []), file])
   }
   return found
 }
@@ -84,6 +72,23 @@ function unlistedNetworkHosts(hosts: string[], egress: string): string[] {
     return egress.includes(`\`${host}\``) ? [] : [`${host}: missing from EGRESS.md`]
   })
 }
+
+describe('URL host extraction', () => {
+  test.each([
+    ['a literal URL', "fetch('https://evil.example/collect')", ['evil.example']],
+    [
+      'a host followed by a template path',
+      `fetch(\`https://api.evil.example\${path}\`)`,
+      ['api.evil.example']
+    ],
+    ['a host followed by a template port', `\`http://127.0.0.1:\${port}/mcp\``, ['127.0.0.1']],
+    ['a templated host', `fetch(\`https://\${host}/x\`)`, []],
+    ['a WebSocket URL', "new WebSocket('wss://socket.example.org/live')", ['socket.example.org']],
+    ['an upper-case scheme', "'HTTPS://Loud.Example.COM/'", ['loud.example.com']]
+  ])('finds %s', (_, text, hosts) => {
+    expect(urlHostsIn(text)).toEqual(hosts)
+  })
+})
 
 describe('hard-coded external hosts', () => {
   test('every host a shipped file names is allow-listed', async () => {

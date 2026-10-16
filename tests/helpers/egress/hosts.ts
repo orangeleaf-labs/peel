@@ -44,6 +44,10 @@ export const ALLOWED_HOSTS: Record<string, AllowedHost> = {
     kind: 'network',
     reason: 'Installing the MCP companion; package release'
   },
+  'release-assets.githubusercontent.com': {
+    kind: 'network',
+    reason: 'Updater: GitHub redirects latest.json and the release bundles here'
+  },
   'api.github.com': { kind: 'network', reason: 'Docs site build and CI tooling, not the app' },
   'openpencil.dev': { kind: 'link', reason: UPSTREAM },
   'app.openpencil.dev': { kind: 'link', reason: UPSTREAM },
