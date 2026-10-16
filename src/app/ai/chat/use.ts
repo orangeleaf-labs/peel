@@ -25,13 +25,7 @@ import { createChatSessionManager } from '@/app/ai/chat/transports'
 import { designModelProfile } from '@/app/ai/models'
 import { exposeChatTransportOverride } from '@/app/browser-bridge'
 import { getActiveEditorStore } from '@/app/editor/active-store'
-import {
-  pexelsKeyStatus,
-  unsplashKeyStatus,
-  setPexelsKey,
-  setUnsplashKey,
-  setRememberCredentials
-} from '@/app/settings/credentials/media'
+import { setRememberCredentials } from '@/app/settings/credentials/media'
 
 export type PropertiesTab = 'design' | 'code' | 'ai' | 'lint'
 
@@ -78,11 +72,7 @@ export function useAIChat() {
     customModelID,
     customAPIType,
     maxOutputTokens,
-    pexelsKeyStatus,
-    setPexelsKey,
     setRememberCredentials,
-    unsplashKeyStatus,
-    setUnsplashKey,
     activeTab,
     isConfigured,
     history,

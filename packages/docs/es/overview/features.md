@@ -100,4 +100,4 @@ Todos los comandos admiten `--json`. Instalación: `npm install -g @open-pencil/
 
 ## Carga alternativa desde Google Fonts
 
-Si una fuente no está disponible localmente, OpenPencil la descarga automáticamente desde Google Fonts. No hace falta instalarla manualmente.
+Si una fuente no está disponible localmente, OpenPencil puede descargarla desde Google Fonts y otros proveedores en línea. Las fuentes remotas están desactivadas de forma predeterminada; actívalas en **Ajustes → General → Fuentes remotas**. Mientras estén desactivadas, las fuentes que faltan se sustituyen por fuentes instaladas o incluidas.

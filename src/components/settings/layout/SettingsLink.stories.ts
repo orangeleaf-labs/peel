@@ -26,5 +26,5 @@ type Story = StoryObj<typeof meta>
 
 export const Documentation: Story = {}
 export const APIKey: Story = {
-  args: { href: 'https://www.pexels.com/api/', label: 'Get API key' }
+  args: { href: 'https://www.recraft.ai/profile/api', label: 'Get API key' }
 }

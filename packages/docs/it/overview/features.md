@@ -98,4 +98,4 @@ Tutti i comandi supportano `--json`. Installazione: `npm install -g @open-pencil
 
 ## Caricamento alternativo da Google Fonts
 
-Se un font non è disponibile localmente, OpenPencil lo scarica automaticamente da Google Fonts. Non è necessaria l’installazione manuale.
+Se un font non è disponibile localmente, OpenPencil può scaricarlo da Google Fonts e da altri provider online. I font remoti sono disattivati per impostazione predefinita; attivali in **Impostazioni → Generali → Font remoti**. Finché sono disattivati, i font mancanti vengono sostituiti da font installati o inclusi.

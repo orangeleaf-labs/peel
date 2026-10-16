@@ -82,6 +82,10 @@ export interface AppPreferences {
   onboarding: {
     aiSetup: AISetupState
   }
+  fonts: {
+    /** Fonts may come from online providers; off until the user turns it on. */
+    remote: boolean
+  }
 }
 
 export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
@@ -107,7 +111,8 @@ export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
     sort: 'newest'
   },
   toolbar: structuredClone(DEFAULT_TOOLBAR_LAYOUT),
-  onboarding: { aiSetup: 'pending' }
+  onboarding: { aiSetup: 'pending' },
+  fonts: { remote: false }
 }
 
 const STORAGE_KEY = 'open-pencil:preferences:v1'
@@ -183,7 +188,8 @@ const appPreferencesSchema = section({
   ),
   onboarding: section({
     aiSetup: v.fallback(v.picklist(AI_SETUP_STATES), defaults.onboarding.aiSetup)
-  })
+  }),
+  fonts: section({ remote: v.fallback(v.boolean(), defaults.fonts.remote) })
 })
 
 /** Reads stored preferences, keeping every valid field and defaulting the rest. */
@@ -219,6 +225,10 @@ export function updateRecoveryEnabled(enabled: boolean): void {
 
 export function updateAISetupState(aiSetup: AISetupState): void {
   appPreferences.value = { ...appPreferences.value, onboarding: { aiSetup } }
+}
+
+export function updateRemoteFontsEnabled(remote: boolean): void {
+  appPreferences.value = { ...appPreferences.value, fonts: { remote } }
 }
 
 export function updateCanvasRenderingMode(canvasMode: CanvasRenderingMode): void {

@@ -452,9 +452,6 @@ tests/engine/tools/modify.test.ts
 tests/engine/tools/modify/image-fill.test.ts
 tests/engine/tools/read.test.ts
 tests/engine/tools/registry.test.ts
-tests/engine/tools/stock-photo/apply.test.ts
-tests/engine/tools/stock-photo/credentials.test.ts
-tests/engine/tools/stock-photo/requests.test.ts
 tests/engine/tools/structure.test.ts
 tests/engine/tools/xpath/basic.test.ts
 tests/engine/vector/blob/mutation.test.ts

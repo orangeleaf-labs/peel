@@ -10,6 +10,7 @@ import { animationPreference } from '@/app/shell/motion'
 import { useAppTheme } from '@/app/shell/theme'
 import CredentialSettingsSection from '@/components/settings/credentials/CredentialSettingsSection.vue'
 import AccentColorPicker from '@/components/settings/general/AccentColorPicker.vue'
+import FontSettingsSection from '@/components/settings/general/FontSettingsSection.vue'
 import ProfileNameSection from '@/components/settings/general/ProfileNameSection.vue'
 import RenderingSettingsSection from '@/components/settings/general/RenderingSettingsSection.vue'
 import SettingsGroup from '@/components/settings/layout/SettingsGroup.vue'
@@ -179,6 +180,7 @@ const snapToPixelGrid = computed({
     </SettingsSection>
 
     <CredentialSettingsSection />
+    <FontSettingsSection />
     <RenderingSettingsSection />
   </section>
 </template>

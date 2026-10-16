@@ -131,4 +131,4 @@ brew install --cask openpencil
 
 ## Google Fonts Fallback
 
-When a font isn't available locally, OpenPencil fetches it from Google Fonts automatically. No manual installation needed when opening .fig files with unfamiliar fonts.
+When a font isn't available locally, OpenPencil can fetch it from Google Fonts and other online providers. Remote fonts are off by default; turn them on under **Settings → General → Remote fonts**. While they are off, missing fonts use installed or bundled substitutes.

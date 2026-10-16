@@ -100,4 +100,4 @@ Toutes les commandes acceptent `--json`. Installation : `npm install -g @open-pe
 
 ## Chargement de secours depuis Google Fonts
 
-Si une police n’est pas disponible localement, OpenPencil la télécharge automatiquement depuis Google Fonts. Aucune installation manuelle n’est nécessaire.
+Si une police n’est pas disponible localement, OpenPencil peut la télécharger depuis Google Fonts et d’autres fournisseurs en ligne. Les polices distantes sont désactivées par défaut ; activez-les dans **Paramètres → Général → Polices distantes**. Tant qu’elles sont désactivées, les polices manquantes sont remplacées par des polices installées ou fournies.

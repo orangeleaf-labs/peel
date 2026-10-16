@@ -68,7 +68,7 @@ test('external Settings requests respect a dirty editor', async ({ page }) => {
   await expect(name).toHaveValue('Keep this draft')
   await requestSection()
   await page.getByRole('button', { name: 'Discard', exact: true }).click()
-  await expect(page.getByRole('button', { name: /Pexels/ })).toBeVisible()
+  await expect(page.locator('[data-vectorize-settings]')).toBeVisible()
 })
 
 test('model credential Clear is staged until Save and Cancel preserves the saved key', async ({

@@ -100,4 +100,4 @@ Alle Befehle unterstützen `--json`. Installation: `npm install -g @open-pencil/
 
 ## Ersatzweise Google Fonts laden
 
-Ist eine Schrift nicht lokal verfügbar, lädt OpenPencil sie automatisch von Google Fonts. Eine manuelle Installation ist nicht erforderlich.
+Ist eine Schrift nicht lokal verfügbar, kann OpenPencil sie von Google Fonts und anderen Online-Anbietern laden. Das ist standardmäßig aus; schalte es unter **Einstellungen → Allgemein → Online-Schriften laden** ein. Solange es aus ist, werden fehlende Schriften durch installierte oder mitgelieferte ersetzt.

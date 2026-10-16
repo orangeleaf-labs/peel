@@ -241,7 +241,6 @@ async function remove() {
               "
               :error="fieldErrors.credential"
               @blur="feedback.blur('credential')"
-              kind="api"
               :placeholder="hasExistingKey ? credentials.savedReplace : providerDef.keyPlaceholder"
               :key-u-r-l="providerDef.keyURL"
               :key-u-r-l-label="credentials.getAPIKey"
