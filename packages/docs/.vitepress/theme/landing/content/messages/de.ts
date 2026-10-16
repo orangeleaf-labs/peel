@@ -222,21 +222,6 @@ export const de: LandingMessages = {
       }
     ]
   },
-  waitlist: {
-    label: 'E-Mail-Adresse',
-    placeholder: 'du@beispiel.de',
-    submit: 'Auf die Warteliste',
-    confirmHuman: 'Bestätige, dass du ein Mensch bist',
-    invalid: 'Gib eine gültige E-Mail-Adresse ein.',
-    joined: 'Schau in dein Postfach',
-    joinedDetail: 'Öffne den Link, den wir dir geschickt haben, um deine Adresse zu bestätigen.',
-    failed:
-      'Die Warteliste ist nicht erreichbar. Prüfe deine Verbindung und versuch es noch einmal.',
-    privacy: 'Wir schreiben dir nur zu OpenPencil Cloud.',
-    refused: 'Wir konnten nicht bestätigen, dass du kein Bot bist. Versuch es noch einmal.',
-    limited: 'Zu viele Versuche. Versuch es in einer Minute noch einmal.',
-    unavailable: 'Von hier aus ist die Anmeldung nicht möglich. Trag dich auf openpencil.dev ein.'
-  },
   closing: {
     title: 'Nimm deine Designs mit.',
     download: 'OpenPencil herunterladen',

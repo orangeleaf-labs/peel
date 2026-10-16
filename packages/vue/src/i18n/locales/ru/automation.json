@@ -78,6 +78,7 @@
   "writeApprovalExport": "Агент хочет экспортировать {format} с помощью {tool} в {target}.",
   "writeApprovalSettings": "Агент хочет изменить настройки приложения с помощью {tool}: {target}.",
   "writeApprovalWrite": "Агент хочет записать файл с помощью {tool}: {target}.",
+  "writeApprovalCode": "Агент хочет запустить скрипт с правами приложения с помощью {tool}: {target}",
   "writeApprovalUnknownTarget": "Агент хочет записать данные за пределами документа с помощью {tool}.",
   "writeApprovalDenyHint": "Если отказать, агент получит ошибку и ничего не будет записано.",
   "writeApprovalAllow": "Разрешить",

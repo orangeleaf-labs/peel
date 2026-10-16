@@ -1,6 +1,7 @@
 import { request as httpRequest } from 'node:http'
 import type { IncomingMessage } from 'node:http'
 
+import { automationRPCTimeout } from '@open-pencil/core/rpc'
 import { readDiscoveryFile } from '@open-pencil/mcp/discovery'
 import type { DiscoveryInfo } from '@open-pencil/mcp/discovery'
 import { platformHasUnixSockets } from '@open-pencil/mcp/transport'
@@ -9,6 +10,13 @@ import type { AppTarget } from '#cli/app/target'
 
 /** Maximum time to wait for a single RPC request before giving up. */
 const RPC_TIMEOUT_MS = 30_000
+// The server's own wait for the app (10s) and margin (5s) on top of its timeout for a command.
+const SERVER_WAIT_MARGIN_MS = 15_000
+
+/** A command that may ask the user in the app waits until the app's answer can come back. */
+function rpcTimeout(command: unknown): number {
+  return Math.max(RPC_TIMEOUT_MS, automationRPCTimeout(command, 0) + SERVER_WAIT_MARGIN_MS)
+}
 
 let cachedInfo: DiscoveryInfo | null = null
 
@@ -67,9 +75,10 @@ function doRequest(
       })
     })
 
+    const timeoutMs = rpcTimeout(body?.command)
     const timer = setTimeout(() => {
-      req.destroy(new Error(`RPC request timed out after ${RPC_TIMEOUT_MS / 1000}s`))
-    }, RPC_TIMEOUT_MS)
+      req.destroy(new Error(`RPC request timed out after ${timeoutMs / 1000}s`))
+    }, timeoutMs)
 
     req.on('error', (err) => {
       clearTimeout(timer)

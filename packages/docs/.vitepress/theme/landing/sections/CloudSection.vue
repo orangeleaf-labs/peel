@@ -6,7 +6,6 @@ import IconShieldCheck from '~icons/lucide/shield-check'
 import IconSparkles from '~icons/lucide/sparkles'
 
 import { useLandingMessages } from '../content/messages'
-import WaitlistForm from '../waitlist/WaitlistForm.vue'
 
 const messages = useLandingMessages()
 
@@ -20,7 +19,6 @@ const ICONS = [IconRefreshCw, IconMessageSquare, IconLibrary, IconSparkles, Icon
     <span class="landing-badge">{{ messages.cloud.badge }}</span>
     <h2>{{ messages.cloud.title }}</h2>
     <p class="lede">{{ messages.cloud.lede }}</p>
-    <WaitlistForm class="form" />
     <dl class="landing-facts">
       <div v-for="(feature, index) in messages.cloud.features" :key="feature.title">
         <component :is="ICONS[index]" class="icon" aria-hidden="true" />
@@ -38,10 +36,6 @@ const ICONS = [IconRefreshCw, IconMessageSquare, IconLibrary, IconSparkles, Icon
   color: var(--vp-c-text-2);
   font-size: 18px;
   line-height: 1.6;
-}
-
-.form {
-  margin-top: 28px;
 }
 
 /* Five features fit one row on a desktop instead of leaving one alone on the next. */
