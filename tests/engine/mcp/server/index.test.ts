@@ -500,7 +500,8 @@ describe('MCP server with mcpRoot', () => {
       expect(result.isError).not.toBe(true)
       expect(browser.requests.find((item) => item.command === 'close_file')?.args).toEqual({
         document_id: 'doc-1',
-        unsaved: 'discard'
+        unsaved: 'discard',
+        agent: expect.objectContaining({ kind: 'mcp' })
       })
     })
   })
@@ -543,7 +544,8 @@ describe('MCP server with mcpRoot', () => {
       const result = await client.callTool({ name: 'update_settings', arguments: { settings } })
       expect(result.isError).not.toBe(true)
       expect(browser.requests.find((item) => item.command === 'update_settings')?.args).toEqual({
-        settings
+        settings,
+        agent: expect.objectContaining({ kind: 'mcp' })
       })
       expect(JSON.stringify(result.content)).toContain('light')
     })
@@ -565,7 +567,10 @@ describe('MCP server with mcpRoot', () => {
       const { realpath } = await import('node:fs/promises')
       const { dirname, basename } = await import('node:path')
       const canonicalPath = join(await realpath(dirname(savePath)), basename(savePath))
-      expect(request?.args).toEqual({ path: canonicalPath })
+      expect(request?.args).toEqual({
+        path: canonicalPath,
+        agent: expect.objectContaining({ kind: 'mcp' })
+      })
     })
   })
 

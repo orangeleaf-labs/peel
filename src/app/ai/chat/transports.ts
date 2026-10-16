@@ -8,7 +8,7 @@ import type {
   ToolExecutionOptions,
   UIMessage
 } from 'ai'
-import type { ComputedRef, Ref } from 'vue'
+import type { ComputedRef } from 'vue'
 import { ref } from 'vue'
 
 import type { AIProviderID } from '@open-pencil/core/constants'
@@ -37,7 +37,6 @@ import {
 } from '@/app/diagnostics/events'
 import type { AIDiagnosticContext } from '@/app/diagnostics/events/ai'
 import type { getActiveEditorStore } from '@/app/editor/active-store'
-import { trackUsage } from '@/app/telemetry'
 
 import { resumableTransport } from './history/continuation'
 import { createTraceStore } from './history/idb'
@@ -51,7 +50,6 @@ type EditorStore = ReturnType<typeof getActiveEditorStore>
 
 type ChatSessionOptions = {
   isConfigured: ComputedRef<boolean>
-  providerID: Ref<AIProviderID>
   credentialsReady: Promise<void>
   getActiveEditorStore: () => EditorStore
 }
@@ -235,7 +233,6 @@ async function settleEndedReply(
 
 export function createChatSessionManager({
   isConfigured,
-  providerID,
   credentialsReady,
   getActiveEditorStore
 }: ChatSessionOptions) {
@@ -269,7 +266,6 @@ export function createChatSessionManager({
     if (isAbort) recordChatStopped(context)
     else if (!isDisconnect && !isError) {
       recordChatCompleted({ finishReason: finishReason ?? null }, context)
-      trackUsage({ name: 'ai_reply_finished', provider: providerID.value })
     }
   }
 

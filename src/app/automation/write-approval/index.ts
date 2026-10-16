@@ -2,10 +2,13 @@ export {
   answerWriteApproval,
   approveWrite,
   currentWriteApproval,
+  denyWriteApprovals,
   requestWriteApproval,
-  WriteDeniedError
+  WriteDeniedError,
+  type WriteApprovalOptions
 } from './queue'
 export {
+  codeWriteRequest,
   settingsPatchPaths,
   toolWriteRequest,
   writeDeniedMessage,

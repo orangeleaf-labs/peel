@@ -216,6 +216,13 @@ export async function resolveSafePath(filePath: string, root: string): Promise<S
   return resolveSafePathInternal(filePath, root, 0)
 }
 
+/** Tools whose result `writeToolOutput` writes to their `path` argument. */
+export const FILE_OUTPUT_TOOLS: ReadonlySet<string> = new Set([
+  'export_svg',
+  'export_image',
+  'get_jsx'
+])
+
 export async function writeToolOutput(
   toolName: string,
   result: Record<string, unknown>,

@@ -78,6 +78,7 @@
   "writeApprovalExport": "エージェントが{tool}で{format}を{target}に書き出そうとしています。",
   "writeApprovalSettings": "エージェントが{tool}でアプリの設定を変更しようとしています：{target}",
   "writeApprovalWrite": "エージェントが{tool}でファイルに書き込もうとしています：{target}",
+  "writeApprovalCode": "エージェントが{tool}でアプリの権限を使ってスクリプトを実行しようとしています：{target}",
   "writeApprovalUnknownTarget": "エージェントが{tool}でドキュメント外に書き込もうとしています。",
   "writeApprovalDenyHint": "拒否すると、エージェントにはエラーが返され、何も書き込まれません。",
   "writeApprovalAllow": "許可",

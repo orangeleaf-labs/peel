@@ -53,17 +53,6 @@ export interface CommentPreferences {
   sort: CommentSort
 }
 
-/** Whether the person was asked to share usage stats, and what they answered. */
-export const USAGE_STATS_CONSENTS = ['unset', 'granted', 'denied'] as const
-export type UsageStatsConsent = (typeof USAGE_STATS_CONSENTS)[number]
-
-export interface SharingPreferences {
-  /** The daily anonymous ping, on unless turned off. */
-  dailyPing: boolean
-  /** Opt-in usage stats; nothing is sent until this is `granted`. */
-  usageStats: UsageStatsConsent
-}
-
 /** Whether guided AI setup was offered and finished or skipped. */
 export const AI_SETUP_STATES = ['pending', 'done'] as const
 export type AISetupState = (typeof AI_SETUP_STATES)[number]
@@ -93,7 +82,6 @@ export interface AppPreferences {
   onboarding: {
     aiSetup: AISetupState
   }
-  sharing: SharingPreferences
 }
 
 export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
@@ -119,8 +107,7 @@ export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
     sort: 'newest'
   },
   toolbar: structuredClone(DEFAULT_TOOLBAR_LAYOUT),
-  onboarding: { aiSetup: 'pending' },
-  sharing: { dailyPing: true, usageStats: 'unset' }
+  onboarding: { aiSetup: 'pending' }
 }
 
 const STORAGE_KEY = 'open-pencil:preferences:v1'
@@ -196,10 +183,6 @@ const appPreferencesSchema = section({
   ),
   onboarding: section({
     aiSetup: v.fallback(v.picklist(AI_SETUP_STATES), defaults.onboarding.aiSetup)
-  }),
-  sharing: section({
-    dailyPing: v.fallback(v.boolean(), defaults.sharing.dailyPing),
-    usageStats: v.fallback(v.picklist(USAGE_STATS_CONSENTS), defaults.sharing.usageStats)
   })
 })
 
@@ -236,13 +219,6 @@ export function updateRecoveryEnabled(enabled: boolean): void {
 
 export function updateAISetupState(aiSetup: AISetupState): void {
   appPreferences.value = { ...appPreferences.value, onboarding: { aiSetup } }
-}
-
-export function updateSharingPreferences(changes: Partial<SharingPreferences>): void {
-  appPreferences.value = {
-    ...appPreferences.value,
-    sharing: { ...appPreferences.value.sharing, ...changes }
-  }
 }
 
 export function updateCanvasRenderingMode(canvasMode: CanvasRenderingMode): void {

@@ -78,6 +78,7 @@
   "writeApprovalExport": "Un agente vuole esportare {format} con {tool} in {target}.",
   "writeApprovalSettings": "Un agente vuole modificare le impostazioni dell’app con {tool}: {target}.",
   "writeApprovalWrite": "Un agente vuole scrivere un file con {tool}: {target}.",
+  "writeApprovalCode": "Un agente vuole eseguire uno script con i permessi dell’app usando {tool}: {target}",
   "writeApprovalUnknownTarget": "Un agente vuole scrivere fuori dal documento con {tool}.",
   "writeApprovalDenyHint": "Se rifiuti, l’agente riceve un errore e non viene scritto nulla.",
   "writeApprovalAllow": "Consenti",

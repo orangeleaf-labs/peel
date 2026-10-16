@@ -24,7 +24,9 @@ export async function runWithWriteApproval(
   const request = toolWriteRequest(def, args, { writesOutputPath: false })
   if (!request) return execute()
   const run = currentRun(store)
-  if (!(await requestWriteApproval(request))) return { error: writeDeniedMessage(request) }
+  // Stopping the reply withdraws its request, which then reads as stopped rather than denied.
+  const allowed = await requestWriteApproval(request, { owner: run })
   if (!run.active) return { error: 'Stopped before this call ran; nothing was changed.' }
+  if (!allowed) return { error: writeDeniedMessage(request) }
   return execute()
 }

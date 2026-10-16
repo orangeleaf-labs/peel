@@ -27,7 +27,7 @@ did not cover a case, the safer and more reversible option was taken.
 | Automation open/save outside the user's grants fails rather than prompting to widen the scope, so an MCP or CLI client cannot `save_file` or `new_document` into the MCP root unless the user saved that exact file in the app. | Safer and reversible; the user opens or saves the file once in the app to grant it. |
 | `$APPCACHE/WebKit` and `$APPLOCALDATA/EBWebView` are denied globally. | WKWebView and WebView2 keep their data there; the deny keeps a later widening of the allow-list from reaching them. |
 | AI writes are approved per call; there is no "allow for this session". | Safer default; nothing is remembered that the user cannot see. |
-| No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
+| No answer to an in-app AI chat write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, stock photos, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
 | AI connections saved for a removed provider are dropped when settings load; their old keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
 | The model list is checked in rather than fetched. | No runtime call to models.dev; new Claude models arrive with an app update. |
@@ -39,3 +39,11 @@ did not cover a case, the safer and more reversible option was taken.
 | jsDelivr is allowed only under `/fontsource/`, and not for paths with an encoded `/` or `\`. | jsDelivr serves arbitrary third-party content and would otherwise be an exfiltration channel. |
 | `www.figma.com` is allowed only for `POST /file/<key>/image/batch`, and not as a redirect target. | It is the only Figma request the app makes; a redirect hop's method is unknown, so it is refused rather than guessed. |
 | Desktop S3 storage is blocked until endpoint approval lands (#14). | Safer interim than letting the webview reach user-configured hosts. |
+| `packages/feedback` is deleted from the fork rather than only excluded from the workspace. | Upstream keeps it, so it can be restored at any time; deleting it means no build, CI job or deploy can bring it back by accident. |
+| The `sharing` preference is dropped, not migrated. | Nothing reads it any more; the preference parser drops the old key on load. |
+| The docs privacy page is reworded rather than deleted. | Its route stays and now says Peel sends no telemetry; the network table is finished with `EGRESS.md` later in Phase 2. |
+| Workflow edits are committed as patches under `.github/pending-workflows/` for a person to apply, and the telemetry egress test skips `.github/workflows` until then. | The agent's GitHub token lacks the `workflow` scope, so pushes touching `.github/workflows` are rejected. |
+| Bridge `export`/`export_jsx` (CLI export) do not ask for write approval. | The app only returns bytes; the CLI writes the file itself, so the app cannot see or enforce the destination. |
+| An automation write approval is denied 45 s after the app receives the call, wherever it waits; callers wait 90 s (MCP server) or 105 s (stdio bridge, CLI). | MCP SDK clients give up after 60 s by default, so an Allow must never land after the agent was told the call failed. |
+| Automation saves ask first, then let the fs scope refuse an ungranted path. | A reliable scope pre-check needs a Rust command; checking with `exists` uses a different allow-list and could refuse legitimate saves. |
+| Each write-approval request gets its full 60 s once it is shown, and Stop withdraws a chat run's pending requests. | Queued requests must not expire unseen behind an earlier one. |
