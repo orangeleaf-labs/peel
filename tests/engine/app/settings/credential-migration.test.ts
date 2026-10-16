@@ -132,6 +132,24 @@ describe('legacy credential migration', () => {
     expect(storage.getItem('open-pencil:pexels-api-key')).toBeNull()
   })
 
+  test('deletes plaintext keys for removed providers without migrating them', async () => {
+    for (const migrated of [false, true]) {
+      const storage = new TestStorage()
+      const store = new MemoryCredentialStore()
+      if (migrated) storage.setItem('open-pencil:credential-migration', '1')
+      storage.setItem('open-pencil:openrouter-api-key', 'openrouter-key')
+      storage.setItem('open-pencil:ai-key:openai', 'openai-key')
+      storage.setItem('open-pencil:ai-key:anthropic', 'anthropic-key')
+
+      expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
+      expect(storage.getItem('open-pencil:openrouter-api-key')).toBeNull()
+      expect(storage.getItem('open-pencil:ai-key:openai')).toBeNull()
+      expect(await store.read(providerCredentialRef('anthropic'))).toBe(
+        migrated ? null : 'anthropic-key'
+      )
+    }
+  })
+
   test('retains plaintext when the destination is unavailable', async () => {
     const storage = new TestStorage()
     storage.setItem('open-pencil:ai-key:anthropic', 'keep-me')
