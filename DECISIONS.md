@@ -32,3 +32,4 @@ did not cover a case, the safer and more reversible option was taken.
 | Collaboration code and dependencies are deleted rather than feature-flagged. | Nothing bundled can reach signalling hosts; bringing it back means reverting one commit. |
 | The `/share/:roomId` route is removed with no redirect. | The desktop app has no address bar and refuses join deep links. |
 | The Vue SDK `collaboration` i18n namespace keeps the 14 keys agent presence and settings still use. | A smaller change; renaming the namespace can come later. |
+| The ~800 changed-line limit per PR counts added lines; deleting a whole removed feature (files, locale keys, lockfile entries) stays in one PR. | A removal split across PRs leaves half-removed features on master; deleted lines are easy to review as a set. |
