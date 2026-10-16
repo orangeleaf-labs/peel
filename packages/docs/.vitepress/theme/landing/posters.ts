@@ -14,10 +14,9 @@ export type PosterLayout = (typeof POSTER_LAYOUTS)[number]
 /**
  * A stage is captured as its canvas and its panel, because the stage's width follows the page
  * while the panel keeps its own: the canvas image scales to fit, as the live canvas fits its
- * scene, and the panel image stays as it is. The collaboration stage is two canvases, captured
- * as one frame.
+ * scene, and the panel image stays as it is.
  */
-export type PosterPart = 'canvas' | 'panel' | 'frame'
+export type PosterPart = 'canvas' | 'panel'
 
 /** Below this width a stage stacks its panel under the canvas, as Tailwind's `max-md` does. */
 export const PHONE_MAX_WIDTH = 767
@@ -25,8 +24,8 @@ export const PHONE_MAX_WIDTH = 767
 /** The query parameter the generator opens pages with: stages start at once and stay still. */
 export const POSTER_CAPTURE_PARAM = 'poster-capture'
 
-export function posterParts(kind: FeatureKind): PosterPart[] {
-  return kind === 'collab' ? ['frame'] : ['canvas', 'panel']
+export function posterParts(): PosterPart[] {
+  return ['canvas', 'panel']
 }
 
 export interface PosterTarget {

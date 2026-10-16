@@ -35,5 +35,7 @@
   "providerDisabled": "已停用 {provider}。",
   "fallbackDownloaded": "后备字体已下载。",
   "fallbackDownloadFailed": "无法下载后备字体。",
-  "clearCache": "清除缓存"
+  "clearCache": "清除缓存",
+  "remoteFonts": "远程字体",
+  "remoteFontsDescription": "从 Google Fonts、Fontsource 和其他在线提供商下载文档使用的字体。关闭时，缺失的字体将由已安装或内置的字体替代。"
 }

@@ -108,13 +108,13 @@ export function followDocumentComments(
     replaceDocument()
     if (!store) return
     const stops = [
-      // Comments change on the document node: here, from a collaborator, or by a tool.
+      // Comments change on the document node: here, from another save, or by a tool.
       store.onEditorEvent('node:updated', (id) => {
         if (id === store.graph.rootId) queueReconcile()
         else rememberPositions()
       }),
       store.onEditorEvent('node:reparented', rememberPositions),
-      // A collaboration room can bring its own document node, with its own comments.
+      // A new document node, such as one a load brings, carries its own comments.
       store.onEditorEvent('node:created', (node) => {
         if (node.parentId === null) queueMicrotask(() => show(readComments(store.graph)))
       }),

@@ -56,7 +56,7 @@ const preview: Preview = {
             ['Navigation', 'Layer Tree', 'Properties'],
             'Chat',
             ['Markdown', 'Message', 'Attachments'],
-            'Collaboration',
+            'Presence',
             'Settings',
             'Home',
             'Shell',

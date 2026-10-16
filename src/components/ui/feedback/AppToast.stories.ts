@@ -80,7 +80,7 @@ export const ErrorWithAction: Story = {
 
 export const RepeatedMessage: Story = {
   args: {
-    message: 'Lost connection to the collaboration room',
+    message: 'Lost connection to the storage provider',
     variant: 'warning',
     count: 4,
     copyable: true,

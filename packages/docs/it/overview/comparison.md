@@ -175,8 +175,8 @@ Penpot offre plugin isolati, ma non un’API equivalente per script senza interf
 | Sviluppo | OpenPencil | TypeScript e Vue anziché Clojure, Rust e Docker |
 | Applicazione desktop | OpenPencil | Tauri nativo |
 | Disposizione | OpenPencil | Yoga anziché due implementazioni proprie |
-| Collaborazione | Punti di forza diversi | Penpot: server e accessi; OpenPencil: P2P senza hosting |
+| Collaborazione | Penpot | Penpot: server e accessi; OpenPencil: nessuna |
 | Installazione autonoma | Penpot | Distribuzione Docker |
 | Maturità | Penpot | Anni di uso in produzione |
 
-OpenPencil è un editor compatto in un solo processo con CanvasKit e supporto nativo `.fig`. Penpot è una piattaforma client-server completa con Clojure, ClojureScript, Rust, database e servizi Docker. Entrambi supportano la collaborazione con modelli diversi.
+OpenPencil è un editor compatto in un solo processo con CanvasKit e supporto nativo `.fig`. Penpot è una piattaforma client-server completa con Clojure, ClojureScript, Rust, database e servizi Docker.

@@ -8,16 +8,9 @@ pub struct DeepLinkOpen {
     pub node: Option<String>,
 }
 
-/// A collaboration room to open, from `openpencil://join?room=<id>`.
-#[derive(Debug, PartialEq, Eq)]
-pub struct DeepLinkJoin {
-    pub room: String,
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum DeepLink {
     Open(DeepLinkOpen),
-    Join(DeepLinkJoin),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -27,37 +20,15 @@ pub enum DeepLinkError {
     AbsolutePath,
     ParentSegment,
     BadExtension,
-    BadRoom,
-}
-
-/// Room IDs are 32 lowercase base36 characters (`ROOM_ID_LENGTH` and `ROOM_ID_CHARS` in
-/// `src/constants.ts`); anything else is refused before it reaches the frontend.
-const ROOM_ID_LENGTH: usize = 32;
-
-fn is_room_id(room: &str) -> bool {
-    room.len() == ROOM_ID_LENGTH
-        && room
-            .bytes()
-            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit())
 }
 
 pub fn parse_deep_link(url: &Url) -> Result<DeepLink, DeepLinkError> {
-    // openpencil://<action>?…  → host is the action.
+    // openpencil://<action>?…  → host is the action. Collaboration is disabled in Peel, so
+    // the upstream `join` (room) action is refused like any other unknown action.
     match url.host_str().unwrap_or("") {
         "open" => parse_open_url(url).map(DeepLink::Open),
-        "join" => parse_join_url(url).map(DeepLink::Join),
         action => Err(DeepLinkError::UnknownAction(action.to_string())),
     }
-}
-
-fn parse_join_url(url: &Url) -> Result<DeepLinkJoin, DeepLinkError> {
-    let room = url
-        .query_pairs()
-        .find(|(key, _)| key == "room")
-        .map(|(_, value)| value.into_owned())
-        .filter(|room| is_room_id(room))
-        .ok_or(DeepLinkError::BadRoom)?;
-    Ok(DeepLinkJoin { room })
 }
 
 pub fn parse_open_url(url: &Url) -> Result<DeepLinkOpen, DeepLinkError> {
@@ -199,32 +170,13 @@ mod tests {
         assert_eq!(parse("openpencil://open?file=a.pen").unwrap().node, None);
     }
 
-    const ROOM: &str = "abcdefghijklmnopqrstuvwxyz012345";
-
     #[test]
-    fn join_with_room() {
+    fn refuses_room_join_links() {
+        let room = "abcdefghijklmnopqrstuvwxyz012345";
         assert_eq!(
-            parse_deep_link(&Url::parse(&format!("openpencil://join?room={ROOM}")).unwrap()),
-            Ok(DeepLink::Join(DeepLinkJoin { room: ROOM.into() }))
+            parse_deep_link(&Url::parse(&format!("openpencil://join?room={room}")).unwrap()),
+            Err(DeepLinkError::UnknownAction("join".into()))
         );
-    }
-
-    #[test]
-    fn join_refuses_a_room_that_is_not_a_room_id() {
-        for url in [
-            "openpencil://join".to_string(),
-            "openpencil://join?room=".to_string(),
-            "openpencil://join?room=short".to_string(),
-            format!("openpencil://join?room={}", ROOM.to_uppercase()),
-            format!("openpencil://join?room={ROOM}x"),
-            format!("openpencil://join?room={}%2F", &ROOM[..31]),
-        ] {
-            assert_eq!(
-                parse_deep_link(&Url::parse(&url).unwrap()),
-                Err(DeepLinkError::BadRoom),
-                "{url}"
-            );
-        }
     }
 
     #[test]

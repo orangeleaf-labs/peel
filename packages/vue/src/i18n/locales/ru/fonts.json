@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} отключён.",
   "fallbackDownloaded": "Резервные шрифты загружены.",
   "fallbackDownloadFailed": "Не удалось загрузить резервные шрифты.",
-  "clearCache": "Очистить кэш"
+  "clearCache": "Очистить кэш",
+  "remoteFonts": "Удалённые шрифты",
+  "remoteFontsDescription": "Загружать шрифты, используемые в документе, из Google Fonts, Fontsource и других онлайн-источников. Когда выключено, отсутствующие шрифты заменяются установленными или встроенными."
 }

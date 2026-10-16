@@ -15,7 +15,7 @@ El lienzo no tiene límites. El desplazamiento y el zoom permiten llegar a cualq
 
 ## Paleta de comandos y páginas
 
-Pulsa <kbd>⌘</kbd><kbd>K</kbd> en macOS o <kbd>Ctrl</kbd><kbd>K</kbd> en Windows/Linux para buscar acciones del editor y de la aplicación. La paleta también permite cambiar de página. Antes de escribir, muestra las páginas que has visitado recientemente en esta pestaña, las más recientes primero, y **Ir a la página…** abre una lista de todas las páginas. Si escribes el nombre de una página, también la encuentra. Las páginas donde trabajan colaboradores o agentes de AI muestran sus nombres; el panel de páginas marca esas mismas páginas con sus colores.
+Pulsa <kbd>⌘</kbd><kbd>K</kbd> en macOS o <kbd>Ctrl</kbd><kbd>K</kbd> en Windows/Linux para buscar acciones del editor y de la aplicación. La paleta también permite cambiar de página. Antes de escribir, muestra las páginas que has visitado recientemente en esta pestaña, las más recientes primero, y **Ir a la página…** abre una lista de todas las páginas. Si escribes el nombre de una página, también la encuentra. Las páginas donde trabajan agentes de AI muestran sus nombres; el panel de páginas marca esas mismas páginas con sus colores.
 
 ## Herramienta Mano
 

@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} desactivado.",
   "fallbackDownloaded": "Fuentes de respaldo descargadas.",
   "fallbackDownloadFailed": "No se pudieron descargar las fuentes de respaldo.",
-  "clearCache": "Borrar caché"
+  "clearCache": "Borrar caché",
+  "remoteFonts": "Fuentes remotas",
+  "remoteFontsDescription": "Descarga las fuentes que usa un documento desde Google Fonts, Fontsource y otros proveedores en línea. Si está desactivado, las fuentes que faltan se sustituyen por fuentes instaladas o incluidas."
 }

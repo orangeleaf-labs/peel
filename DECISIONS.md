@@ -39,6 +39,13 @@ did not cover a case, the safer and more reversible option was taken.
 | jsDelivr is allowed only under `/fontsource/`, and not for paths with an encoded `/` or `\`. | jsDelivr serves arbitrary third-party content and would otherwise be an exfiltration channel. |
 | `www.figma.com` is allowed only for `POST /file/<key>/image/batch`, and not as a redirect target. | It is the only Figma request the app makes; a redirect hop's method is unknown, so it is refused rather than guessed. |
 | Desktop S3 storage is blocked until endpoint approval lands (#14). | Safer interim than letting the webview reach user-configured hosts. |
+| No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
+| Network-only tools (icons, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
+| Collaboration code and dependencies are deleted rather than feature-flagged. | Nothing bundled can reach signalling hosts; bringing it back means reverting one commit. |
+| The `/share/:roomId` route is removed with no redirect. | The desktop app has no address bar and refuses join deep links. |
+| The Vue SDK `collaboration` i18n namespace keeps the 14 keys agent presence and settings still use. | A smaller change; renaming the namespace can come later. |
+| The mobile presence popover shows only while you run at least one agent. | Without agents it has nothing to follow or rename, and HUD space is scarce. |
+| The ~800 changed-line limit per PR counts added lines; deleting a whole removed feature (files, locale keys, lockfile entries) stays in one PR. | A removal split across PRs leaves half-removed features on master; deleted lines are easy to review as a set. |
 | `packages/feedback` is deleted from the fork rather than only excluded from the workspace. | Upstream keeps it, so it can be restored at any time; deleting it means no build, CI job or deploy can bring it back by accident. |
 | The `sharing` preference is dropped, not migrated. | Nothing reads it any more; the preference parser drops the old key on load. |
 | The docs privacy page is reworded rather than deleted. | Its route stays and now says Peel sends no telemetry; the network table is finished with `EGRESS.md` later in Phase 2. |
@@ -47,3 +54,8 @@ did not cover a case, the safer and more reversible option was taken.
 | An automation write approval is denied 45 s after the app receives the call, wherever it waits; callers wait 90 s (MCP server) or 105 s (stdio bridge, CLI). | MCP SDK clients give up after 60 s by default, so an Allow must never land after the agent was told the call failed. |
 | Automation saves ask first, then let the fs scope refuse an ungranted path. | A reliable scope pre-check needs a Rust command; checking with `exists` uses a different allow-list and could refuse legitimate saves. |
 | Each write-approval request gets its full 60 s once it is shown, and Stop withdraws a chat run's pending requests. | Queued requests must not expire unseen behind an earlier one. |
+| Remote fonts live in the versioned app preferences (`fonts.remote`), not upstream's `op-online-fonts-enabled` key. | Validated like other settings, and an old upstream "on" never counts as consent. |
+| Core's web font resolver starts with no providers, so the CLI and MCP render with local and bundled fonts only. | Safer default; no CLI flag turns them on. |
+| The CLI's `--fonts assets` HTML and Storybook export still fetches font files from providers. | It is an explicit per-command request, and the CLI is not part of the desktop app. |
+| Old Pexels and Unsplash keys in the upstream keychain service and localStorage are left alone. | Peel never reads them, and deleting them could break a co-installed upstream OpenPencil. |
+| The Settings Media section is removed along with its i18n namespace, rather than kept empty. | With stock photos (#9) and vectorization (#11) both gone it had nothing left to configure. |

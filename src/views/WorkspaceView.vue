@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { useEventListener } from '@vueuse/core'
-import { onMounted, onUnmounted, provide, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
-import { useI18n } from '@open-pencil/vue'
 
 import { offerAISetupOnFirstRun } from '@/app/ai/models/settings/onboarding/dialog'
 import { exposeAutomationTestRequests } from '@/app/automation/bridge/test-hooks'
 import { startMCPRuntime, stopMCPRuntime } from '@/app/automation/mcp/runtime'
 import { startWebMCP } from '@/app/automation/webmcp/runtime'
-import { exposeCollaborationActions } from '@/app/browser-bridge'
-import { useJoinRoom } from '@/app/collab/join'
-import { bindDesktopRoomLinks } from '@/app/collab/room/links'
-import { syncRoomRoute } from '@/app/collab/route'
-import { COLLAB_KEY, useCollab } from '@/app/collab/use'
 import { openDemoDocument } from '@/app/demo/document'
 import type { PendingOpenFile } from '@/app/document/io/pending-open'
 import { openPendingFiles } from '@/app/document/io/pending-open'
@@ -55,16 +48,8 @@ const shouldCreateHome =
   !appRuntimeConfig.test &&
   !route.meta.demo &&
   (isTauri() || appRuntimeConfig.recentFiles)
-const { collaboration } = useI18n()
-const joinRoomFromInput = useJoinRoom()
 
-/** A share link opens its room in a tab of its own, so nothing editable shows before it. */
 function openFirstTab(): Tab {
-  const roomId = typeof route.params.roomId === 'string' ? route.params.roomId : null
-  if (roomId) {
-    if (joinRoomFromInput(roomId) && activeTab.value) return activeTab.value
-    toast.error(collaboration.value.invalidRoomLink)
-  }
   return shouldCreateHome ? createHomeTab() : createTab()
 }
 
@@ -94,11 +79,7 @@ useKeyboard()
 useEditorMenu()
 useDocumentDrop()
 
-const collab = useCollab()
-provide(COLLAB_KEY, collab)
-exposeCollaborationActions(collab, joinRoomFromInput)
 exposeAutomationTestRequests()
-syncRoomRoute(router, route)
 
 useEventListener(
   document,
@@ -110,7 +91,6 @@ useEventListener(
 )
 
 const fileAssociationCleanup = ref<(() => void) | null>(null)
-const roomLinksCleanup = ref<(() => void) | null>(null)
 
 /**
  * A drain that fails wholesale — the `take_pending_open` invoke, the event binding —
@@ -137,7 +117,7 @@ function openDocumentPaths(): string[] {
  * Drops the link params through the router, not through `history` directly: the router
  * keeps its own copy of the current URL in `history.state` and re-applies it on the next
  * navigation, which would put `file` and `node` back into the entry. Route and hash are
- * preserved, so the link works on `/`, `/share/:id` and `/demo` alike.
+ * preserved, so the link works on `/` and `/demo` alike.
  */
 function stripWebLinkParams(): void {
   void router.replace({
@@ -193,14 +173,6 @@ onMounted(async () => {
     reportOpenFailure(error)
   }
 
-  try {
-    roomLinksCleanup.value = await bindDesktopRoomLinks((roomId) => {
-      if (!joinRoomFromInput(roomId)) toast.error(collaboration.value.invalidRoomLink)
-    })
-  } catch (error) {
-    console.error('[Room link]', error)
-  }
-
   // The browser twin of the deep link: the desktop build takes its links through the
   // deep-link plugin above, so only a real browser reads them off the address bar.
   if (IS_BROWSER && !isTauri()) {
@@ -219,7 +191,6 @@ onUnmounted(() => {
   stopWebMCP?.()
   void stopMCPRuntime()
   fileAssociationCleanup.value?.()
-  roomLinksCleanup.value?.()
 })
 </script>
 

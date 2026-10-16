@@ -21,6 +21,7 @@ export const WEB_FONT_PROVIDER_LABELS: Record<WebFontProviderId, string> = {
   fontshare: 'Fontshare'
 }
 
+/** The providers a host enables once the user opts in to remote fonts. */
 export const DEFAULT_WEB_FONT_PROVIDER_SETTINGS: Record<WebFontProviderId, boolean> = {
   google: true,
   fontsource: true,
@@ -147,10 +148,12 @@ export interface ResolvedWebFont {
   provider: WebFontProviderId
 }
 
+/**
+ * Resolves fonts from online providers. No provider is enabled until the host opts in with
+ * `setEnabled`, so a font a document lacks falls back to local and bundled faces offline.
+ */
 export class WebFontResolver {
-  private enabled = new Set<WebFontProviderId>(
-    WEB_FONT_PROVIDER_IDS.filter((provider) => DEFAULT_WEB_FONT_PROVIDER_SETTINGS[provider])
-  )
+  private enabled = new Set<WebFontProviderId>()
   private unifontPromises = new Map<WebFontProviderId, Promise<WebUnifont>>()
   private familiesCache = new Map<WebFontProviderId, string[]>()
   private facesCache = new Map<string, Promise<FamilyFace[]>>()

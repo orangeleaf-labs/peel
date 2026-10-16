@@ -2,44 +2,13 @@ import { expect, test } from '@playwright/test'
 
 const story = (id: string) => `/iframe.html?id=${id}&viewMode=story`
 
-// Stories with play functions click on their own; these use ones that do not.
-test("an avatar counts its person's agents and lists them on hover", async ({ page }) => {
-  await page.goto(story('app-collaboration-presence-avatars--many-people'))
-  const ana = page.getByRole('button', { name: 'Follow Ana' })
-  await expect(ana).toContainText('2')
-  await ana.hover()
-  const card = page.getByText('Thinking · Cover')
-  await expect(card).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Follow Orbit' })).toBeVisible()
+test('an avatar stack collapses the people that do not fit into +N', async ({ page }) => {
+  await page.goto(story('app-presence-avatar-stack--more-than-fit'))
+  await expect(page.getByRole('img', { name: 'Dana, Ana, Ben' })).toContainText('+1')
 })
 
-test('more people than fit collapse into +N, which lists everyone', async ({ page }) => {
-  await page.goto(story('app-collaboration-presence-avatars--many-people'))
-  await page.getByRole('button', { name: '2 more' }).click()
-  await expect(page.getByText('Fay')).toBeVisible()
-  await expect(page.getByText('Dana (you)')).toBeVisible()
-})
-
-test('your avatar shows the room is live and opens your menu with Leave room', async ({ page }) => {
-  await page.goto(story('app-collaboration-presence-avatars--many-people'))
-  await expect(page.getByRole('img', { name: 'Connected' })).toBeVisible()
-  await page.getByRole('button', { name: 'Dana (you)' }).click()
-  await expect(page.getByRole('button', { name: 'Leave room' })).toBeVisible()
-})
-
-test('the follow frame names an agent with its owner and offers to stop', async ({ page }) => {
-  await page.goto(story('app-collaboration-follow-frame--following-their-agent'))
-  await expect(page.getByRole('status')).toHaveText(/Following Orbit \(Ana\)/)
+test('the follow frame names the followed agent and offers to stop', async ({ page }) => {
+  await page.goto(story('app-presence-follow-frame--following-an-agent'))
+  await expect(page.getByRole('status')).toHaveText(/Following Fern/)
   await expect(page.getByRole('button', { name: 'Stop following' })).toBeVisible()
-})
-
-test("the keyboard reaches a collaborator's agents through the room list", async ({ page }) => {
-  await page.goto(story('app-collaboration-presence-avatars--room'))
-  const everyone = page.getByRole('button', { name: 'In this room' })
-  await everyone.focus()
-  await everyone.press('Enter')
-  const follow = page.getByRole('button', { name: 'Follow Orbit' })
-  await expect(follow).toBeVisible()
-  await follow.focus()
-  await expect(follow).toBeFocused()
 })

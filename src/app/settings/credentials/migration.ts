@@ -19,9 +19,6 @@ export function providerCredentialRef(
   return credentialRef(providerId, 'api-key', profileId)
 }
 
-export const PEXELS_CREDENTIAL = credentialRef('pexels', 'api-key')
-export const UNSPLASH_CREDENTIAL = credentialRef('unsplash', 'access-key')
-
 type LegacyCredential = {
   storageKey: string
   reference: CredentialRef
@@ -33,10 +30,7 @@ type LegacyScan = {
 }
 
 function scanLegacyCredentials(storage: Storage): LegacyScan {
-  const credentials: LegacyCredential[] = [
-    { storageKey: `${STORAGE_PREFIX}pexels-api-key`, reference: PEXELS_CREDENTIAL },
-    { storageKey: `${STORAGE_PREFIX}unsplash-access-key`, reference: UNSPLASH_CREDENTIAL }
-  ]
+  const credentials: LegacyCredential[] = []
   const removedProviderKeys = REMOVED_PROVIDER_KEYS.filter((key) => storage.getItem(key) !== null)
 
   for (let index = 0; index < storage.length; index++) {

@@ -1,8 +1,0 @@
-{
-  "pexelsAPIKey": "PexelsのAPIキー (ストックフォト)",
-  "unsplashAccessKey": "Unsplashのアクセスキー",
-  "stockPhotoToolOptional": "任意 — stock_photoツール用",
-  "pexelsAlternativeOptional": "任意 — Pexelsの代替案",
-  "getPexelsAPIKey": "Pexelsの無料APIキーを取得 →",
-  "getUnsplashAccessKey": "Unsplashの無料アクセスキーを取得 →"
-}

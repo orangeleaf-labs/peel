@@ -140,9 +140,9 @@ test('settings shortcut preserves the last visited section', async ({ page }) =>
   await canvas.waitForInit()
 
   await page.getByTestId('app-settings-trigger').click()
-  await page.getByTestId('settings-section-media').click()
+  await page.getByTestId('settings-section-storage').click()
   await page.getByTestId('app-settings-done').click()
 
   await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,')
-  await expect(page.getByTestId('settings-media-panel')).toBeVisible()
+  await expect(page.getByTestId('settings-storage-panel')).toBeVisible()
 })

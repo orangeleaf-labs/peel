@@ -117,17 +117,6 @@ openpencil export -f png            # Screenshot canvas
 
 All commands support `--json`. Install: `npm install -g @open-pencil/cli` (or `bun add -g @open-pencil/cli`).
 
-## Real-Time Collaboration
-
-P2P via WebRTC — no server required. Share a link and edit together.
-
-- Live cursors with colored arrows and name pills
-- Presence avatars
-- Follow mode — click a peer to follow their viewport
-- Voice calls — talk with the people in the room, peer to peer, with mute, microphone and speaker choice, and a ring on whoever is speaking
-- Local persistence via IndexedDB
-- Secure room IDs via `crypto.getRandomValues()`
-
 ## Desktop & Web
 
 **Desktop** — Tauri v2, ~7 MB. macOS (signed & notarized), Windows, Linux. Native menus, offline, autosave.
@@ -142,4 +131,4 @@ brew install --cask openpencil
 
 ## Google Fonts Fallback
 
-When a font isn't available locally, OpenPencil fetches it from Google Fonts automatically. No manual installation needed when opening .fig files with unfamiliar fonts.
+When a font isn't available locally, OpenPencil can fetch it from Google Fonts and other online providers. Remote fonts are off by default; turn them on under **Settings → General → Remote fonts**. While they are off, missing fonts use installed or bundled substitutes.
