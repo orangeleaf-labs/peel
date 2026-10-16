@@ -2,11 +2,13 @@ import * as v from 'valibot'
 
 import { parseToolArgs } from '@open-pencil/core/tools'
 
+import { receiveAutomationCall, type AutomationCall } from '@/app/automation/bridge/call'
 import {
   resolveAutomationTarget,
   responseWithTarget,
   type AutomationTarget
 } from '@/app/automation/bridge/target'
+import { approveWrite } from '@/app/automation/write-approval'
 import { resolveBrowserFileURL } from '@/app/document/io/browser'
 import { openBrowserFileFromURL } from '@/app/shell/menu/files'
 import { openFileFromPath } from '@/app/shell/menu/use'
@@ -52,11 +54,28 @@ async function withFileScope<T>(
 }
 
 // Automation never opens the Save dialog: nobody may be there to answer it.
+function assertSavable(store: AutomationTarget['store'], path?: string): void {
+  if (!path && !store.hasWritableSource()) {
+    throw new Error(
+      `"${store.state.documentName}" has not been saved to a file yet; pass a path to save it`
+    )
+  }
+}
+
+/** The user allows each save an agent asks for, naming the file it writes. */
+function approveSave(
+  call: AutomationCall,
+  tool: string,
+  store: AutomationTarget['store'],
+  path?: string
+) {
+  const target = path ?? store.getDocumentFilePath() ?? store.state.documentName
+  return approveWrite({ tool, kind: 'save', target }, call.approval)
+}
+
 async function saveWithoutPrompt(store: AutomationTarget['store'], path?: string): Promise<void> {
   const name = store.state.documentName
-  if (!path && !store.hasWritableSource()) {
-    throw new Error(`"${name}" has not been saved to a file yet; pass a path to save it`)
-  }
+  assertSavable(store, path)
   // A failed save to a new path leaves the document with the source it had.
   const saved = path
     ? await withFileScope('save', path, () => store.saveFigFileToPath(path))
@@ -64,13 +83,33 @@ async function saveWithoutPrompt(store: AutomationTarget['store'], path?: string
   if (!saved) throw new Error(`Could not save "${name}"`)
 }
 
-export async function handleSaveFile(target: AutomationTarget, args: unknown): Promise<unknown> {
+/** Saves once the user allows it; a denied save writes nothing. */
+async function approvedSave(
+  call: AutomationCall,
+  tool: string,
+  store: AutomationTarget['store'],
+  path?: string
+) {
+  assertSavable(store, path)
+  await approveSave(call, tool, store, path)
+  await saveWithoutPrompt(store, path)
+}
+
+export async function handleSaveFile(
+  target: AutomationTarget,
+  args: unknown,
+  call = receiveAutomationCall(args)
+): Promise<unknown> {
   const { path } = parseToolArgs('save_file', saveArgsSchema, args)
-  await saveWithoutPrompt(target.store, path)
+  await approvedSave(call, 'save_file', target.store, path)
   return { ok: true, result: { saved: true } }
 }
 
-export async function handleCloseFile(target: AutomationTarget, args: unknown): Promise<unknown> {
+export async function handleCloseFile(
+  target: AutomationTarget,
+  args: unknown,
+  call = receiveAutomationCall(args)
+): Promise<unknown> {
   const { path, unsaved } = parseToolArgs('close_file', closeArgsSchema, args)
   const store = target.store
   if (store.hasUnsavedChanges()) {
@@ -80,7 +119,7 @@ export async function handleCloseFile(target: AutomationTarget, args: unknown): 
           'Save or discard them: CLI --save or --discard, MCP unsaved "save" or "discard"'
       )
     }
-    if (unsaved === 'save') await saveWithoutPrompt(store, path)
+    if (unsaved === 'save') await approvedSave(call, 'close_file', store, path)
   }
   await closeTab(target.documentId, unsaved === 'discard' ? 'discard' : 'save')
   return { ok: true, result: { closed: getTabById(target.documentId) === undefined } }
@@ -88,9 +127,12 @@ export async function handleCloseFile(target: AutomationTarget, args: unknown): 
 
 export async function handleNewDocument(
   _target: AutomationTarget,
-  args: unknown
+  args: unknown,
+  call = receiveAutomationCall(args)
 ): Promise<unknown> {
   const { path } = parseToolArgs('new_document', saveArgsSchema, args)
+  // Asked before the tab opens, so a denied file leaves no new document behind.
+  if (path) await approveWrite({ tool: 'new_document', kind: 'save', target: path }, call.approval)
   const tab = createTab()
   if (path) {
     try {
