@@ -5,7 +5,6 @@ import { BUILTIN_IO_FORMATS, IORegistry } from '@open-pencil/core/io'
 import { SceneGraph } from '@open-pencil/scene-graph'
 import { createShaderRasterizer } from '@open-pencil/vue'
 
-import { useCollabIdentity } from '@/app/collab/identity'
 import { recordPreparationOutcome } from '@/app/diagnostics'
 import {
   getActiveEditorStore,
@@ -32,6 +31,7 @@ import {
 import { scopedStoreFactory } from '@/app/editor/session/scope'
 import { createInitialAppEditorState, type AppEditorState } from '@/app/editor/session/types'
 import { notificationMessages } from '@/app/i18n/notifications'
+import { useLocalIdentity } from '@/app/identity/use'
 import { createDeferred } from '@/app/runtime/deferred'
 import { toast } from '@/app/shell/ui'
 import { IS_BROWSER, IS_TAURI } from '@/constants'
@@ -52,7 +52,7 @@ function buildEditorStore(initialGraph?: SceneGraph) {
     shaderRasterizer: createShaderRasterizer(),
     resolveFigmaClipboardImages: IS_TAURI ? resolveFigmaClipboardImages : undefined,
     skipInitialGraphSetup: !!initialGraph,
-    getUserName: () => useCollabIdentity().name.value,
+    getUserName: () => useLocalIdentity().name.value,
     getViewportSize: () =>
       viewportSize.width > 0 && viewportSize.height > 0
         ? viewportSize

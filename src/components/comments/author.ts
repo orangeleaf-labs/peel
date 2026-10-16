@@ -5,7 +5,7 @@ import { PEER_COLORS } from '@/constants'
 
 /**
  * How a comment's author is shown: their name, or "Someone" for comments other tools wrote
- * without one, on the color they had in the room, or the first collaborator color.
+ * without one, on the color stored with the comment, or the first presence color.
  */
 export function useCommentAuthor() {
   const messages = useCommentMessages()

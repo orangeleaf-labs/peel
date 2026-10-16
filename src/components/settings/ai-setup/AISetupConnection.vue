@@ -86,7 +86,6 @@ const keyHint = computed(() => (hasSavedKey ? ai.value.aiSetupSavedKeyHint : und
         :label="ai.apiKey"
         :saved="false"
         :hint="keyHint"
-        kind="api"
         :placeholder="hasSavedKey ? credentials.savedReplace : (provider?.keyPlaceholder ?? '')"
         :key-u-r-l="provider?.keyURL"
         :key-u-r-l-label="credentials.getAPIKey"

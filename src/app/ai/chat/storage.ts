@@ -14,10 +14,7 @@ import {
   modelCredentialRevision
 } from '@/app/ai/models'
 import { appCredentialServices, browserCredentialsRemembered } from '@/app/settings/credentials/app'
-import {
-  refreshMediaCredentials,
-  credentialPersistenceRevision
-} from '@/app/settings/credentials/media'
+import { credentialPersistenceRevision } from '@/app/settings/credentials/media'
 import {
   hasLegacyCredential,
   initializeCredentialMigration
@@ -66,10 +63,7 @@ export async function refreshAIProviderStatus(): Promise<void> {
 }
 
 // Startup checks metadata only. Secret migration/resolution belongs to explicit provider use.
-export const credentialsReady = Promise.all([
-  refreshAIProviderStatus(),
-  refreshMediaCredentials()
-]).then(() => undefined)
+export const credentialsReady = refreshAIProviderStatus()
 
 export async function resolveAPIKey(): Promise<string | null> {
   await credentialsReady

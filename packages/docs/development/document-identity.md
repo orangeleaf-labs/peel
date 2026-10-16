@@ -21,4 +21,4 @@ A layer read from the file keeps its saved GUID. A new layer is saved under its 
 
 ## Limits
 
-Random sessions make collisions between separate edits unlikely, not impossible, and nothing reconciles two copies of a file automatically. A shared room stays the authority for its live document; merging offline copies means applying the changes to one of them and sharing the result as a new room.
+Random sessions make collisions between separate edits unlikely, not impossible, and nothing reconciles two copies of a file automatically. Merging offline copies means applying the changes to one of them.

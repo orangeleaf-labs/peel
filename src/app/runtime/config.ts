@@ -2,7 +2,6 @@ import { appPreferences, type CanvasRenderingMode } from '@/app/settings/prefere
 import { IS_BROWSER } from '@/constants'
 
 export type SceneRendererMode = CanvasRenderingMode
-export type CollaborationTransportMode = 'default' | 'test'
 
 export interface AppRuntimeConfig {
   test: boolean
@@ -12,8 +11,6 @@ export interface AppRuntimeConfig {
   showRulers: boolean
   sceneRenderer: SceneRendererMode
   sceneRendererOverride: boolean
-  collaborationTransport: CollaborationTransportMode
-  collaborationRelayURL: string | null
 }
 
 export function parseAppRuntimeConfig(
@@ -31,9 +28,7 @@ export function parseAppRuntimeConfig(
     showChrome: !params.has('no-chrome'),
     showRulers: !params.has('no-rulers'),
     sceneRenderer,
-    sceneRendererOverride: renderer === 'tiled' || renderer === 'retained',
-    collaborationTransport: params.get('collabTransport') === 'test' ? 'test' : 'default',
-    collaborationRelayURL: params.get('collabRelay')
+    sceneRendererOverride: renderer === 'tiled' || renderer === 'retained'
   }
 }
 

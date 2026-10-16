@@ -3,11 +3,7 @@ import { AI_PROVIDERS } from '@open-pencil/core/constants'
 import { aiModelSettings, modelConnectionCredentialRef } from '@/app/ai/models'
 import { mcpConnectionSettings, mcpConnectionCredentialRef } from '@/app/integrations/mcp'
 import { storageCredentialRefs, storageProviderRegistry } from '@/app/integrations/storage'
-import {
-  PEXELS_CREDENTIAL,
-  UNSPLASH_CREDENTIAL,
-  providerCredentialRef
-} from '@/app/settings/credentials/migration'
+import { providerCredentialRef } from '@/app/settings/credentials/migration'
 import { credentialKey } from '@/app/settings/credentials/reference'
 
 import { setBrowserCredentialPersistence } from './app'
@@ -30,8 +26,6 @@ export function appCredentialRefs(): CredentialRef[] {
   return uniqueCredentialRefs([
     ...legacyAIRefs,
     ...modelConnectionRefs,
-    PEXELS_CREDENTIAL,
-    UNSPLASH_CREDENTIAL,
     ...mcpConnectionSettings.value.connections.map((connection) =>
       mcpConnectionCredentialRef(connection.id)
     ),

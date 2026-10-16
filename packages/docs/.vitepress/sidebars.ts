@@ -83,7 +83,6 @@ export const programmableSidebar = (
             { text: 'Coding agents', link: '/programmable/coding-agents' },
           ]
         : []),
-      { text: labels.collaboration, link: `${prefix}/programmable/collaboration` },
     ],
   },
 ]

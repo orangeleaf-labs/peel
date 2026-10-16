@@ -9,7 +9,7 @@ import PersonAvatar from './PersonAvatar.vue'
 import type { PresencePersonRow } from './rows'
 
 /**
- * The people in a room or on a page, overlapping, each with how many agents they run, then
+ * The people on a page or in a comment thread, overlapping, each with how many agents they run, then
  * "+N". Interactive places wrap each person through the `person` slot and the rest through
  * `overflow`; elsewhere it is one picture named by `label`.
  */
@@ -40,7 +40,6 @@ const hidden = computed(() => people.length - shown.value.length)
           :name="person.name || common.you"
           :color="person.color"
           :agent-count="person.agents.length"
-          :voice="person.voice"
           :size="size"
         />
       </slot>

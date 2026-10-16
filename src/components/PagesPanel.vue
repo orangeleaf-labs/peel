@@ -43,7 +43,7 @@ const pageListStyles = tv(pageListTheme)
 const baseStyles = pageListStyles()
 
 const storeRef = useActiveEditorStoreRef()
-/** Who works on each page: people in the room and active agents. */
+/** Which of your agents work on each page. */
 const pagePresence = computed(() =>
   storeRef.value ? presenceByPage(storeRef.value) : new Map<string, never[]>()
 )
