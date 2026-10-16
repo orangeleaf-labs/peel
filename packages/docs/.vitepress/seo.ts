@@ -37,7 +37,6 @@ const SOFTWARE_APPLICATION = {
     'Opens and saves Figma .fig files',
     'AI agents that design on the canvas with your own provider keys',
     'MCP server for AI coding agents',
-    'Real-time collaboration with people and agents',
     'Headless CLI for inspection, linting, and export',
     'Desktop app for macOS, Windows, and Linux',
     'Vue SDK for embedding the editor'

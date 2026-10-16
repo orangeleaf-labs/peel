@@ -2,15 +2,15 @@ import { expect, test } from '@playwright/test'
 
 const story = (id: string) => `/iframe.html?id=${id}&viewMode=story`
 
-test('page markers name everyone and summarize the overflow', async ({ page }) => {
-  await page.goto(story('app-collaboration-page-presence-markers--more-than-fit'))
-  const markers = page.getByRole('img', { name: 'Ana, Orbit, Ben, Pixel, Fern' })
+test('page markers name every agent and summarize the overflow', async ({ page }) => {
+  await page.goto(story('app-presence-page-presence-markers--more-than-fit'))
+  const markers = page.getByRole('img', { name: 'Fern, Orbit, Pixel, Juniper, Wren' })
   await expect(markers).toBeVisible()
   await expect(markers.getByText('+2')).toBeVisible()
 })
 
 test('page markers render nothing for an empty page', async ({ page }) => {
-  await page.goto(story('app-collaboration-page-presence-markers--nobody'))
+  await page.goto(story('app-presence-page-presence-markers--nobody'))
   await expect(page.getByText('Checkout')).toBeVisible()
   await expect(page.getByRole('img')).toHaveCount(0)
 })

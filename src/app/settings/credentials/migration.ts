@@ -9,8 +9,12 @@ const STORAGE_PREFIX = 'open-pencil:'
 const MIGRATION_VERSION_KEY = `${STORAGE_PREFIX}credential-migration`
 const MIGRATION_VERSION = '1'
 const AI_KEY_PREFIX = `${STORAGE_PREFIX}ai-key:`
-/** Plaintext keys for providers Peel removed: deleted, never migrated, so no secret outlives them. */
-const REMOVED_PROVIDER_KEYS = [`${STORAGE_PREFIX}openrouter-api-key`]
+/** Plaintext keys for providers and integrations Peel removed: deleted, never migrated, so no secret outlives them. */
+const REMOVED_PROVIDER_KEYS = [
+  `${STORAGE_PREFIX}openrouter-api-key`,
+  `${STORAGE_PREFIX}pexels-api-key`,
+  `${STORAGE_PREFIX}unsplash-access-key`
+]
 
 export function providerCredentialRef(
   providerId: AIProviderID,
@@ -23,9 +27,6 @@ export function providerCredentialRef(
   return credentialRef(integrationId, 'api-key', profileId)
 }
 
-export const PEXELS_CREDENTIAL = credentialRef('pexels', 'api-key')
-export const UNSPLASH_CREDENTIAL = credentialRef('unsplash', 'access-key')
-
 type LegacyCredential = {
   storageKey: string
   reference: CredentialRef
@@ -37,10 +38,7 @@ type LegacyScan = {
 }
 
 function scanLegacyCredentials(storage: Storage): LegacyScan {
-  const credentials: LegacyCredential[] = [
-    { storageKey: `${STORAGE_PREFIX}pexels-api-key`, reference: PEXELS_CREDENTIAL },
-    { storageKey: `${STORAGE_PREFIX}unsplash-access-key`, reference: UNSPLASH_CREDENTIAL }
-  ]
+  const credentials: LegacyCredential[] = []
   const removedProviderKeys = REMOVED_PROVIDER_KEYS.filter((key) => storage.getItem(key) !== null)
 
   for (let index = 0; index < storage.length; index++) {

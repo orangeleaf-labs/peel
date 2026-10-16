@@ -22,7 +22,7 @@ export interface RulerTheme {
 
 export type MeasurementMode = 'off' | 'shallow' | 'deep'
 
-/** Where a collaborator or an agent is working, in world coordinates. */
+/** Where a person or an agent is working, in world coordinates. */
 export interface PresenceCursor {
   /** Who it is, kept between updates; editors use it to glide a cursor rather than jump it. */
   id?: string

@@ -117,8 +117,6 @@ tests/engine/clipboard/figma/images.test.ts
 tests/engine/clipboard/fixtures/gold-preview-roundtrip.test.ts
 tests/engine/clipboard/openpencil/green-50.test.ts
 tests/engine/clipboard/openpencil/images.test.ts
-tests/engine/collab/room-id.test.ts
-tests/engine/collab/yjs-sync.test.ts
 tests/engine/color/basic.test.ts
 tests/engine/color/color-model.test.ts
 tests/engine/color/document-space-conversion.test.ts
@@ -453,9 +451,6 @@ tests/engine/tools/modify.test.ts
 tests/engine/tools/modify/image-fill.test.ts
 tests/engine/tools/read.test.ts
 tests/engine/tools/registry.test.ts
-tests/engine/tools/stock-photo/apply.test.ts
-tests/engine/tools/stock-photo/credentials.test.ts
-tests/engine/tools/stock-photo/requests.test.ts
 tests/engine/tools/structure.test.ts
 tests/engine/tools/xpath/basic.test.ts
 tests/engine/vector/blob/mutation.test.ts

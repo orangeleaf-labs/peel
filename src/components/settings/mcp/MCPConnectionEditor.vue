@@ -126,7 +126,6 @@ defineExpose({ focusInvalid: () => focusInvalidField(formElement.value) })
             :label="automation.bearerToken"
             input-id="mcp-bearer-token"
             :saved="tokenStatus === 'configured'"
-            kind="api"
             :placeholder="
               tokenStatus === 'configured'
                 ? credentials.savedReplace

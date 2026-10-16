@@ -92,11 +92,11 @@ async function failCredentialWrites(page: Page) {
 test('media explains optional keys and preserves input after a failed save', async ({ page }) => {
   await openSettings(page)
   await page.getByTestId('settings-section-media').click()
-  await page.getByRole('button', { name: /Pexels/ }).click()
+  await page.locator('[data-vectorize-settings]').click()
   const key = page.getByRole('textbox', { name: 'API key', exact: true })
   await expect(page.getByRole('link', { name: 'Get API key' })).toHaveAttribute(
     'href',
-    'https://www.pexels.com/api/'
+    'https://www.recraft.ai/profile/api'
   )
   await expect(key).toHaveAccessibleDescription('Optional. Add a key to enable this service.')
   await key.fill('test-only-replacement')
@@ -118,7 +118,7 @@ test('media explains optional keys and preserves input after a failed save', asy
     await failure.dispose()
   }
   await page.getByRole('button', { name: 'Save', exact: true }).click()
-  await expect(page.getByRole('button', { name: /Pexels/ })).toBeVisible()
+  await expect(page.locator('[data-vectorize-settings]')).toBeVisible()
 })
 
 test('MCP requires a token only for enabled bearer connections and preserves failed saves', async ({

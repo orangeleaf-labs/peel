@@ -212,7 +212,7 @@ Feature-by-feature comparison of Figma Design capabilities with Open Pencil's cu
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Comments (pin, thread, resolve) | 🔲 | Not supported yet |
-| Real-time multiplayer | ✅ | P2P via Trystero + Yjs CRDT, cursors, follow mode; no server required |
+| Real-time multiplayer | — | Not available: collaboration is disabled |
 | Cursor chat | 🔲 | Inline chat bubbles at cursor |
 | Branching & merging | 🔲 | Version branches for design files |
 | Dev Mode (inspect) | 🟡 | Code tab shows JSX representation of selection; no CSS properties or handoff specs |

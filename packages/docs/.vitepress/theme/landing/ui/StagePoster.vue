@@ -46,7 +46,7 @@ function source(theme: PosterTheme, layout: 'desktop' | 'phone', part: PosterPar
 <template>
   <div class="stage-poster" :data-kind="kind">
     <div v-for="theme in POSTER_THEMES" :key="theme" class="layer" :data-theme="theme">
-      <picture v-for="part in posterParts(kind)" :key="part" :class="part">
+      <picture v-for="part in posterParts()" :key="part" :class="part">
         <source :media="phoneMedia" :srcset="source(theme, 'phone', part)" />
         <img :src="source(theme, 'desktop', part)" alt="" loading="lazy" decoding="async" />
       </picture>
@@ -138,13 +138,11 @@ img {
 }
 
 /* The live canvas fits its scene to whatever room it has; the still does the same. */
-.canvas,
-.frame {
+.canvas {
   flex: 1;
 }
 
-.canvas img,
-.frame img {
+.canvas img {
   object-fit: contain;
 }
 

@@ -1,0 +1,1 @@
+- Fonts are no longer downloaded from Google Fonts or other online providers unless you turn on Remote fonts in Settings → General, and the Unsplash and Pexels stock photo integration is removed.

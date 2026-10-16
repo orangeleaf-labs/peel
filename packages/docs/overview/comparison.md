@@ -262,7 +262,7 @@ Open Pencil's approach is simpler and lower overhead. Penpot's approach is more 
 
 ## 10. What Penpot Does Better
 
-1. **Server-side collaboration** — centralized multi-user editing with WebSockets, user accounts, and access control (Open Pencil uses P2P via Trystero + Yjs — no server, but also no access control or persistence beyond the session)
+1. **Server-side collaboration** — centralized multi-user editing with WebSockets, user accounts, and access control (Open Pencil has no collaboration)
 2. **PDF export** — headless Chromium export service for PDF rendering (OpenPencil exports SVG but not PDF yet)
 3. **Plugin system** — full plugin API with sandboxed execution
 4. **Design tokens** — native design token support
@@ -285,8 +285,8 @@ OpenPencil ships with an [`eval` command](/programmable/cli/scripting) that prov
 | **Developer onboarding** | Open Pencil | TS/Vue vs Clojure/Rust/Docker |
 | **Desktop experience** | Open Pencil | Tauri native vs browser-only |
 | **Layout engine** | Open Pencil | Yoga (proven) vs custom dual implementation |
-| **Collaboration** | Tie | Penpot: server-based with access control; Open Pencil: P2P via Trystero + Yjs, zero hosting |
+| **Collaboration** | Penpot | Penpot: server-based with access control; Open Pencil: none |
 | **Self-hosting** | Penpot | Docker-ready vs desktop-only |
 | **Ecosystem maturity** | Penpot | Years of production vs early stage |
 
-Open Pencil is architecturally leaner — a single-process CanvasKit renderer in ~26K LOC of TypeScript, Figma-compatible by design. Penpot is a full-stack platform with ~299K LOC across Clojure, ClojureScript, Rust, and SCSS, plus a Docker service fleet. Both now offer real-time collaboration (different architectures: P2P vs server). Penpot has a plugin ecosystem and server-side PDF export; Open Pencil has Figma-compatible headless scripting, **90 AI/MCP tools**, SVG export, and a native desktop app.
+Open Pencil is architecturally leaner — a single-process CanvasKit renderer in ~26K LOC of TypeScript, Figma-compatible by design. Penpot is a full-stack platform with ~299K LOC across Clojure, ClojureScript, Rust, and SCSS, plus a Docker service fleet. Penpot has a plugin ecosystem and server-side PDF export; Open Pencil has Figma-compatible headless scripting, **90 AI/MCP tools**, SVG export, and a native desktop app.

@@ -3,28 +3,18 @@ import { computed, ref, watch } from 'vue'
 
 import { vectorizeProviderID } from '@/app/editor/vectorize'
 import { useVectorizeSettings } from '@/app/editor/vectorize/settings/use'
-import {
-  pexelsKeyStatus,
-  setPexelsKey,
-  unsplashKeyStatus,
-  setUnsplashKey
-} from '@/app/settings/credentials/media'
 
-export type MediaSettingsService = 'pexels' | 'unsplash' | 'vectorize'
+export type MediaSettingsService = 'vectorize'
 
-const stockServices = {
-  pexels: { status: pexelsKeyStatus, set: setPexelsKey },
-  unsplash: { status: unsplashKeyStatus, set: setUnsplashKey }
-}
-
-export function useMediaSettingsEditor(service: MediaSettingsService, services = stockServices) {
+/** Edits the vectorization provider and its key; the only media service with settings. */
+export function useMediaSettingsEditor() {
   const key = ref('')
   const providerID = ref(vectorizeProviderID.value)
   const initialProvider = providerID.value
   const removeKey = ref(false)
   const busy = ref(false)
   const saveError = ref('')
-  const vector = service === 'vectorize' ? useVectorizeSettings(key, providerID) : null
+  const vector = useVectorizeSettings(key, providerID)
   let disposed = false
   tryOnScopeDispose(() => {
     disposed = true
@@ -40,11 +30,9 @@ export function useMediaSettingsEditor(service: MediaSettingsService, services =
 
   const keyStatus = computed(() => {
     if (removeKey.value) return 'missing'
-    return service === 'vectorize'
-      ? (vector?.keyStatus.value ?? 'missing')
-      : services[service].status.value
+    return vector.keyStatus.value
   })
-  const error = computed(() => saveError.value || vector?.error.value || '')
+  const error = computed(() => saveError.value || vector.error.value || '')
   const dirty = computed(
     () => key.value.length > 0 || removeKey.value || providerID.value !== initialProvider
   )
@@ -64,16 +52,12 @@ export function useMediaSettingsEditor(service: MediaSettingsService, services =
     busy.value = true
     saveError.value = ''
     try {
-      if (vector) {
-        const saved =
-          removeKey.value && !key.value.trim()
-            ? await vector.clearCredential()
-            : await vector.saveCredential()
-        if (!saved || isDisposed()) return false
-        vectorizeProviderID.value = providerID.value
-      } else if (service !== 'vectorize' && (key.value.trim() || removeKey.value)) {
-        await services[service].set(key.value.trim())
-      }
+      const saved =
+        removeKey.value && !key.value.trim()
+          ? await vector.clearCredential()
+          : await vector.saveCredential()
+      if (!saved || isDisposed()) return false
+      vectorizeProviderID.value = providerID.value
       return !isDisposed()
     } catch (cause) {
       if (!isDisposed()) saveError.value = cause instanceof Error ? cause.message : String(cause)

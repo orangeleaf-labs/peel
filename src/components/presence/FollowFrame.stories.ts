@@ -5,14 +5,14 @@ import type { FollowedLabel } from '@/app/presence/registry'
 
 import FollowFrame from './FollowFrame.vue'
 
-const ana = { r: 0.92, g: 0.34, b: 0.29, a: 1 }
+const fern = { r: 0.3, g: 0.7, b: 0.45, a: 1 }
 
 type Args = { followed: FollowedLabel; onStop: () => void }
 
 const meta = {
-  title: 'App/Collaboration/Follow Frame',
+  title: 'App/Presence/Follow Frame',
   component: FollowFrame,
-  args: { followed: { kind: 'person', name: 'Ana', color: ana }, onStop: fn() },
+  args: { followed: { kind: 'agent', name: 'Fern', color: fern }, onStop: fn() },
   render: (args) => ({
     components: { FollowFrame },
     setup: () => ({ args }),
@@ -23,15 +23,11 @@ const meta = {
 export default meta
 type Story = StoryObj<Meta<Args>>
 
-export const FollowingAPerson: Story = {
+export const FollowingAnAgent: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByRole('status')).toHaveTextContent('Following Ana')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Following Fern')
     await userEvent.click(canvas.getByRole('button', { name: 'Stop following' }))
     await expect(args.onStop).toHaveBeenCalledOnce()
   }
-}
-
-export const FollowingTheirAgent: Story = {
-  args: { followed: { kind: 'agent', name: 'Orbit', owner: 'Ana', color: ana } }
 }

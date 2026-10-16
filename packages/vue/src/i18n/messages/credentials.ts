@@ -18,7 +18,6 @@ export const credentialsMessageDefaults = {
   remember: 'Remember credentials on this browser',
   savedReplace: 'Key saved — enter new to replace',
   apiKey: 'API key',
-  accessKey: 'Access key',
   getAPIKey: 'Get API key'
 } as const
 

@@ -374,12 +374,3 @@ export {
 
 export * from './io'
 export * from './lint'
-
-export {
-  setPexelsAPIKey,
-  setUnsplashAccessKey,
-  registerStockPhotoProvider,
-  setActiveStockPhotoProvider,
-  getStockPhotoProviders
-} from './tools/stock-photo'
-export type { StockPhotoProvider, StockPhotoResult } from './tools/stock-photo'

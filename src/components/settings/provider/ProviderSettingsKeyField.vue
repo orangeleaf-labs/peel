@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 import { useI18n } from '@open-pencil/vue'
 
 import SettingsLink from '@/components/settings/layout/SettingsLink.vue'
 import ProviderSettingsField from '@/components/settings/provider/ProviderSettingsField.vue'
 import ProviderSettingsInput from '@/components/settings/provider/ProviderSettingsInput.vue'
 
-const { label, modelValue, saved, kind, placeholder, keyURL, keyURLLabel, inputId, hint, error } =
+const { label, modelValue, saved, placeholder, keyURL, keyURLLabel, inputId, hint, error } =
   defineProps<{
     label: string
     modelValue: string
     saved: boolean
-    kind: 'api' | 'pexels' | 'unsplash'
     placeholder: string
     inputId?: string
     keyURL?: string
@@ -29,18 +26,6 @@ const emit = defineEmits<{
 }>()
 
 const { common } = useI18n()
-
-const inputDataTestId = computed(() => {
-  if (kind === 'pexels') return 'provider-settings-pexels-key'
-  if (kind === 'unsplash') return 'provider-settings-unsplash-key'
-  return 'provider-settings-api-key'
-})
-
-const clearDataTestId = computed(() => {
-  if (kind === 'pexels') return 'provider-settings-clear-pexels-key'
-  if (kind === 'unsplash') return 'provider-settings-clear-unsplash-key'
-  return 'provider-settings-clear-key'
-})
 </script>
 
 <template>
@@ -50,7 +35,7 @@ const clearDataTestId = computed(() => {
     :error="error"
     :label-for="inputId"
     :clear-label="saved ? common.clear : undefined"
-    :data-test-id="clearDataTestId"
+    data-test-id="provider-settings-clear-key"
     @clear="emit('clear')"
     @blur="emit('blur')"
   >
@@ -60,7 +45,7 @@ const clearDataTestId = computed(() => {
         :model-value="modelValue"
         :aria-label="label"
         type="password"
-        :data-test-id="inputDataTestId"
+        data-test-id="provider-settings-api-key"
         :placeholder="placeholder"
         @update:model-value="emit('update:modelValue', String($event))"
         @change="emit('change')"

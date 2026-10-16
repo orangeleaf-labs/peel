@@ -90,10 +90,6 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 Wszystkie polecenia obsługują `--json`. Instalacja: `npm install -g @open-pencil/cli` albo `bun add -g @open-pencil/cli`.
 
-## Współpraca w czasie rzeczywistym
-
-Połączenie równorzędne WebRTC nie wymaga centralnego serwera. Udostępnij odnośnik i edytuj dokument wspólnie z innymi osobami, korzystając z kursorów, informacji o obecności, trybu śledzenia i rozmów głosowych z osobami w pokoju.
-
 ## Wersja komputerowa i internetowa
 
 **Komputer:** Tauri v2, około 7 MB, dla macOS, Windows i Linux, z menu systemowymi, pracą bez sieci i automatycznym zapisem.
@@ -102,4 +98,4 @@ Połączenie równorzędne WebRTC nie wymaga centralnego serwera. Udostępnij od
 
 ## Zastępcze ładowanie Google Fonts
 
-Jeśli czcionka nie jest dostępna lokalnie, OpenPencil automatycznie pobiera ją z Google Fonts. Ręczna instalacja nie jest potrzebna.
+Jeśli czcionka nie jest dostępna lokalnie, OpenPencil może pobrać ją z Google Fonts i innych dostawców online. Zdalne czcionki są domyślnie wyłączone; włącz je w **Ustawienia → Ogólne → Zdalne czcionki**. Gdy są wyłączone, brakujące czcionki są zastępowane zainstalowanymi lub dołączonymi.
