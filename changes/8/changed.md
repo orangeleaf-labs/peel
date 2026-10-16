@@ -1,1 +1,2 @@
 - Collaboration is removed: there are no share links, rooms, voice calls or peer-to-peer connections, and the app no longer contacts public signalling, STUN or TURN servers.
+- Your own agents, including resting ones, are listed from your avatar beside the properties panel, where you can follow or rename them.
