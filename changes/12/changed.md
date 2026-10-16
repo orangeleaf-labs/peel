@@ -1,0 +1,1 @@
+- Coding agents (Claude Code, Codex, Gemini CLI, Pi) and connections to external MCP servers are removed; AI chat uses the Anthropic API directly.
