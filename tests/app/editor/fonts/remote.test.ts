@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import {
-  DEFAULT_WEB_FONT_PROVIDER_SETTINGS,
-  FontManager,
-  fontManager
-} from '@open-pencil/core/text'
+import { DEFAULT_WEB_FONT_PROVIDER_SETTINGS, FontManager } from '@open-pencil/core/text'
 
 import { onlineFontProviders, onlineFontsEnabled } from '@/app/editor/fonts'
 import { optInFontFetch } from '@/app/editor/fonts/remote'
@@ -29,8 +25,15 @@ function recordRequests() {
 
 describe('remote fonts preference', () => {
   test('is off by default, so the app enables no online font provider', () => {
+    // Other suites share the process-wide `fontManager`, so check the default it is fed and a
+    // fresh manager rather than the singleton's current state.
     expect(onlineFontsEnabled.value).toBe(false)
-    expect(fontManager.enabledOnlineFontProviders()).toEqual([])
+    const manager = new FontManager()
+    manager.setOnlineFontProviders(
+      onlineFontProviders(onlineFontsEnabled.value, DEFAULT_WEB_FONT_PROVIDER_SETTINGS, true)
+    )
+    expect(new FontManager().enabledOnlineFontProviders()).toEqual([])
+    expect(manager.enabledOnlineFontProviders()).toEqual([])
   })
 
   test('the font loader makes no network request while it is off', async () => {
