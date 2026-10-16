@@ -134,12 +134,35 @@ fn cancelled() -> ProxyHttpError {
 
 type HeadResult = Result<ProxyHttpHead, ProxyHttpError>;
 
+/// Headers reqwest and hyper set from the URL and body. A page-supplied value would let it
+/// address another virtual host behind an allowed name, or frame the body differently than it
+/// is sent; `fetch` forbids the same names.
+const CONNECTION_HEADERS: &[&str] = &[
+    "host",
+    "connection",
+    "content-length",
+    "transfer-encoding",
+    "te",
+    "trailer",
+    "upgrade",
+    "keep-alive",
+];
+
+fn connection_header(name: &HeaderName) -> bool {
+    // `HeaderName` is lowercase whatever the page sent.
+    let name = name.as_str();
+    CONNECTION_HEADERS.contains(&name) || name.starts_with("proxy-")
+}
+
 fn request_headers(headers: Option<Vec<ProxyHttpHeader>>) -> HeaderMap {
     let mut mapped = HeaderMap::new();
     for header in headers.unwrap_or_default() {
         let Ok(header_name) = HeaderName::from_bytes(header.name.as_bytes()) else {
             continue;
         };
+        if connection_header(&header_name) {
+            continue;
+        }
         let Ok(header_value) = HeaderValue::from_str(&header.value) else {
             continue;
         };
@@ -155,8 +178,9 @@ fn request_method(method: Option<String>) -> Result<Method, ProxyHttpError> {
 
 async fn send(request: ProxyHttpRequest) -> Result<reqwest::Response, ProxyHttpError> {
     // Checked before a client exists, so a refused URL causes no network I/O.
-    let parsed =
-        check_str(&request.url).map_err(|error| ProxyHttpError::blocked(error.to_string()))?;
+    let method = request_method(request.method)?;
+    let parsed = check_str(&request.url, &method)
+        .map_err(|error| ProxyHttpError::blocked(error.to_string()))?;
 
     let follow = request.follow_redirects.unwrap_or(true);
     let client = reqwest::Client::builder()
@@ -169,7 +193,7 @@ async fn send(request: ProxyHttpRequest) -> Result<reqwest::Response, ProxyHttpE
         .build()
         .map_err(|e| ProxyHttpError::request(e.to_string()))?;
     let mut builder = client
-        .request(request_method(request.method)?, parsed)
+        .request(method, parsed)
         .headers(request_headers(request.headers));
     if let Some(body) = request.body {
         builder = builder.body(body);
@@ -312,7 +336,7 @@ pub fn cancel_http_request(requests: tauri::State<'_, ProxyHttpRequests>, id: St
 
 #[cfg(test)]
 mod tests {
-    use super::{send, ProxyHttpRequest, Requests};
+    use super::{request_headers, send, ProxyHttpHeader, ProxyHttpRequest, Requests};
 
     fn request(url: &str) -> ProxyHttpRequest {
         ProxyHttpRequest {
@@ -347,6 +371,90 @@ mod tests {
             assert!(error.message.starts_with("Blocked request"), "{url}");
         }
         assert!(listener.accept().is_err(), "no connection may be made");
+    }
+
+    fn header(name: &str, value: &str) -> ProxyHttpHeader {
+        ProxyHttpHeader {
+            name: name.into(),
+            value: value.into(),
+        }
+    }
+
+    /// Answers one request on a loopback port and returns its head, lowercased.
+    fn capture_server() -> (String, std::sync::mpsc::Receiver<String>) {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+        let address = listener.local_addr().expect("address");
+        let (sender, receiver) = std::sync::mpsc::channel();
+        std::thread::spawn(move || {
+            let Ok((mut stream, _)) = listener.accept() else {
+                return;
+            };
+            let mut head = Vec::new();
+            let mut buffer = [0u8; 4096];
+            while !head.windows(4).any(|window| window == b"\r\n\r\n") {
+                match stream.read(&mut buffer) {
+                    Ok(0) | Err(_) => break,
+                    Ok(read) => head.extend_from_slice(&buffer[..read]),
+                }
+            }
+            let _ = stream.write_all(
+                b"HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+            );
+            let _ = sender.send(String::from_utf8_lossy(&head).to_ascii_lowercase());
+        });
+        (address.to_string(), receiver)
+    }
+
+    #[test]
+    fn connection_headers_from_the_page_are_not_sent() {
+        let (address, head) = capture_server();
+        let headers = request_headers(Some(vec![
+            header("Host", "internal.example.com"),
+            header("CONNECTION", "close, x-secret"),
+            header("Content-Length", "999"),
+            header("Transfer-Encoding", "chunked"),
+            header("te", "trailers"),
+            header("Trailer", "x-secret"),
+            header("Upgrade", "websocket"),
+            header("Keep-Alive", "timeout=5"),
+            header("Proxy-Authorization", "Basic eA=="),
+            header("proxy-connection", "keep-alive"),
+            header("X-Kept", "yes"),
+        ]));
+        assert_eq!(headers.len(), 1);
+
+        // Loopback HTTP so the test needs no network; `send` refuses it before this point.
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .build()
+            .expect("client");
+        let response = tauri::async_runtime::block_on(
+            client
+                .post(format!("http://{address}/"))
+                .headers(headers)
+                .body("body")
+                .send(),
+        )
+        .expect("response");
+        assert_eq!(response.status().as_u16(), 204);
+
+        let head = head.recv().expect("request head");
+        assert!(head.contains(&format!("\r\nhost: {address}\r\n")), "{head}");
+        assert!(!head.contains("internal.example.com"), "{head}");
+        assert!(head.contains("\r\ncontent-length: 4\r\n"), "{head}");
+        for name in [
+            "transfer-encoding",
+            "te:",
+            "trailer",
+            "upgrade",
+            "keep-alive",
+            "proxy-",
+            "x-secret",
+        ] {
+            assert!(!head.contains(name), "{name} in {head}");
+        }
+        assert!(head.contains("\r\nx-kept: yes\r\n"), "{head}");
     }
 
     #[test]

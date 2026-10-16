@@ -36,5 +36,6 @@ did not cover a case, the safer and more reversible option was taken.
 | Remove the ACP coding agents and the Pi harness rather than hide them. | They spawn CLIs that talk to non-Anthropic providers; removing them leaves no path to turn back on. |
 | Remove connections to external MCP servers; keep the app's local MCP server. | A remote MCP server is an unlisted host; the local server only serves AI clients the user runs. |
 | Keep the in-app install of the `@open-pencil/mcp` companion. | It only installs the local server; the npm registry host is listed in EGRESS.md. |
-| jsDelivr is allowed only under `/fontsource/`. | jsDelivr serves arbitrary third-party content and would otherwise be an exfiltration channel. |
+| jsDelivr is allowed only under `/fontsource/`, and not for paths with an encoded `/` or `\`. | jsDelivr serves arbitrary third-party content and would otherwise be an exfiltration channel. |
+| `www.figma.com` is allowed only for `POST /file/<key>/image/batch`, and not as a redirect target. | It is the only Figma request the app makes; a redirect hop's method is unknown, so it is refused rather than guessed. |
 | Desktop S3 storage is blocked until endpoint approval lands (#14). | Safer interim than letting the webview reach user-configured hosts. |

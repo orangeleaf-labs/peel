@@ -8,6 +8,7 @@
 
 use std::fmt;
 
+use reqwest::Method;
 use url::{Host, Url};
 
 /// Hosts reached at any path, each with the feature that needs it. Exact names only: none of
@@ -26,9 +27,7 @@ const ALLOWED_HOSTS: &[&str] = &[
     // Online fonts, Fontshare provider: family list and CSS, then the font files.
     "api.fontshare.com",
     "cdn.fontshare.com",
-    // Pasting from Figma: the image batch lookup for the copied file...
-    "www.figma.com",
-    // ...and the signed image URLs that lookup returns.
+    // Pasting from Figma: the signed image URLs the image batch lookup below returns.
     "s3-alpha-sig.figma.com",
     "s3-alpha.figma.com",
 ];
@@ -38,6 +37,42 @@ const ALLOWED_PATH_PREFIXES: &[(&str, &str)] = &[
     // Online fonts, Fontsource provider: font files on jsDelivr's Fontsource mirror.
     ("cdn.jsdelivr.net", "/fontsource/"),
 ];
+
+/// Hosts allowed for one request only: its method and a path shape, with no query.
+struct Endpoint {
+    host: &'static str,
+    method: Method,
+    path: fn(&str) -> bool,
+}
+
+const ALLOWED_ENDPOINTS: &[Endpoint] = &[
+    // Pasting from Figma: the image batch lookup for the copied file
+    // (`src/app/editor/clipboard/figma-images.ts`).
+    Endpoint {
+        host: "www.figma.com",
+        method: Method::POST,
+        path: figma_image_batch,
+    },
+];
+
+/// `/file/<key>/image/batch`, where a Figma file key is letters, digits, `-` and `_`.
+fn figma_image_batch(path: &str) -> bool {
+    path.strip_prefix("/file/")
+        .and_then(|rest| rest.strip_suffix("/image/batch"))
+        .is_some_and(|key| {
+            !key.is_empty()
+                && key
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
+        })
+}
+
+/// Whether a path holds an encoded `/` or `\`, which a server may decode into a segment
+/// separator after the prefix was compared.
+fn encodes_separator(path: &str) -> bool {
+    let lower = path.to_ascii_lowercase();
+    lower.contains("%2f") || lower.contains("%5c")
+}
 
 /// The most redirects one request follows, each re-checked against the list.
 pub const MAX_REDIRECTS: usize = 5;
@@ -99,43 +134,62 @@ fn https_domain(url: &Url) -> Result<&str, EgressError> {
     }
 }
 
-fn statically_allowed(domain: &str, path: &str) -> bool {
+/// `method` is None for a redirect hop, whose method reqwest does not expose; hosts limited to
+/// one method then refuse it.
+fn statically_allowed(domain: &str, url: &Url, method: Option<&Method>) -> bool {
+    let path = url.path();
     ALLOWED_HOSTS.contains(&domain)
-        || ALLOWED_PATH_PREFIXES
-            .iter()
-            .any(|(host, prefix)| *host == domain && path.starts_with(prefix))
+        || ALLOWED_PATH_PREFIXES.iter().any(|(host, prefix)| {
+            *host == domain && path.starts_with(prefix) && !encodes_separator(path)
+        })
+        || ALLOWED_ENDPOINTS.iter().any(|endpoint| {
+            endpoint.host == domain
+                && method == Some(&endpoint.method)
+                && url.query().is_none()
+                && (endpoint.path)(path)
+        })
 }
 
-/// Accepts a URL the proxy may send to, or says why not.
-pub fn check(url: &Url) -> Result<(), EgressError> {
+/// Accepts a URL the proxy may send to with `method`, or says why not. `method` is None for a
+/// redirect hop.
+pub fn check(url: &Url, method: Option<&Method>) -> Result<(), EgressError> {
     let domain = https_domain(url)?;
     // `port()` is None for the default port, which the parser drops from `https://h:443`.
     if let Some(port) = url.port() {
         return Err(EgressError::Port(format!("{domain}:{port}")));
     }
-    if statically_allowed(domain, url.path()) {
+    if statically_allowed(domain, url, method) {
         Ok(())
     } else {
         Err(EgressError::NotAllowed(domain.to_owned()))
     }
 }
 
-pub fn check_str(url: &str) -> Result<Url, EgressError> {
+pub fn check_str(url: &str, method: &Method) -> Result<Url, EgressError> {
     let parsed = Url::parse(url).map_err(|error| EgressError::Invalid(error.to_string()))?;
-    check(&parsed)?;
+    check(&parsed, Some(method))?;
     Ok(parsed)
 }
 
 /// The redirect policy for a request: each hop is checked like the first URL.
 pub fn redirect_policy(follow: bool) -> reqwest::redirect::Policy {
+    checked_redirects(follow, |url| check(url, None))
+}
+
+fn checked_redirects(
+    follow: bool,
+    hop: impl Fn(&Url) -> Result<(), EgressError> + Send + Sync + 'static,
+) -> reqwest::redirect::Policy {
     if !follow {
         return reqwest::redirect::Policy::none();
     }
-    reqwest::redirect::Policy::custom(|attempt| {
-        if attempt.previous().len() >= MAX_REDIRECTS {
+    reqwest::redirect::Policy::custom(move |attempt| {
+        // `previous()` starts with the first URL, so it holds one URL per redirect followed so
+        // far plus that one: this is redirect number `previous().len()`.
+        if attempt.previous().len() > MAX_REDIRECTS {
             return attempt.error("too many redirects");
         }
-        match check(attempt.url()) {
+        match hop(attempt.url()) {
             Ok(()) => attempt.follow(),
             Err(error) => attempt.error(error),
         }
@@ -172,7 +226,7 @@ mod tests {
     use EgressError::*;
 
     fn check(url: &str) -> Result<(), EgressError> {
-        check_str(url).map(|_| ())
+        check_str(url, &Method::GET).map(|_| ())
     }
 
     fn assert_cases(cases: &[(&str, Result<(), EgressError>)]) {
@@ -190,7 +244,6 @@ mod tests {
         assert_cases(&[
             ("https://api.anthropic.com/v1/messages", Ok(())),
             ("https://fonts.gstatic.com/s/inter/v13/a.woff2", Ok(())),
-            ("https://www.figma.com/file/abc/image/batch", Ok(())),
             // The default port spelled out is the default port.
             ("https://api.anthropic.com:443/v1/messages", Ok(())),
             // Host names are case-insensitive.
@@ -287,8 +340,55 @@ mod tests {
                 "https://cdn.jsdelivr.net/fontsource/%2e%2e/npm/x",
                 jsdelivr.clone(),
             ),
-            ("https://cdn.jsdelivr.net/fontsourcex/", jsdelivr),
+            ("https://cdn.jsdelivr.net/fontsourcex/", jsdelivr.clone()),
+            // An encoded separator could be decoded into `/` or `\` after the prefix matched.
+            (
+                "https://cdn.jsdelivr.net/fontsource/..%2fnpm/x",
+                jsdelivr.clone(),
+            ),
+            (
+                "https://cdn.jsdelivr.net/fontsource/..%2Fnpm/x",
+                jsdelivr.clone(),
+            ),
+            (
+                "https://cdn.jsdelivr.net/fontsource/..%5cnpm/x",
+                jsdelivr.clone(),
+            ),
+            ("https://cdn.jsdelivr.net/fontsource/..%5Cnpm/x", jsdelivr),
         ]);
+    }
+
+    #[test]
+    fn limits_figma_to_the_image_batch_lookup() {
+        let figma = refused("www.figma.com");
+        let post = |url: &str| check_str(url, &Method::POST).map(|_| ());
+        assert_eq!(
+            post("https://www.figma.com/file/AbC123-x_y/image/batch"),
+            Ok(())
+        );
+        for url in [
+            "https://www.figma.com/",
+            "https://www.figma.com/file/abc",
+            "https://www.figma.com/file//image/batch",
+            "https://www.figma.com/file/a/b/image/batch",
+            "https://www.figma.com/file/a%2fb/image/batch",
+            "https://www.figma.com/file/abc/image/batch/extra",
+            "https://www.figma.com/file/abc/image/batch?leak=1",
+            "https://www.figma.com/api/multiplayer/abc",
+            "https://www.figma.com/file/x/../../api/upload/image/batch",
+        ] {
+            assert_eq!(post(url), figma.clone(), "{url}");
+        }
+        for method in [Method::GET, Method::PUT, Method::DELETE] {
+            assert_eq!(
+                check_str("https://www.figma.com/file/abc/image/batch", &method).map(|_| ()),
+                figma.clone(),
+                "{method}"
+            );
+        }
+        // A redirect hop's method is unknown, so it may not land on the method-limited host.
+        let url = Url::parse("https://www.figma.com/file/abc/image/batch").expect("url");
+        assert_eq!(super::check(&url, None), figma);
     }
 
     /// Serves one redirect on a loopback port and reports how many requests it answered.
@@ -339,6 +439,59 @@ mod tests {
             assert!(error_chain(&error).contains(reason), "{location}");
             assert_eq!(served.recv().expect("served"), 1);
         }
+    }
+
+    /// Serves a chain of `hops` redirects on one loopback port, then a 200.
+    fn redirect_chain(hops: usize) -> String {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+        let address = listener.local_addr().expect("address");
+        std::thread::spawn(move || {
+            for stream in listener.incoming() {
+                let Ok(mut stream) = stream else { return };
+                let mut buffer = [0u8; 4096];
+                let read = stream.read(&mut buffer).unwrap_or(0);
+                let request = String::from_utf8_lossy(&buffer[..read]);
+                let step: usize = request
+                    .split_whitespace()
+                    .nth(1)
+                    .and_then(|path| path.strip_prefix('/'))
+                    .and_then(|step| step.parse().ok())
+                    .unwrap_or(0);
+                let response = if step < hops {
+                    format!(
+                        "HTTP/1.1 302 Found\r\nLocation: http://{address}/{}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+                        step + 1
+                    )
+                } else {
+                    "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned()
+                };
+                let _ = stream.write_all(response.as_bytes());
+            }
+        });
+        format!("http://{address}/0")
+    }
+
+    #[test]
+    fn follows_at_most_max_redirects() {
+        // Loopback hops pass here so the test needs no network; `check` itself refuses them.
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .redirect(checked_redirects(true, |_| Ok(())))
+            .build()
+            .expect("client");
+        let get = |hops| tauri::async_runtime::block_on(client.get(redirect_chain(hops)).send());
+
+        let response = get(MAX_REDIRECTS).expect("a chain of MAX_REDIRECTS is followed");
+        assert_eq!(response.status().as_u16(), 200);
+        assert!(response
+            .url()
+            .path()
+            .ends_with(&format!("/{MAX_REDIRECTS}")));
+
+        let error = get(MAX_REDIRECTS + 1).expect_err("one more redirect is refused");
+        assert!(error.is_redirect());
+        assert!(error_chain(&error).contains("too many redirects"));
     }
 
     #[test]
