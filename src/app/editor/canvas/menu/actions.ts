@@ -6,7 +6,6 @@ import type { EditorStore } from '@/app/editor/active-store'
 import { pasteClipboardToReplace } from '@/app/editor/clipboard/paste-to-replace'
 import { executeClipboardCommand } from '@/app/editor/clipboard/system'
 import { createTextClipboard } from '@/app/editor/clipboard/text'
-import { canVectorizeImageNode, vectorizeImageNode } from '@/app/editor/vectorize'
 import { notificationMessages } from '@/app/i18n/notifications'
 import { toast } from '@/app/shell/ui'
 
@@ -76,14 +75,6 @@ export function createCanvasMenuActions(store: EditorStore, selectedIds: Ref<Set
     clipboardWrite,
     copyNodeId,
     copyXPath,
-    copyAsPNG,
-    canVectorizeImage: () => {
-      void selectedIds.value
-      return canVectorizeImageNode(store)
-    },
-    vectorizeImage: async () => {
-      const nodeId = ids()[0]
-      if (nodeId) await vectorizeImageNode(store, nodeId)
-    }
+    copyAsPNG
   }
 }

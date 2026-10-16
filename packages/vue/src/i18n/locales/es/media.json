@@ -1,5 +1,0 @@
-{
-  "vectorization": "Vectorización de imágenes",
-  "vectorizationDescription": "Envía capas de imagen a Recraft o fal.ai y devuelve vectores editables. Pueden aplicarse cargos del proveedor.",
-  "vectorizeProvider": "Servicio de vectorización"
-}

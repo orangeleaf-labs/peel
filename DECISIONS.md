@@ -32,6 +32,7 @@ did not cover a case, the safer and more reversible option was taken.
 | AI connections saved for a removed provider are dropped when settings load; their old keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
 | The model list is checked in rather than fetched. | No runtime call to models.dev; new Claude models arrive with an app update. |
 | Plaintext localStorage keys for removed AI providers are deleted at startup, not migrated. | No plaintext secret outlives its provider; upstream's own migration already deletes these entries. |
+| Stored Recraft and fal.ai keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
 | No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
 | Collaboration code and dependencies are deleted rather than feature-flagged. | Nothing bundled can reach signalling hosts; bringing it back means reverting one commit. |
@@ -51,3 +52,4 @@ did not cover a case, the safer and more reversible option was taken.
 | Core's web font resolver starts with no providers, so the CLI and MCP render with local and bundled fonts only. | Safer default; no CLI flag turns them on. |
 | The CLI's `--fonts assets` HTML and Storybook export still fetches font files from providers. | It is an explicit per-command request, and the CLI is not part of the desktop app. |
 | Old Pexels and Unsplash keys in the upstream keychain service and localStorage are left alone. | Peel never reads them, and deleting them could break a co-installed upstream OpenPencil. |
+| The Settings Media section is removed along with its i18n namespace, rather than kept empty. | With stock photos (#9) and vectorization (#11) both gone it had nothing left to configure. |

@@ -60,7 +60,7 @@ test('external Settings requests respect a dirty editor', async ({ page }) => {
     page.evaluate(async () => {
       const path = '/src/app/settings/dialog.ts'
       const { openSettingsDialog } = await import(path)
-      openSettingsDialog('media')
+      openSettingsDialog('storage')
     })
   await requestSection()
   await expect(page.getByRole('alertdialog')).toBeVisible()
@@ -68,7 +68,7 @@ test('external Settings requests respect a dirty editor', async ({ page }) => {
   await expect(name).toHaveValue('Keep this draft')
   await requestSection()
   await page.getByRole('button', { name: 'Discard', exact: true }).click()
-  await expect(page.locator('[data-vectorize-settings]')).toBeVisible()
+  await expect(page.getByTestId('settings-storage-panel')).toBeVisible()
 })
 
 test('model credential Clear is staged until Save and Cancel preserves the saved key', async ({

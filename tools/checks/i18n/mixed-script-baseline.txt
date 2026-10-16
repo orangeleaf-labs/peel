@@ -125,7 +125,6 @@ ja:files.importHTMLCSSDescription
 ja:fonts.downloadFallbackPacksDescription
 ja:fonts.remoteFontsDescription
 ja:fonts.unsupportedFormat
-ja:media.vectorizationDescription
 ja:menu.copyAsJSX
 ja:menu.copyAsPNG
 ja:menu.copyAsSVG
@@ -296,7 +295,6 @@ zh-cn:files.importHTMLCSSDescription
 zh-cn:fonts.downloadFallbackPacksDescription
 zh-cn:fonts.remoteFontsDescription
 zh-cn:fonts.unsupportedFormat
-zh-cn:media.vectorizationDescription
 zh-cn:menu.copyAsJSX
 zh-cn:menu.copyAsPNG
 zh-cn:menu.copyAsSVG

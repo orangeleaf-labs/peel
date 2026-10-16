@@ -1,5 +1,0 @@
-{
-  "vectorization": "Bildvektorisierung",
-  "vectorizationDescription": "Sendet Bildebenen an Recraft oder fal.ai und gibt bearbeitbare Vektoren zurück. Es können Anbietergebühren anfallen.",
-  "vectorizeProvider": "Vektorisierungsdienst"
-}

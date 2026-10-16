@@ -1,0 +1,2 @@
+- Image vectorization with Recraft or fal.ai is removed, so images are no longer sent to those services.
+- The Media section of Settings is removed, since stock photos and image vectorization no longer exist.

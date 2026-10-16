@@ -14,7 +14,6 @@ import { diagnosticsMessageDefaults, diagnosticsMessages } from '#vue/i18n/messa
 import { editorMessageDefaults, editorMessages } from '#vue/i18n/messages/editor'
 import { filesMessageDefaults, filesMessages } from '#vue/i18n/messages/files'
 import { fontsMessageDefaults, fontsMessages } from '#vue/i18n/messages/fonts'
-import { mediaMessageDefaults, mediaMessages } from '#vue/i18n/messages/media'
 import { menuMessageDefaults, menuMessages } from '#vue/i18n/messages/menu'
 import { pageMessageDefaults, pageMessages } from '#vue/i18n/messages/pages'
 import { panelMessageDefaults, panelMessages } from '#vue/i18n/messages/panels'
@@ -45,7 +44,6 @@ export {
   editorMessages,
   filesMessages,
   fontsMessages,
-  mediaMessages,
   menuMessages,
   pageMessages,
   panelMessages,
@@ -74,7 +72,6 @@ export const messageDefaults = {
   editor: editorMessageDefaults,
   files: filesMessageDefaults,
   fonts: fontsMessageDefaults,
-  media: mediaMessageDefaults,
   menu: menuMessageDefaults,
   pages: pageMessageDefaults,
   panels: panelMessageDefaults,

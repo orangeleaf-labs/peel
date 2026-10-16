@@ -4,11 +4,15 @@ import { spawnACPProcess } from '@/app/ai/acp/process'
 
 import { clearTauriMocks, mockTauriIPC } from '#tests/helpers/tauri/mocks'
 
+// Bun provides a global `navigator`; restore it rather than deleting it for later suites.
+const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+
 afterEach(async () => {
   await clearTauriMocks()
   vi.restoreAllMocks()
   Reflect.deleteProperty(globalThis, 'window')
   Reflect.deleteProperty(globalThis, 'navigator')
+  if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator)
 })
 
 describe('Tauri process helpers', () => {

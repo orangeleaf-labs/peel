@@ -89,38 +89,6 @@ async function failCredentialWrites(page: Page) {
   })
 }
 
-test('media explains optional keys and preserves input after a failed save', async ({ page }) => {
-  await openSettings(page)
-  await page.getByTestId('settings-section-media').click()
-  await page.locator('[data-vectorize-settings]').click()
-  const key = page.getByRole('textbox', { name: 'API key', exact: true })
-  await expect(page.getByRole('link', { name: 'Get API key' })).toHaveAttribute(
-    'href',
-    'https://www.recraft.ai/profile/api'
-  )
-  await expect(key).toHaveAccessibleDescription('Optional. Add a key to enable this service.')
-  await key.fill('test-only-replacement')
-  const failure = await failCredentialWrites(page)
-  try {
-    await page.getByRole('button', { name: 'Save', exact: true }).click()
-    await expect(key).toHaveValue('test-only-replacement')
-    await expect(key).not.toHaveAttribute('aria-invalid', 'true')
-    await expect(
-      page.getByRole('alert', {
-        name: 'Could not save these changes. Check the settings and try again.',
-        exact: true
-      })
-    ).toBeVisible()
-    await expect(key).toHaveAccessibleDescription('Optional. Add a key to enable this service.')
-    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeEnabled()
-  } finally {
-    await failure.evaluate((handle) => handle.restore())
-    await failure.dispose()
-  }
-  await page.getByRole('button', { name: 'Save', exact: true }).click()
-  await expect(page.locator('[data-vectorize-settings]')).toBeVisible()
-})
-
 test('MCP requires a token only for enabled bearer connections and preserves failed saves', async ({
   page
 }) => {

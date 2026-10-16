@@ -1,7 +1,6 @@
 import { AI_PROVIDERS } from '@open-pencil/core/constants'
 
 import { aiModelSettings, modelConnectionCredentialRef } from '@/app/ai/models'
-import { VECTORIZE_CREDENTIAL_REFS } from '@/app/editor/vectorize/credentials'
 import { mcpConnectionSettings, mcpConnectionCredentialRef } from '@/app/integrations/mcp'
 import { storageCredentialRefs, storageProviderRegistry } from '@/app/integrations/storage'
 import { providerCredentialRef } from '@/app/settings/credentials/migration'
@@ -27,7 +26,6 @@ export function appCredentialRefs(): CredentialRef[] {
   return uniqueCredentialRefs([
     ...legacyAIRefs,
     ...modelConnectionRefs,
-    ...VECTORIZE_CREDENTIAL_REFS,
     ...mcpConnectionSettings.value.connections.map((connection) =>
       mcpConnectionCredentialRef(connection.id)
     ),

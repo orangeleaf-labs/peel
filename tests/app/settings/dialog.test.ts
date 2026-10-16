@@ -15,6 +15,7 @@ afterEach(() => {
 describe('Settings sections', () => {
   test('offer no Privacy section, since the app sends no pings or usage stats', () => {
     expect(SETTINGS_SECTIONS).not.toContain('privacy')
+    expect(SETTINGS_SECTIONS).not.toContain('media')
     expect(SETTINGS_SECTIONS).toEqual([
       'general',
       'toolbar',
@@ -23,7 +24,6 @@ describe('Settings sections', () => {
       'diagnostics',
       'mcp',
       'tools',
-      'media',
       'storage'
     ])
   })
