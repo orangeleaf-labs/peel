@@ -12,8 +12,6 @@ import {
 } from '../src/shards'
 
 const REPO_ROOT = await resolveWorkspaceRoot(import.meta.dir)
-// Packages whose tests run in their own CI job instead of the unit shards.
-const OWN_SUITES = ['packages/feedback/']
 
 async function discover(pattern: string): Promise<string[]> {
   return Array.fromAsync(new Bun.Glob(pattern).scan({ cwd: REPO_ROOT }))
@@ -25,7 +23,7 @@ test('every app, engine and package-local test belongs to exactly one shard', as
     ...(await discover('tests/integration/**/*.test.ts')),
     ...(await discover('tests/engine/**/*.test.ts')),
     ...(await discover('packages/*/tests/**/*.test.ts'))
-  ].filter((file) => !OWN_SUITES.some((suite) => file.startsWith(suite)))
+  ]
   const paths = pathsForUnitTestGroup('all')
   const invalidAssignments = discovered.flatMap((file) => {
     const owners = paths.filter((path) => file.startsWith(`${path}/`))

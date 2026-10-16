@@ -43,9 +43,6 @@
       "#mcp/*": [
         "./packages/mcp/src/*"
       ],
-      "#feedback/*": [
-        "./packages/feedback/src/*"
-      ],
       "#dom-css/*": [
         "./packages/dom-css/src/*"
       ],

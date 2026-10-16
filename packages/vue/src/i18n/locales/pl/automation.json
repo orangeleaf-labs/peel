@@ -78,6 +78,7 @@
   "writeApprovalExport": "Agent chce wyeksportować {format} narzędziem {tool} do {target}.",
   "writeApprovalSettings": "Agent chce zmienić ustawienia aplikacji narzędziem {tool}: {target}.",
   "writeApprovalWrite": "Agent chce zapisać plik narzędziem {tool}: {target}.",
+  "writeApprovalCode": "Agent chce uruchomić skrypt z uprawnieniami aplikacji narzędziem {tool}: {target}",
   "writeApprovalUnknownTarget": "Agent chce zapisać dane poza dokumentem narzędziem {tool}.",
   "writeApprovalDenyHint": "Jeśli odmówisz, agent otrzyma błąd i nic nie zostanie zapisane.",
   "writeApprovalAllow": "Zezwól",

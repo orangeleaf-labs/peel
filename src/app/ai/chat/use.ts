@@ -35,7 +35,6 @@ const activeTab = ref<PropertiesTab>('design')
 
 const chatSession = createChatSessionManager({
   isConfigured,
-  providerID,
   credentialsReady,
   getActiveEditorStore
 })

@@ -1,6 +1,8 @@
 import { request } from 'node:http'
 import type { ClientRequest, RequestOptions } from 'node:http'
 
+import { automationRPCTimeout } from '@open-pencil/core/rpc'
+
 import { readDiscoveryFile } from '#mcp/transport/discovery'
 import { getSocketPath, platformHasUnixSockets } from '#mcp/transport/paths'
 
@@ -16,6 +18,13 @@ type StdioRPCBridgeOptions = {
 
 // 35s gives a 5s margin over the worst case (10s app wait + 20s RPC timeout = 30s)
 const RPC_TIMEOUT = 35_000
+// The server's own wait for the app (10s) and margin (5s) on top of its timeout for this command.
+const SERVER_WAIT_MARGIN = 15_000
+
+/** How long one call waits for the server, which may wait on the user's approval in the app. */
+function rpcTimeout(body: Record<string, unknown>): number {
+  return Math.max(RPC_TIMEOUT, automationRPCTimeout(body.command, 0) + SERVER_WAIT_MARGIN)
+}
 const DISCONNECTED_MESSAGE =
   'OpenPencil app is not connected. ' +
   'STOP and tell the user: "The OpenPencil desktop app is not running or no document is open. ' +
@@ -136,7 +145,8 @@ export function createStdioRPCBridge({
   function httpRequest(
     method: string,
     path: string,
-    body?: Record<string, unknown>
+    body?: Record<string, unknown>,
+    timeoutMs = RPC_TIMEOUT
   ): Promise<{ status: number; data: unknown; req: ClientRequest }> {
     return new Promise((resolve, reject) => {
       const bodyJSON = body ? JSON.stringify(body) : undefined
@@ -179,7 +189,7 @@ export function createStdioRPCBridge({
       // unreachable" signal rather than racing with the outer timer.
       // If the outer sendRPC timer already rejected, the error handler
       // is a no-op (settled guard in attempt()).
-      req.setTimeout(RPC_TIMEOUT - 5_000, () => {
+      req.setTimeout(timeoutMs - 5_000, () => {
         req.destroy(new Error('Socket timeout'))
       })
       if (bodyJSON) req.write(bodyJSON)
@@ -318,11 +328,12 @@ export function createStdioRPCBridge({
       () =>
         new Promise((resolve, reject) => {
           let settled = false
+          const timeoutMs = rpcTimeout(body)
           const timer = setTimeout(() => {
             if (settled) return
             settled = true
-            reject(new Error(`RPC timeout (${Math.round(RPC_TIMEOUT / 1000)}s)`))
-          }, RPC_TIMEOUT)
+            reject(new Error(`RPC timeout (${Math.round(timeoutMs / 1000)}s)`))
+          }, timeoutMs)
 
           /**
            * Performs one HTTP request attempt. `allowAuthRetry` controls whether
@@ -330,7 +341,7 @@ export function createStdioRPCBridge({
            * It is set to `false` for the second attempt to prevent infinite loops.
            */
           function attempt(allowAuthRetry: boolean) {
-            httpRequest('POST', '/rpc', body)
+            httpRequest('POST', '/rpc', body, timeoutMs)
               .then(({ status, data, req }) => {
                 // If the overall RPC timeout fired while the request was in-flight,
                 // the server may have already executed the tool. Destroying the
