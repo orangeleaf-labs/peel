@@ -23,12 +23,17 @@ const storageSettingsServices = {
   statuses: storageCredentialStatuses,
   manager: appCredentialServices.manager,
   test: testStorageDraft,
+  approve: (providerId: StorageProviderID, preferences: Record<string, string>) =>
+    storageProviderRegistry.get(providerId).approveEndpoint?.(preferences) ?? Promise.resolve(),
   resume: resumeStorageSync,
   changed: (providerId: StorageProviderID) =>
     emitStorageWorkspaceEvent({ providerId, kind: 'changed' })
 }
 
-import type { StorageProviderID } from '@/app/integrations/storage/types'
+import type {
+  StorageProviderID,
+  StorageProviderRegistration
+} from '@/app/integrations/storage/types'
 import type { SettingsSaveResult } from '@/app/settings/save-result'
 
 export function useStorageSettings(
@@ -114,6 +119,17 @@ export function useStorageSettings(
     cleared.value = uniq([...cleared.value, field])
   }
 
+  function writePreferences(
+    target: StorageProviderRegistration,
+    preferences: Record<string, string>,
+    written: () => void
+  ) {
+    for (const field of target.preferenceFields) {
+      services.writePreference(target.id, field.id, preferences[field.id] ?? '')
+      written()
+    }
+  }
+
   async function save(): Promise<SettingsSaveResult> {
     if (busy.value || disposed) return 'failed'
     let persisted = false
@@ -126,11 +142,12 @@ export function useStorageSettings(
     const credentials = { ...credentialDrafts.value }
     const removals = new Set(cleared.value)
     try {
+      // The desktop proxy reaches a storage endpoint only once the user allows it, so ask
+      // before saving settings that would send requests there.
+      await services.approve(target.id, preferences)
+      if (!current(request)) return 'failed'
       // Persistence spans preferences and the native credential store; it is not atomic.
-      for (const field of target.preferenceFields) {
-        services.writePreference(target.id, field.id, preferences[field.id] ?? '')
-        persisted = true
-      }
+      writePreferences(target, preferences, () => (persisted = true))
       for (const field of target.credentialFields) {
         if (!current(request)) return persisted ? 'partial' : 'failed'
         const reference = credentialRef(target.id, field.id)
@@ -170,13 +187,11 @@ export function useStorageSettings(
     const target = provider.value.id
     const credentials = { ...credentialDrafts.value }
     const removals = cleared.value.filter((field) => !credentials[field]?.trim())
+    const preferences = { ...preferenceDrafts.value }
     try {
-      const result = await services.test(
-        target,
-        { ...preferenceDrafts.value },
-        credentials,
-        removals
-      )
+      await services.approve(target, preferences)
+      if (!current(request)) return null
+      const result = await services.test(target, preferences, credentials, removals)
       return current(request) ? result : null
     } catch (cause) {
       return current(request)

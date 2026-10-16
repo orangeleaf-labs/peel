@@ -11,7 +11,8 @@ use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::Manager;
 use tokio::sync::oneshot;
 
-use crate::egress::{check_str, error_chain, redirect_policy, refused_redirect};
+use crate::egress::{error_chain, redirect_policy, refused_redirect, Allowed};
+use crate::storage_endpoints::StorageEndpoints;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ProxyHttpHeader {
@@ -176,16 +177,20 @@ fn request_method(method: Option<String>) -> Result<Method, ProxyHttpError> {
     Method::from_bytes(raw.as_bytes()).map_err(|e| ProxyHttpError::request(e.to_string()))
 }
 
-async fn send(request: ProxyHttpRequest) -> Result<reqwest::Response, ProxyHttpError> {
+async fn send(
+    request: ProxyHttpRequest,
+    allowed: Allowed,
+) -> Result<reqwest::Response, ProxyHttpError> {
     // Checked before a client exists, so a refused URL causes no network I/O.
     let method = request_method(request.method)?;
-    let parsed = check_str(&request.url, &method)
+    let parsed = allowed
+        .check_str(&request.url, &method)
         .map_err(|error| ProxyHttpError::blocked(error.to_string()))?;
 
     let follow = request.follow_redirects.unwrap_or(true);
     let client = reqwest::Client::builder()
         // Every hop is re-checked against the same allow-list.
-        .redirect(redirect_policy(follow))
+        .redirect(redirect_policy(allowed, follow))
         // An idle limit, not a total one: a streamed model response can run for
         // minutes while still delivering bytes. Callers cap the total with timeout_ms.
         .connect_timeout(Duration::from_secs(30))
@@ -219,11 +224,12 @@ fn end_body(on_body: &Channel<InvokeResponseBody>, end: ProxyHttpBodyEnd) {
 
 async fn run(
     request: ProxyHttpRequest,
+    allowed: Allowed,
     head: oneshot::Sender<HeadResult>,
     on_body: Channel<InvokeResponseBody>,
 ) {
     let limit = request.max_response_bytes;
-    let mut response = match send(request).await {
+    let mut response = match send(request, allowed).await {
         Ok(response) => response,
         Err(error) => {
             let _ = head.send(Err(error));
@@ -303,6 +309,7 @@ pub async fn proxy_http_request<R: tauri::Runtime>(
     on_body: Channel<InvokeResponseBody>,
 ) -> HeadResult {
     let id = request.id.clone();
+    let allowed = app.state::<StorageEndpoints>().allowed();
     let (head, head_received) = oneshot::channel();
     {
         // Held while spawning, so the task cannot remove its entry before it exists.
@@ -314,7 +321,7 @@ pub async fn proxy_http_request<R: tauri::Runtime>(
         let task_app = app.clone();
         let task_id = id.clone();
         let task = tauri::async_runtime::spawn(async move {
-            run(request, head, on_body).await;
+            run(request, allowed, head, on_body).await;
             task_app
                 .state::<ProxyHttpRequests>()
                 .requests()
@@ -337,6 +344,7 @@ pub fn cancel_http_request(requests: tauri::State<'_, ProxyHttpRequests>, id: St
 #[cfg(test)]
 mod tests {
     use super::{request_headers, send, ProxyHttpHeader, ProxyHttpRequest, Requests};
+    use crate::egress::Allowed;
 
     fn request(url: &str) -> ProxyHttpRequest {
         ProxyHttpRequest {
@@ -363,7 +371,9 @@ mod tests {
             "https://api.anthropic.com@evil.com/".to_owned(),
             "https://evil.com/collect".to_owned(),
         ] {
-            let Err(error) = tauri::async_runtime::block_on(send(request(&url))) else {
+            let Err(error) =
+                tauri::async_runtime::block_on(send(request(&url), Allowed::default()))
+            else {
                 panic!("{url} must be refused");
             };
             assert!(error.blocked, "{url}");

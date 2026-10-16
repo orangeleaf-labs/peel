@@ -1,5 +1,6 @@
 import { defineStorageProvider, StorageProviderRegistry } from './registry'
 import { createS3StorageAdapter } from './s3/adapter'
+import { approveStorageEndpoint } from './s3/approval'
 
 export const S3_STORAGE_PROVIDER = defineStorageProvider({
   id: 's3-compatible',
@@ -14,7 +15,8 @@ export const S3_STORAGE_PROVIDER = defineStorageProvider({
     { id: 'access-key-id', label: 'Access key ID', required: true },
     { id: 'secret-access-key', label: 'Secret access key', required: true }
   ],
-  createAdapter: createS3StorageAdapter
+  createAdapter: createS3StorageAdapter,
+  approveEndpoint: (preferences) => approveStorageEndpoint(preferences.endpoint)
 })
 
 export const storageProviderRegistry = new StorageProviderRegistry([S3_STORAGE_PROVIDER])

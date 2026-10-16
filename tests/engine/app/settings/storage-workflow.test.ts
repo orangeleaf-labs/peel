@@ -13,6 +13,7 @@ function fixture() {
   })
   const writes: string[] = []
   const tests: Record<string, string>[] = []
+  const approvals: Array<{ endpoint: string; writesBefore: number }> = []
   const changed: string[] = []
   const manager: CredentialManager = {
     backend: 'memory',
@@ -29,6 +30,7 @@ function fixture() {
     preferences,
     writes,
     tests,
+    approvals,
     changed,
     services: {
       readPreferences: () => ({ ...preferences.value }),
@@ -44,6 +46,9 @@ function fixture() {
       test: async (_provider: string, values: Record<string, string>) => {
         tests.push(values)
         return { ok: true, message: 'Connected' }
+      },
+      approve: async (_provider: string, values: Record<string, string>) => {
+        approvals.push({ endpoint: values.endpoint ?? '', writesBefore: writes.length })
       },
       resume: async () => undefined,
       changed: (provider: string) => {
@@ -132,6 +137,51 @@ test('failed storage saves retain replacement drafts and expose the failure', as
     expect(credentials.value['secret-access-key']).toBe('test-only-replacement')
     scope.stop()
     expect(credentials.value).toEqual({})
+  } finally {
+    scope.stop()
+  }
+})
+
+test('saving asks to approve the endpoint before writing anything', async () => {
+  const f = fixture()
+  const scope = effectScope()
+  try {
+    const state = scope.run(() => useStorageSettings(ref({}), f.services))
+    if (!state) throw new Error('Missing scope')
+    state.preferenceDrafts.value.endpoint = 'https://new.example.com'
+    expect(await state.save()).toBe('saved')
+    expect(f.approvals).toEqual([{ endpoint: 'https://new.example.com', writesBefore: 0 }])
+    expect(f.writes).toContain('preference:endpoint')
+  } finally {
+    scope.stop()
+  }
+})
+
+test('a declined endpoint is neither saved nor tested', async () => {
+  const f = fixture()
+  f.services.approve = async () => {
+    throw new Error('Cloud storage was not allowed to connect to new.example.com.')
+  }
+  const scope = effectScope()
+  const credentials = ref<Record<string, string>>({})
+  try {
+    const state = scope.run(() => useStorageSettings(credentials, f.services))
+    if (!state) throw new Error('Missing scope')
+    state.preferenceDrafts.value.endpoint = 'https://new.example.com'
+    credentials.value['secret-access-key'] = 'test-only-draft'
+
+    expect(await state.testConnection()).toEqual({
+      ok: false,
+      message: 'Cloud storage was not allowed to connect to new.example.com.'
+    })
+    expect(f.tests).toEqual([])
+
+    expect(await state.save()).toBe('failed')
+    expect(state.error.value).toBe('Cloud storage was not allowed to connect to new.example.com.')
+    expect(f.writes).toEqual([])
+    expect(f.changed).toEqual([])
+    expect(f.preferences.value.endpoint).toBe('https://old.example.com')
+    expect(credentials.value['secret-access-key']).toBe('test-only-draft')
   } finally {
     scope.stop()
   }

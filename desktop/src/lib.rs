@@ -8,6 +8,7 @@ mod fonts;
 mod http;
 mod menu;
 mod menu_events;
+mod storage_endpoints;
 #[cfg(target_os = "macos")]
 mod window;
 
@@ -26,6 +27,7 @@ use std::{
     path::{Path, PathBuf},
     sync::Mutex,
 };
+use storage_endpoints::{approvals_file, approve_storage_endpoint, StorageEndpoints};
 use tauri::{Emitter, Manager};
 use tauri_plugin_fs::FsExt;
 #[cfg(target_os = "macos")]
@@ -313,6 +315,7 @@ pub fn run() {
         .manage(ProxyHttpRequests::default())
         .invoke_handler(tauri::generate_handler![
             agents::agent_lookup,
+            approve_storage_endpoint,
             build_fig_file,
             credential_read,
             credential_access_paused,
@@ -350,6 +353,9 @@ pub fn run() {
             handle_menu_event(app, event.id().0.as_str());
         })
         .setup(|app| {
+            // Cloud storage endpoints the user approved, which the proxy may reach beyond its
+            // static allow-list (`egress.rs`).
+            app.manage(StorageEndpoints::load(approvals_file(app.handle())));
             queue_open_paths(app.handle(), startup_open_paths());
 
             use tauri_plugin_deep_link::DeepLinkExt;

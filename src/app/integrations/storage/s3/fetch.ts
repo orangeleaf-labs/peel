@@ -35,11 +35,12 @@ function requestHost(input: RequestInfo | URL): string {
   }
 }
 
-/** The desktop proxy refused the endpoint: it reaches only a fixed list of hosts. */
+/** The desktop proxy refused the endpoint: nobody approved it, or it is not an HTTPS domain. */
 function storageEndpointBlocked(input: RequestInfo | URL, cause: Error): Error {
   return new Error(
     `The desktop app is not allowed to connect to ${requestHost(input)}. ` +
-      'Custom storage endpoints are not allowed in the desktop app yet.',
+      'Storage endpoints must be https:// addresses with a domain name; save the storage ' +
+      'settings and choose Allow to approve this one.',
     { cause }
   )
 }

@@ -24,9 +24,11 @@ Endpoint examples:
 - AWS S3: `https://s3.eu-west-1.amazonaws.com`
 - Backblaze B2: `https://s3.eu-central-003.backblazeb2.com`
 - Cloudflare R2: `https://<account-id>.r2.cloudflarestorage.com`
-- MinIO: `http://localhost:9000`, or wherever your server listens
+- MinIO: `https://minio.example.com:9000`, or wherever your server listens
 
 Select **Test connection** to check the endpoint, keys, and bucket before saving, then **Save**. OpenPencil addresses objects as `{endpoint}/{bucket}/{key}`, so the bucket name never goes into the endpoint.
+
+The desktop app connects only to hosts it knows, so the first **Test connection** or **Save** for an endpoint asks whether to allow it to connect to that host for cloud storage. Choose **Allow** once per endpoint; the answer is kept for later launches. The desktop app needs an `https://` endpoint with a domain name: plain `http://`, IP addresses, and `localhost` are refused.
 
 Access keys are kept in the system credential store in the desktop app. In the browser they are encrypted in browser storage, or kept only until you close the session when **Settings → General → Remember API keys on this device** is off.
 
