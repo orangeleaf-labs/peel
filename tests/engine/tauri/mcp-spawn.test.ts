@@ -22,11 +22,15 @@ const DISCOVERY_JSON = JSON.stringify({
   startedAt: new Date().toISOString()
 })
 
+// Bun provides a global `navigator`; restore it rather than deleting it for later suites.
+const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+
 afterEach(async () => {
   await clearTauriMocks()
   vi.restoreAllMocks()
   Reflect.deleteProperty(globalThis, 'window')
   Reflect.deleteProperty(globalThis, 'navigator')
+  if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator)
   Reflect.deleteProperty(globalThis, 'location')
 })
 
