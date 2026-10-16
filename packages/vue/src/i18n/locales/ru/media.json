@@ -1,8 +1,0 @@
-{
-  "pexelsAPIKey": "API-ключ Pexels",
-  "unsplashAccessKey": "Ключ доступа Unsplash",
-  "stockPhotoToolOptional": "Необязательно — включает инструмент стоковых фото",
-  "pexelsAlternativeOptional": "Необязательно — альтернативный источник фото",
-  "getPexelsAPIKey": "Получить бесплатный API-ключ Pexels →",
-  "getUnsplashAccessKey": "Получить бесплатный ключ доступа Unsplash →"
-}

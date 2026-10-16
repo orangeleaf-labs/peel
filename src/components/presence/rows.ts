@@ -1,6 +1,5 @@
 import type { Color } from '@open-pencil/scene-graph/primitives'
 
-import type { RemotePeer } from '@/app/collab/types'
 import { agentPage } from '@/app/presence/registry'
 import type { AgentPresence, AgentStatus, FollowTarget } from '@/app/presence/types'
 
@@ -13,20 +12,12 @@ export interface PresenceAgentRow {
   renamable: boolean
 }
 
-/** How a person takes part in the room's voice call. */
-export interface PresenceVoice {
-  muted: boolean
-  speaking: boolean
-}
-
 export interface PresencePersonRow {
-  /** Undefined for ourselves, who cannot be followed. */
+  /** A stable key for anyone other than you, such as a comment author; undefined for you. */
   clientId?: number
   name: string
   color: Color
   agents: PresenceAgentRow[]
-  /** Present while the person is in the voice call. */
-  voice?: PresenceVoice
 }
 
 function agentRows(
@@ -44,64 +35,29 @@ function agentRows(
 }
 
 /**
- * Ourselves first, then everyone else in the room, each with the agents they run and how they
- * are in the voice call. `speaking` holds the presence clients speaking now.
+ * You, with every agent you run, resting ones and ones with no page included, so any of them can
+ * be followed or renamed.
  */
-export function presenceRows(
-  self: { name: string; color: Color; agents: readonly AgentPresence[]; voice?: PresenceVoice },
-  peers: readonly RemotePeer[],
-  pageName: (pageId: string) => string | undefined,
-  speaking: ReadonlySet<number> = new Set()
-): PresencePersonRow[] {
-  return [
-    {
-      name: self.name,
-      color: self.color,
-      agents: agentRows(self.agents, pageName, true),
-      voice: self.voice
-    },
-    ...peers.map((peer) => ({
-      clientId: peer.clientId,
-      name: peer.name,
-      color: peer.color,
-      agents: agentRows(peer.agents, pageName, false),
-      voice: peer.voice && {
-        muted: peer.voice.muted,
-        speaking: !peer.voice.muted && speaking.has(peer.clientId)
-      }
-    }))
-  ]
+export function selfPresenceRow(
+  self: { name: string; color: Color; agents: readonly AgentPresence[] },
+  pageName: (pageId: string) => string | undefined
+): PresencePersonRow {
+  return { name: self.name, color: self.color, agents: agentRows(self.agents, pageName, true) }
 }
 
-/**
- * The people on one page, each with only the agents they run there: collaborators whose cursor is
- * on it, and anyone, you included, whose agents work there.
- */
+/** You on one page, with only the agents you run there; empty while none of them works there. */
 export function pagePresenceRows(
   self: { name: string; color: Color; agents: readonly AgentPresence[] },
-  peers: readonly RemotePeer[],
   pageId: string
 ): PresencePersonRow[] {
-  const onPage = (agents: readonly AgentPresence[]) =>
-    agentRows(
-      agents.filter((agent) => agentPage(agent) === pageId),
-      () => undefined,
-      false
-    )
-  const rows: PresencePersonRow[] = []
-  const ownAgents = onPage(self.agents)
-  if (ownAgents.length > 0) rows.push({ name: self.name, color: self.color, agents: ownAgents })
-  for (const peer of peers) {
-    const agents = onPage(peer.agents)
-    if (peer.cursor?.pageId !== pageId && agents.length === 0) continue
-    rows.push({ clientId: peer.clientId, name: peer.name, color: peer.color, agents })
-  }
-  return rows
+  const agents = agentRows(
+    self.agents.filter((agent) => agentPage(agent) === pageId),
+    () => undefined,
+    false
+  )
+  return agents.length > 0 ? [{ name: self.name, color: self.color, agents }] : []
 }
 
 export function isFollowing(following: FollowTarget | null, target: FollowTarget): boolean {
-  if (!following || following.kind !== target.kind) return false
-  return following.kind === 'person'
-    ? target.kind === 'person' && following.clientId === target.clientId
-    : target.kind === 'agent' && following.agentId === target.agentId
+  return following?.agentId === target.agentId
 }

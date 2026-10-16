@@ -24,7 +24,6 @@ export const UNIT_TEST_GROUPS = {
     'tests/app',
     'tests/integration',
     'tests/engine/app',
-    'tests/engine/collab',
     'tests/engine/tauri'
   ],
   cli: ['packages/cli/tests', 'tests/engine/cli'],

@@ -23,7 +23,6 @@ graph TB
             end
         end
         MCP["MCP Server (90 tools, stdio+HTTP)"]
-        Collab["P2P Collab (Trystero + Yjs)"]
     end
 ```
 
@@ -48,7 +47,7 @@ The renderer is split into focused modules in `packages/core/src/renderer/`: sce
 
 Flat `Map<string, Node>` keyed by GUID strings. Tree structure via `parentIndex` references. Provides O(1) lookup, efficient traversal, hit testing, and rectangular area queries for marquee selection.
 
-The graph emits typed events via nanoevents: `node:created`, `node:updated`, `node:deleted`, `node:reparented`, `node:reordered`. Subsystems subscribe to these instead of manual call-site wiring — the editor uses them for render invalidation and microtask-batched component instance sync, while the collab system uses them for Yjs propagation.
+The graph emits typed events via nanoevents: `node:created`, `node:updated`, `node:deleted`, `node:reparented`, `node:reordered`. Subsystems subscribe to these instead of manual call-site wiring — the editor uses them for render invalidation and microtask-batched component instance sync.
 
 See [Scene Graph Reference](/reference/scene-graph) for internals.
 
@@ -92,10 +91,6 @@ Inverse-command pattern. Before applying any change, affected fields are snapsho
 ### Clipboard
 
 Figma-compatible bidirectional clipboard. Encodes/decodes Kiwi binary (same format as .fig files) via native browser copy/paste events. Handles vector path scaling, instance children, component set detection, and override application.
-
-### P2P Collaboration
-
-Real-time peer-to-peer collaboration via Trystero (WebRTC) + Yjs CRDT. No server relay — signaling over MQTT public brokers, STUN/TURN for NAT traversal. Awareness protocol provides live cursors, selections, and presence. Local persistence via y-indexeddb.
 
 ### CLI-to-App RPC Bridge
 

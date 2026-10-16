@@ -39,7 +39,6 @@ import {
 
 import { useAIChat } from '@/app/ai/chat/use'
 import { useEditorStore } from '@/app/editor/active-store'
-import { useCanvasCollaborationAwareness } from '@/app/editor/canvas/collaboration-awareness'
 import { createCanvasContextSelection } from '@/app/editor/canvas/context-selection'
 import { canvasOverlayObstacles } from '@/app/editor/canvas/obstacles'
 import { useFollowView } from '@/app/presence/follow-view'
@@ -73,7 +72,9 @@ function activatePane() {
 }
 
 function updatePaneCursor(cx: number, cy: number) {
-  if (isActivePane.value) updateCursor(cx, cy)
+  if (!isActivePane.value) return
+  store.state.cursorCanvasX = cx
+  store.state.cursorCanvasY = cy
 }
 
 const getRenderState = paneId ? () => store.getPaneRenderState(paneId) : undefined
@@ -84,7 +85,6 @@ const onViewportResize = (width: number, height: number) => {
   if (isActivePane.value) store.setViewportSize(width, height)
 }
 
-const { updateCursor } = useCanvasCollaborationAwareness(store)
 const { selectAtContextPoint } = createCanvasContextSelection(canvasRef, store)
 
 const shouldSuspendRender = () =>

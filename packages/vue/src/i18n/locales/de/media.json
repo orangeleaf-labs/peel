@@ -1,8 +1,0 @@
-{
-  "pexelsAPIKey": "Pexels-API-Schlüssel",
-  "unsplashAccessKey": "Unsplash-Zugriffsschlüssel",
-  "stockPhotoToolOptional": "Optional — Zugangsdaten für das stock_photo-Werkzeug",
-  "pexelsAlternativeOptional": "Optional — Alternative zu Pexels",
-  "getPexelsAPIKey": "Kostenlosen Pexels-API-Schlüssel abrufen →",
-  "getUnsplashAccessKey": "Kostenlosen Unsplash-Zugriffsschlüssel abrufen →"
-}

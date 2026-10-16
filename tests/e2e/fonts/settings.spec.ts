@@ -47,6 +47,10 @@ test('font settings popover exposes web font access without desktop-only cache a
 
   await expect(page.getByText('Allow browser access to local fonts')).toBeVisible()
   await expect(page.getByTestId('font-settings-request-access')).toBeVisible()
+  // Remote fonts are off until the user turns them on.
+  await expect(page.getByTestId('font-settings-toggle-online-fonts')).toHaveText('Enable')
+  await expect(page.getByTestId('font-settings-provider-google')).toBeDisabled()
+  await page.getByTestId('font-settings-toggle-online-fonts').click()
   await expect(page.getByTestId('font-settings-toggle-online-fonts')).toHaveText('Disable')
   await expect(page.getByTestId('font-settings-provider-google')).toBeChecked()
   await expect(page.getByTestId('font-settings-provider-fontsource')).toBeChecked()
@@ -54,9 +58,6 @@ test('font settings popover exposes web font access without desktop-only cache a
   await expect(page.getByTestId('font-settings-provider-fontshare')).not.toBeChecked()
   await page.getByTestId('font-settings-toggle-online-fonts').click()
   await expect(page.getByTestId('font-settings-toggle-online-fonts')).toHaveText('Enable')
-  await expect(page.getByTestId('font-settings-provider-google')).toBeDisabled()
-  await page.getByTestId('font-settings-toggle-online-fonts').click()
-  await expect(page.getByTestId('font-settings-toggle-online-fonts')).toHaveText('Disable')
   await expect(page.getByTestId('font-settings-download-fallbacks')).toHaveCount(0)
   await expect(page.getByTestId('font-settings-refresh-cache')).toHaveCount(0)
   await expect(page.getByTestId('font-settings-clear-cache')).toHaveCount(0)

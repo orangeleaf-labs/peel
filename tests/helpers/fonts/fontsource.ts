@@ -1,5 +1,7 @@
 import type { Page, Route } from '@playwright/test'
 
+import { allowRemoteFonts } from './runtime'
+
 interface FontsourceFixture {
   family: string
   subset: string
@@ -7,8 +9,9 @@ interface FontsourceFixture {
   format?: 'ttf' | 'otf'
 }
 
-/** Use real font bytes through the browser-enabled provider, without external network requests. */
+/** Turn remote fonts on and serve real font bytes through Fontsource, without external network requests. */
 export async function mockFontsource(page: Page, fixtures: readonly FontsourceFixture[]) {
+  await allowRemoteFonts(page)
   const counts = { downloads: 0 }
   const entries = new Map(fixtures.map((fixture, index) => [String(index), fixture]))
   const pattern =

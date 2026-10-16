@@ -9,7 +9,6 @@ export const SETTINGS_SECTIONS = [
   'diagnostics',
   'mcp',
   'tools',
-  'media',
   'storage'
 ] as const
 

@@ -30,3 +30,23 @@ test('a new catalog tells listeners to ask for their families again', () => {
   manager.setHostFontCatalog([])
   expect(resets).toBe(1)
 })
+
+test('a new manager enables no online provider, so a missing font needs no network', async () => {
+  const manager = new FontManager()
+  const urls: string[] = []
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = Object.assign(
+    async (input: string | URL | Request) => {
+      urls.push(input instanceof Request ? input.url : String(input))
+      return new Response('{}', { status: 200 })
+    },
+    { preconnect: originalFetch.preconnect }
+  )
+  try {
+    expect(manager.enabledOnlineFontProviders()).toEqual([])
+    expect(await manager.loadFont('Peel Missing Family', 'Regular', 'Ab')).toBeNull()
+    expect(urls).toEqual([])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})

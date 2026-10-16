@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import {
   DEFAULT_WEB_FONT_PROVIDER_SETTINGS,
@@ -20,6 +20,8 @@ import {
   createTauriDownloadedFontCache,
   downloadedFontCacheSummary as tauriDownloadedFontCacheSummary
 } from '@/app/editor/fonts/cache'
+import { optInFontFetch } from '@/app/editor/fonts/remote'
+import { appPreferences, updateRemoteFontsEnabled } from '@/app/settings/preferences/store'
 import { isTauri } from '@/app/tauri/env'
 import { tauriFetch } from '@/app/tauri/http'
 import { IS_TAURI } from '@/constants'
@@ -30,24 +32,36 @@ if (typeof navigator !== 'undefined') {
 
 export type FontProviderSettings = Record<WebFontProviderId, boolean>
 
-export const onlineFontsEnabled = useLocalStorage('op-online-fonts-enabled', true)
+/** Whether fonts may come from online providers; off unless the user turns it on. */
+export const onlineFontsEnabled = computed({
+  get: () => appPreferences.value.fonts.remote,
+  set: updateRemoteFontsEnabled
+})
 export const fontProviderSettings = useLocalStorage<FontProviderSettings>(
   'op-font-providers',
   DEFAULT_WEB_FONT_PROVIDER_SETTINGS
 )
 
+/** The providers the font manager may use: none while remote fonts are off. */
+export function onlineFontProviders(
+  enabled: boolean,
+  settings: FontProviderSettings,
+  desktop = isTauri()
+): Partial<FontProviderSettings> {
+  if (!enabled) return {}
+  return Object.fromEntries(
+    WEB_FONT_PROVIDER_IDS.map((provider) => [
+      provider,
+      settings[provider] && (desktop || provider !== 'google')
+    ])
+  )
+}
+
 watch(
   [onlineFontsEnabled, fontProviderSettings],
   () => {
     fontManager.setOnlineFontProviders(
-      onlineFontsEnabled.value
-        ? Object.fromEntries(
-            WEB_FONT_PROVIDER_IDS.map((provider) => [
-              provider,
-              fontProviderSettings.value[provider] && (isTauri() || provider !== 'google')
-            ])
-          )
-        : {}
+      onlineFontProviders(onlineFontsEnabled.value, fontProviderSettings.value)
     )
   },
   { deep: true, immediate: true }
@@ -59,12 +73,14 @@ function configureTauriFontCache() {
   if (tauriFontCacheConfigured || !isTauri()) return
   tauriFontCacheConfigured = true
   fontManager.setDownloadedFontCache(createTauriDownloadedFontCache())
-  fontManager.setWebFontFetch(tauriFetch)
+  fontManager.setWebFontFetch(optInFontFetch(() => onlineFontsEnabled.value, tauriFetch))
   fontManager.setHostFontLoader(loadSystemFont)
 }
 
 configureTauriFontCache()
-if (!isTauri()) fontManager.setWebFontFetch(browserWebFontFetch)
+if (!isTauri()) {
+  fontManager.setWebFontFetch(optInFontFetch(() => onlineFontsEnabled.value, browserWebFontFetch))
+}
 
 interface TauriFontFamily {
   family: string

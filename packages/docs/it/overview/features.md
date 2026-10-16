@@ -90,10 +90,6 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 Tutti i comandi supportano `--json`. Installazione: `npm install -g @open-pencil/cli` oppure `bun add -g @open-pencil/cli`.
 
-## Collaborazione in tempo reale
-
-La connessione peer-to-peer WebRTC non richiede un server centrale. Condividi un link e modifica il documento insieme agli altri partecipanti, con cursori, presenza, modalità di seguito e chiamate vocali con chi è nella stanza.
-
 ## Desktop e Web
 
 **Desktop:** Tauri v2, circa 7 MB, per macOS, Windows e Linux, con menu nativi, uso senza rete e salvataggio automatico.
@@ -102,4 +98,4 @@ La connessione peer-to-peer WebRTC non richiede un server centrale. Condividi un
 
 ## Caricamento alternativo da Google Fonts
 
-Se un font non è disponibile localmente, OpenPencil lo scarica automaticamente da Google Fonts. Non è necessaria l’installazione manuale.
+Se un font non è disponibile localmente, OpenPencil può scaricarlo da Google Fonts e da altri provider online. I font remoti sono disattivati per impostazione predefinita; attivali in **Impostazioni → Generali → Font remoti**. Finché sono disattivati, i font mancanti vengono sostituiti da font installati o inclusi.
