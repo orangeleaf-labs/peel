@@ -34,6 +34,17 @@ function agentRows(
   }))
 }
 
+/**
+ * You, with every agent you run, resting ones and ones with no page included, so any of them can
+ * be followed or renamed.
+ */
+export function selfPresenceRow(
+  self: { name: string; color: Color; agents: readonly AgentPresence[] },
+  pageName: (pageId: string) => string | undefined
+): PresencePersonRow {
+  return { name: self.name, color: self.color, agents: agentRows(self.agents, pageName, true) }
+}
+
 /** You on one page, with only the agents you run there; empty while none of them works there. */
 export function pagePresenceRows(
   self: { name: string; color: Color; agents: readonly AgentPresence[] },

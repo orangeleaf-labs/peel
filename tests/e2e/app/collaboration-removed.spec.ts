@@ -37,13 +37,18 @@ test('the home view offers no way to join a room', async ({ page }) => {
 test('a share link matches no route, opens no room, and connects nowhere', async ({ page }) => {
   const remote = recordRemoteSockets(page)
   await page.goto(`/share/${ROOM_ID}?test`)
-  const matched = await page.evaluate(async () => {
+  const { matched, paths } = await page.evaluate(async () => {
     const routerURL = '/src/router.ts'
     const router: { default: typeof AppRouter } = await import(routerURL)
     await router.default.isReady()
-    return router.default.currentRoute.value.matched.length
+    return {
+      matched: router.default.currentRoute.value.matched.length,
+      paths: router.default.getRoutes().map((route) => route.path)
+    }
   })
   expect(matched).toBe(0)
+  expect(paths.length).toBeGreaterThan(0)
+  expect(paths.filter((path) => path.startsWith('/share'))).toEqual([])
   await expect(page.getByTestId('editor-root')).toHaveCount(0)
   expect(remote).toEqual([])
 })

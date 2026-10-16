@@ -89,12 +89,15 @@ describe('collaboration is removed', () => {
 
   test('the lockfile installs none of them', async () => {
     const lock = await readFile(repoPath('bun.lock'), 'utf8')
-    expect(lock).not.toMatch(/"(@trystero-p2p\/[^"]+|trystero|yjs|y-protocols|y-indexeddb)"/)
+    expect(lock).not.toMatch(
+      /"(@trystero-p2p\/[^"]+|trystero|yjs|y-protocols|y-indexeddb|y-webrtc|lib0)"/
+    )
   })
 
   test('no shipped module imports them or names a signalling host', async () => {
     const offending = (await shippedSources()).flatMap(({ path, text }) => [
-      ...[...text.matchAll(/(?:from|import\()\s*['"]([^'"]+)['"]/g)]
+      // `from 'x'`, `import('x')`, and a side-effect `import 'x'`.
+      ...[...text.matchAll(/(?:\bfrom|\bimport\s*\(?)\s*['"]([^'"]+)['"]/g)]
         .map((match) => match[1] ?? '')
         .filter((specifier) =>
           COLLAB_PACKAGE.test(
@@ -107,6 +110,17 @@ describe('collaboration is removed', () => {
         .map((specifier) => `${path}: imports ${specifier}`),
       ...SIGNALLING_HOSTS.filter((host) => text.includes(host)).map((host) => `${path}: ${host}`)
     ])
+    expect(offending).toEqual([])
+  })
+
+  test('the app opens no peer-to-peer connection', async () => {
+    const offending = (await shippedSources())
+      .filter(({ path }) => path.startsWith('src/'))
+      .flatMap(({ path, text }) =>
+        ['RTCPeerConnection', 'iceServers']
+          .filter((name) => text.includes(name))
+          .map((name) => `${path}: ${name}`)
+      )
     expect(offending).toEqual([])
   })
 

@@ -16,6 +16,7 @@ import EditorCanvas from '@/components/EditorCanvas.vue'
 import LayersPanel from '@/components/LayersPanel.vue'
 import MobileDrawer from '@/components/MobileDrawer.vue'
 import MobileHud from '@/components/MobileHud/MobileHud.vue'
+import SelfPresenceMenu from '@/components/presence/SelfPresenceMenu.vue'
 import PropertiesPanel from '@/components/PropertiesPanel.vue'
 import Toolbar from '@/components/toolbar/Toolbar.vue'
 import IconButton from '@/components/ui/button/IconButton.vue'
@@ -81,7 +82,9 @@ const { editor } = useI18n()
       class="flex flex-col"
     >
       <div class="flex shrink-0 items-center gap-1 border-b border-border px-1.5 py-1.5">
-        <div class="min-w-0 flex-1" />
+        <div class="flex min-w-0 flex-1 items-center">
+          <SelfPresenceMenu />
+        </div>
         <IconButton
           :label="
             editor.startPreview({
