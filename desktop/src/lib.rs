@@ -1,6 +1,7 @@
 mod agents;
 mod credentials;
 mod deep_link;
+mod egress;
 mod fig_container;
 mod folder_picker;
 mod fonts;

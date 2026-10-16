@@ -27,6 +27,23 @@ export function asFetch(implementation: FetchImplementation): typeof fetch {
   return Object.assign(implementation, fetch)
 }
 
+function requestHost(input: RequestInfo | URL): string {
+  try {
+    return new URL(input instanceof Request ? input.url : input.toString()).host
+  } catch {
+    return 'this endpoint'
+  }
+}
+
+/** The desktop proxy refused the endpoint: it reaches only a fixed list of hosts. */
+function storageEndpointBlocked(input: RequestInfo | URL, cause: Error): Error {
+  return new Error(
+    `The desktop app is not allowed to connect to ${requestHost(input)}. ` +
+      'Custom storage endpoints are not allowed in the desktop app yet.',
+    { cause }
+  )
+}
+
 /** Prefer Tauri HTTP bridge on desktop to avoid bucket CORS requirements. */
 async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const { signal, timedOut } = storageFetchSignal(
@@ -34,8 +51,13 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): P
   )
   try {
     if (isTauri()) {
-      const { tauriFetch } = await import('@/app/tauri/http')
-      return await tauriFetch(input, { ...init, signal })
+      const { EgressBlockedError, tauriFetch } = await import('@/app/tauri/http')
+      try {
+        return await tauriFetch(input, { ...init, signal })
+      } catch (error) {
+        if (error instanceof EgressBlockedError) throw storageEndpointBlocked(input, error)
+        throw error
+      }
     }
     // Request bodies are owned by the Request; re-wrap so we can attach a timeout signal.
     if (input instanceof Request) {

@@ -37,6 +37,14 @@ Only Linux was exercised; the macOS-only native cases were skipped.
 3. Edit that file in another app and check Peel reloads it.
 4. Save As into a new folder, export a PNG, and double-click a `.fig` in Finder or Explorer; each must work.
 
+### Confirm the Figma image hosts
+
+Pasting from Figma fetches image URLs with `POST www.figma.com/file/<key>/image/batch` (the only request allowed to `www.figma.com`, with no redirects into it); Peel allows the images only on `s3-alpha-sig.figma.com` and `s3-alpha.figma.com`, which could not be checked without network access.
+
+1. In a desktop build, copy a frame with an image fill in Figma and paste it into Peel.
+2. If the image is missing and the web inspector console warns about a blocked host, add that host to `ALLOWED_HOSTS` in `desktop/src/egress.rs` with a comment, and to EGRESS.md.
+3. If the console warns that `www.figma.com` is blocked, the lookup redirected or changed shape; adjust its entry in `ALLOWED_ENDPOINTS` in `desktop/src/egress.rs`.
+
 ### Apply the pending workflow changes
 
 The agent's GitHub token has no `workflow` scope, so it cannot change files under `.github/workflows/`. Workflow edits are saved as patches in `.github/pending-workflows/` instead.
