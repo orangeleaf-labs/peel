@@ -1,13 +1,16 @@
 import type { ToolCapability, ToolDef } from '@open-pencil/core/tools'
 
 /** What an agent's call would change outside the open document, as the user is asked about it. */
-export type WriteKind = 'save' | 'export' | 'settings' | 'write'
+export type WriteKind = 'save' | 'export' | 'settings' | 'write' | 'code'
 
 export interface WriteRequest {
   /** The tool or automation command, as the agent named it. */
   tool: string
   kind: WriteKind
-  /** The file path, the document name, or the settings the call changes; empty when unknown. */
+  /**
+   * The file path, the document name, the settings the call changes, or the start of the code it
+   * runs; empty when unknown.
+   */
   target: string
   /** The exported format, for an export. */
   format?: string
@@ -21,15 +24,27 @@ const FILE_OUTPUT_FORMATS: Readonly<
   Partial<Record<string, (args: Record<string, unknown>) => string>>
 > = {
   export_svg: () => 'SVG',
-  export_pdf: () => 'PDF',
   export_image: (args) => (typeof args.format === 'string' ? args.format.toUpperCase() : 'PNG'),
   get_jsx: () => 'JSX'
 }
 
 const OUTSIDE_WRITE_CAPABILITIES: ReadonlySet<ToolCapability> = new Set([
   'filesystem:write',
-  'settings:write'
+  'settings:write',
+  // A script runs with the app's own permissions, whatever it is meant to do.
+  'code:execute'
 ])
+
+/** How much of a script the dialog shows. */
+const CODE_PREVIEW_LENGTH = 240
+
+/** Asks before a script runs, showing its start; the code can reach anything the app can. */
+export function codeWriteRequest(tool: string, code: string): WriteRequest {
+  const flat = code.replaceAll(/\s+/g, ' ').trim()
+  const target =
+    flat.length > CODE_PREVIEW_LENGTH ? `${flat.slice(0, CODE_PREVIEW_LENGTH - 1)}…` : flat
+  return { tool, kind: 'code', target }
+}
 
 export interface ToolWriteOptions {
   /**
@@ -53,6 +68,9 @@ export function toolWriteRequest(
   if (!def.capabilities.some((capability) => OUTSIDE_WRITE_CAPABILITIES.has(capability))) {
     return null
   }
+  if (def.capabilities.includes('code:execute')) {
+    return codeWriteRequest(def.name, typeof args.code === 'string' ? args.code : '')
+  }
   if (def.capabilities.includes('filesystem:write')) {
     return { tool: def.name, kind: 'write', target: path }
   }
@@ -71,6 +89,6 @@ export function settingsPatchPaths(patch: unknown, prefix = ''): string[] {
 
 /** What the agent hears when the user says no; nothing was written. */
 export function writeDeniedMessage(request: WriteRequest): string {
-  const target = request.target ? ` (${request.target})` : ''
+  const target = request.target && request.kind !== 'code' ? ` (${request.target})` : ''
   return `The user did not allow "${request.tool}" to write outside the document${target}; nothing was changed.`
 }

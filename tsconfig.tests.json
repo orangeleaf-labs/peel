@@ -46,9 +46,6 @@
       "@open-pencil/harness": [
         "./packages/harness/src/index.ts"
       ],
-      "#feedback/*": [
-        "./packages/feedback/src/*"
-      ],
       "#dom-css/*": [
         "./packages/dom-css/src/*"
       ],
@@ -127,7 +124,6 @@
     "tests/helpers/tauri/native-global.d.ts"
   ],
   "exclude": [
-    "tests/e2e/native/**",
-    "packages/feedback/**"
+    "tests/e2e/native/**"
   ]
 }

@@ -212,20 +212,6 @@ export const en: LandingMessages = {
       }
     ]
   },
-  waitlist: {
-    label: 'Email address',
-    placeholder: 'you@example.com',
-    submit: 'Join the waitlist',
-    confirmHuman: 'Confirm you’re human',
-    invalid: 'Enter a valid email address.',
-    joined: 'Check your inbox',
-    joinedDetail: 'Open the link we sent to confirm your address.',
-    failed: 'Couldn’t reach the waitlist. Check your connection and try again.',
-    privacy: 'We only email you about OpenPencil Cloud.',
-    refused: 'We couldn’t confirm you’re not a bot. Try again.',
-    limited: 'Too many attempts. Try again in a minute.',
-    unavailable: 'You can’t join from here. Join on openpencil.dev instead.'
-  },
   closing: {
     title: 'Take your designs with you.',
     download: 'Download OpenPencil',

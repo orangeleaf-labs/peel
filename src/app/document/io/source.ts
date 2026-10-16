@@ -15,7 +15,6 @@ import { createDocumentRecovery } from '@/app/document/recovery'
 import { recoveryEnabled } from '@/app/document/recovery/preferences'
 import type { StorageDocumentBinding, StorageProviderID } from '@/app/integrations/storage/types'
 import { createCanvasId } from '@/app/storage/id'
-import { trackDocumentFormat } from '@/app/telemetry'
 
 type DocumentSourceState = EditorState & {
   documentName: string
@@ -139,7 +138,6 @@ export function createDocumentSourceActions({
     setSourceIdentity({ handle: handle ?? null, path: path ?? null })
     markDocumentSaved()
     void recovery.markProtectedVersion(changes.capture())
-    trackDocumentFormat('document_opened', sourceFormat)
     if (isFig && (handle || path)) {
       void startWatchingFile()
     }
