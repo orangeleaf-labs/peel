@@ -32,3 +32,4 @@ did not cover a case, the safer and more reversible option was taken.
 | AI connections saved for a removed provider are dropped when settings load; their old keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
 | The model list is checked in rather than fetched. | No runtime call to models.dev; new Claude models arrive with an app update. |
 | Plaintext localStorage keys for removed AI providers are deleted at startup, not migrated. | No plaintext secret outlives its provider; upstream's own migration already deletes these entries. |
+| Stored Recraft and fal.ai keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |

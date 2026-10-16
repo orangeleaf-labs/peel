@@ -1,0 +1,1 @@
+- Image vectorization with Recraft or fal.ai is removed, so images are no longer sent to those services.
