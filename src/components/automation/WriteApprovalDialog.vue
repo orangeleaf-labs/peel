@@ -56,6 +56,8 @@ function mainDescription(request: WriteRequest): string {
       return m.writeApprovalSettings({ tool, target })
     case 'write':
       return m.writeApprovalWrite({ tool, target })
+    case 'code':
+      return m.writeApprovalCode({ tool, target })
   }
 }
 

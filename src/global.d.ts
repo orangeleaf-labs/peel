@@ -1,5 +1,4 @@
 import type { OpenPencilWindowAPI } from './app/browser-bridge'
-import type { TurnstileAPI } from './app/cloud/waitlist/turnstile'
 
 export {}
 
@@ -25,7 +24,5 @@ declare global {
     showOpenFilePicker?(options?: FilePickerOptions): Promise<FileSystemFileHandle[]>
     showSaveFilePicker?(options?: FilePickerOptions): Promise<FileSystemFileHandle>
     mockWindowOpen?(url: string): void
-    /** Cloudflare Turnstile, once its script has loaded. */
-    turnstile?: TurnstileAPI
   }
 }

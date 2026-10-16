@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto'
 import * as v from 'valibot'
 import type { WebSocket } from 'ws'
 
+import { automationRPCTimeout } from '@open-pencil/core/rpc'
+
 import { isAuthorized } from '#mcp/auth'
 import type { RPCJSONObject } from '#mcp/json'
 import type { PendingRequest } from '#mcp/rpc-types'
@@ -198,10 +200,12 @@ export function createBrowserRPCBridge({
         }
         const id = randomUUID()
         const settle = createSettler(resolve, reject)
+        // A command that may ask the user waits past the app's approval deadline.
+        const timeoutMs = automationRPCTimeout(body.command, RPC_TIMEOUT)
         const timer = setTimeout(() => {
           pending.delete(id)
-          settle.reject(new Error(`RPC timeout (${Math.round(RPC_TIMEOUT / 1000)}s)`))
-        }, RPC_TIMEOUT)
+          settle.reject(new Error(`RPC timeout (${Math.round(timeoutMs / 1000)}s)`))
+        }, timeoutMs)
         pending.set(id, { resolve: settle.resolve, reject: settle.reject, timer })
         try {
           ws.send(JSON.stringify({ ...body, type: 'request', id }))

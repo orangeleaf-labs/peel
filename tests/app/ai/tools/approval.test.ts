@@ -8,7 +8,12 @@ import { FigmaAPI } from '@open-pencil/core/figma-api'
 import { createAITools, endRun, startRun } from '@/app/ai/tools'
 import { runWithWriteApproval } from '@/app/ai/tools/approval'
 import * as figmaFactory from '@/app/automation/bridge/figma-factory'
-import { currentWriteApproval } from '@/app/automation/write-approval'
+import {
+  answerWriteApproval,
+  currentWriteApproval,
+  denyWriteApprovals,
+  requestWriteApproval
+} from '@/app/automation/write-approval'
 import { createEditorStore } from '@/app/editor/session/create'
 import { WRITE_APPROVAL_TIMEOUT_MS } from '@/constants'
 
@@ -24,6 +29,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  // A request a failed test left waiting must not stand in front of the next file's.
+  denyWriteApprovals()
   endRun(store)
   store.dispose()
 })
@@ -68,15 +75,19 @@ test('no answer before the timeout counts as Deny and runs nothing', async () =>
   }
 })
 
-test('a reply stopped while the user decided runs nothing, even on Allow', async () => {
+test('stopping the reply withdraws its request, and writes queued behind it are asked next', async () => {
   const execute = mock(async () => ({ written: true }))
   const pending = runWithWriteApproval(store, fileWriter, target, execute)
   await nextWriteApproval()
+  const mcpSave = { tool: 'save_file', kind: 'save', target: '/tmp/mcp.fig' } as const
+  const queued = requestWriteApproval(mcpSave)
   endRun(store)
-  await answerNextWriteApproval(true)
 
   expect(await pending).toEqual({ error: expect.stringContaining('Stopped') })
   expect(execute).not.toHaveBeenCalled()
+  expect(currentWriteApproval.value).toBe(mcpSave)
+  answerWriteApproval(mcpSave, true)
+  expect(await queued).toBe(true)
 })
 
 test('document edits, reads and returned exports from the chat never ask', async () => {

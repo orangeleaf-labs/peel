@@ -21,6 +21,7 @@ describe('toolWriteRequest', () => {
     for (const def of ALL_TOOLS) {
       if (def.capabilities.includes('filesystem:write')) continue
       if (def.capabilities.includes('settings:write')) continue
+      if (def.capabilities.includes('code:execute')) continue
       expect(toolWriteRequest(def, {}, chat)).toBeNull()
       expect(toolWriteRequest(def, {}, automation)).toBeNull()
     }
@@ -50,6 +51,21 @@ describe('toolWriteRequest', () => {
       format: 'SVG'
     })
     expect(toolWriteRequest(tool('get_jsx'), { path: 'Card.tsx' }, automation)?.format).toBe('JSX')
+  })
+
+  test('a PDF export is returned, never written, so its path does not ask', () => {
+    expect(toolWriteRequest(tool('export_pdf'), { path: 'card.pdf' }, automation)).toBeNull()
+  })
+
+  test('a script asks in every interface, showing its start', () => {
+    const code = `figma.currentPage.children.length\n${'x'.repeat(400)}`
+    for (const options of [chat, automation]) {
+      const request = expectDefined(toolWriteRequest(tool('eval'), { code }, options), 'request')
+      expect(request.kind).toBe('code')
+      expect(request.tool).toBe('eval')
+      expect(request.target.startsWith('figma.currentPage.children.length x')).toBe(true)
+      expect(request.target.length).toBeLessThanOrEqual(240)
+    }
   })
 
   test('a vector path argument is geometry, not a file', () => {
