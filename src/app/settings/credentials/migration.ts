@@ -21,9 +21,6 @@ export function providerCredentialRef(
   return credentialRef(integrationId, 'api-key', profileId)
 }
 
-export const PEXELS_CREDENTIAL = credentialRef('pexels', 'api-key')
-export const UNSPLASH_CREDENTIAL = credentialRef('unsplash', 'access-key')
-
 type LegacyCredential = {
   storageKey: string
   reference: CredentialRef
@@ -31,9 +28,7 @@ type LegacyCredential = {
 
 function legacyCredentials(storage: Storage): LegacyCredential[] {
   const credentials: LegacyCredential[] = [
-    { storageKey: LEGACY_OPENROUTER_KEY, reference: providerCredentialRef('openrouter') },
-    { storageKey: `${STORAGE_PREFIX}pexels-api-key`, reference: PEXELS_CREDENTIAL },
-    { storageKey: `${STORAGE_PREFIX}unsplash-access-key`, reference: UNSPLASH_CREDENTIAL }
+    { storageKey: LEGACY_OPENROUTER_KEY, reference: providerCredentialRef('openrouter') }
   ]
 
   for (let index = 0; index < storage.length; index++) {

@@ -150,12 +150,6 @@ ja:files.importHTMLCSSDescription
 ja:fonts.downloadFallbackPacksDescription
 ja:fonts.remoteFontsDescription
 ja:fonts.unsupportedFormat
-ja:media.getPexelsAPIKey
-ja:media.getUnsplashAccessKey
-ja:media.pexelsAPIKey
-ja:media.pexelsAlternativeOptional
-ja:media.stockPhotoToolOptional
-ja:media.unsplashAccessKey
 ja:media.vectorizationDescription
 ja:menu.copyAsJSX
 ja:menu.copyAsPNG
@@ -352,12 +346,6 @@ zh-cn:files.importHTMLCSSDescription
 zh-cn:fonts.downloadFallbackPacksDescription
 zh-cn:fonts.remoteFontsDescription
 zh-cn:fonts.unsupportedFormat
-zh-cn:media.getPexelsAPIKey
-zh-cn:media.getUnsplashAccessKey
-zh-cn:media.pexelsAPIKey
-zh-cn:media.pexelsAlternativeOptional
-zh-cn:media.stockPhotoToolOptional
-zh-cn:media.unsplashAccessKey
 zh-cn:media.vectorizationDescription
 zh-cn:menu.copyAsJSX
 zh-cn:menu.copyAsPNG

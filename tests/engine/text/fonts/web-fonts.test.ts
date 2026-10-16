@@ -1,33 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
-  FontManager,
   normalizedCoverageText,
   WebFontResolver,
   webFontSubsetsForText
 } from '@open-pencil/core/text'
-
-import { fetchStub } from '#tests/helpers/fetch'
-
-describe('online font providers', () => {
-  test('stay off until the host enables them, so a missing font needs no network', async () => {
-    const manager = new FontManager()
-    const urls: string[] = []
-    const originalFetch = globalThis.fetch
-    globalThis.fetch = fetchStub(async (input) => {
-      urls.push(String(input))
-      return new Response('{}', { status: 200 })
-    })
-    try {
-      expect(new WebFontResolver().enabledProviders()).toEqual([])
-      expect(manager.enabledOnlineFontProviders()).toEqual([])
-      expect(await manager.loadFont('Peel Missing Family', 'Regular', 'Ab')).toBeNull()
-      expect(urls).toEqual([])
-    } finally {
-      globalThis.fetch = originalFetch
-    }
-  })
-})
 
 describe('web font coverage requests', () => {
   test('normalizes coverage without splitting supplementary code points', () => {

@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import {
   DEFAULT_WEB_FONT_PROVIDER_SETTINGS,
@@ -20,7 +20,8 @@ import {
   createTauriDownloadedFontCache,
   downloadedFontCacheSummary as tauriDownloadedFontCacheSummary
 } from '@/app/editor/fonts/cache'
-import { optInFontFetch, REMOTE_FONTS_STORAGE_KEY } from '@/app/editor/fonts/remote'
+import { optInFontFetch } from '@/app/editor/fonts/remote'
+import { appPreferences, updateRemoteFontsEnabled } from '@/app/settings/preferences/store'
 import { isTauri } from '@/app/tauri/env'
 import { tauriFetch } from '@/app/tauri/http'
 import { IS_TAURI } from '@/constants'
@@ -32,7 +33,10 @@ if (typeof navigator !== 'undefined') {
 export type FontProviderSettings = Record<WebFontProviderId, boolean>
 
 /** Whether fonts may come from online providers; off unless the user turns it on. */
-export const onlineFontsEnabled = useLocalStorage(REMOTE_FONTS_STORAGE_KEY, false)
+export const onlineFontsEnabled = computed({
+  get: () => appPreferences.value.fonts.remote,
+  set: updateRemoteFontsEnabled
+})
 export const fontProviderSettings = useLocalStorage<FontProviderSettings>(
   'op-font-providers',
   DEFAULT_WEB_FONT_PROVIDER_SETTINGS

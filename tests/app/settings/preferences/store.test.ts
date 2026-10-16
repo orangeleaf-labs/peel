@@ -15,6 +15,12 @@ describe('parseAppPreferences', () => {
     expect(Object.keys(preferences)).not.toContain('sharing')
   })
 
+  test('keeps remote fonts off unless they were turned on', () => {
+    expect(DEFAULT_APP_PREFERENCES.fonts.remote).toBe(false)
+    expect(parseAppPreferences({ fonts: { remote: 'yes' } }).fonts.remote).toBe(false)
+    expect(parseAppPreferences({ fonts: { remote: true } }).fonts.remote).toBe(true)
+  })
+
   test('keeps valid choices and defaults only the fields that are not', () => {
     const preferences = parseAppPreferences({
       appearance: { animations: 'off' },

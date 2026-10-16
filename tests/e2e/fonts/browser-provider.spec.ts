@@ -10,10 +10,14 @@ test('loads document font families from the browser provider before rendering', 
     const coreTextURL = '/packages/core/src/text/index.ts'
     const { fontManager }: { fontManager: FontManager } = await import(coreTextURL)
     // Remote fonts are off by default; turn them on as the Settings switch does.
-    const appFontsURL = '/src/app/editor/fonts/index.ts'
-    const appFonts: { onlineFontsEnabled: { value: boolean } } = await import(appFontsURL)
-    appFonts.onlineFontsEnabled.value = true
-    await new Promise((resolve) => setTimeout(resolve))
+    const preferencesURL = '/src/app/settings/preferences/store.ts'
+    const preferences: { updateRemoteFontsEnabled(remote: boolean): void } = await import(
+      preferencesURL
+    )
+    preferences.updateRemoteFontsEnabled(true)
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve)
+    })
     fontManager.setOnlineFontProviders({
       google: false,
       fontsource: true,

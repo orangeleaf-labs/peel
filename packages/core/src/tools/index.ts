@@ -43,5 +43,4 @@ export {
   parseOverlapScope,
   parseOverlapSeverity
 } from './analyze/overlaps/params'
-export { setPexelsAPIKey, setUnsplashAccessKey } from './stock-photo'
 export { importSVG } from './create'

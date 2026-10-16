@@ -17,7 +17,7 @@ import type {
 } from '@/app/settings/credentials/types'
 
 const API_KEY = credentialRef('openai-compatible', 'api-key')
-const MEDIA_KEY = credentialRef('pexels', 'api-key')
+const MEDIA_KEY = credentialRef('vectorize-recraft', 'api-key')
 
 class TestCredentialStore implements CredentialStore {
   readonly #values = new Map<string, string>()

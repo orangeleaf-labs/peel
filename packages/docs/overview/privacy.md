@@ -21,4 +21,3 @@ OpenPencil is local-first, but some features reach the network. The desktop app 
 | Cloud storage | The storage provider you configure |
 | Fonts | Google Fonts and other font providers, only after you turn on Remote fonts in Settings → General, to supply a font a document uses that is not installed |
 | Icons | The Iconify API, when you search or insert icons |
-| Stock images | Unsplash or Pexels, when you search them |

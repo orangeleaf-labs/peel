@@ -5,7 +5,6 @@ import {
   hasLegacyCredential,
   initializeCredentialMigration,
   migrateLegacyCredentials,
-  PEXELS_CREDENTIAL,
   providerCredentialRef
 } from '@/app/settings/credentials/migration'
 import type {
@@ -92,7 +91,7 @@ describe('legacy credential migration', () => {
 
   test('concurrent migrations share one in-flight run', async () => {
     const storage = new CountingStorage()
-    storage.setItem('open-pencil:pexels-api-key', 'legacy-pexels-key')
+    storage.setItem('open-pencil:openrouter-api-key', 'legacy-openrouter-key')
 
     await Promise.all([
       initializeCredentialMigration(storage),
@@ -100,22 +99,22 @@ describe('legacy credential migration', () => {
     ])
 
     expect(storage.scans).toBe(storage.length)
-    expect(storage.getItem('open-pencil:pexels-api-key')).toBeNull()
+    expect(storage.getItem('open-pencil:openrouter-api-key')).toBeNull()
   })
 
   test('concurrent migrations of distinct sources both complete', async () => {
-    const mediaStorage = new TestStorage()
+    const legacyStorage = new TestStorage()
     const providerStorage = new TestStorage()
-    mediaStorage.setItem('open-pencil:pexels-api-key', 'legacy-pexels-key')
+    legacyStorage.setItem('open-pencil:openrouter-api-key', 'legacy-openrouter-key')
     providerStorage.setItem('open-pencil:ai-key:anthropic', 'legacy-anthropic-key')
 
     const results = await Promise.all([
-      initializeCredentialMigration(mediaStorage),
+      initializeCredentialMigration(legacyStorage),
       initializeCredentialMigration(providerStorage)
     ])
 
     expect(results).toEqual([true, true])
-    expect(mediaStorage.getItem('open-pencil:pexels-api-key')).toBeNull()
+    expect(legacyStorage.getItem('open-pencil:openrouter-api-key')).toBeNull()
     expect(providerStorage.getItem('open-pencil:ai-key:anthropic')).toBeNull()
   })
 
@@ -124,15 +123,12 @@ describe('legacy credential migration', () => {
     const store = new MemoryCredentialStore()
     storage.setItem('open-pencil:openrouter-api-key', 'old-openrouter-key')
     storage.setItem('open-pencil:ai-key:anthropic', 'anthropic-key')
-    storage.setItem('open-pencil:pexels-api-key', 'pexels-key')
 
     expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
     expect(await store.read(providerCredentialRef('openrouter'))).toBe('old-openrouter-key')
     expect(await store.read(providerCredentialRef('anthropic'))).toBe('anthropic-key')
-    expect(await store.read(PEXELS_CREDENTIAL)).toBe('pexels-key')
     expect(storage.getItem('open-pencil:openrouter-api-key')).toBeNull()
     expect(storage.getItem('open-pencil:ai-key:anthropic')).toBeNull()
-    expect(storage.getItem('open-pencil:pexels-api-key')).toBeNull()
   })
 
   test('retains plaintext when the destination is unavailable', async () => {
@@ -146,12 +142,12 @@ describe('legacy credential migration', () => {
   test('clearing after migration removes a legacy-only credential for good', async () => {
     const storage = new TestStorage()
     const store = new MemoryCredentialStore()
-    storage.setItem('open-pencil:pexels-api-key', 'legacy-pexels-key')
+    storage.setItem('open-pencil:openrouter-api-key', 'legacy-openrouter-key')
 
     expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
-    await store.remove(PEXELS_CREDENTIAL)
+    await store.remove(providerCredentialRef('openrouter'))
 
-    expect(hasLegacyCredential(PEXELS_CREDENTIAL, storage)).toBeFalse()
-    expect(await store.read(PEXELS_CREDENTIAL)).toBeNull()
+    expect(hasLegacyCredential(providerCredentialRef('openrouter'), storage)).toBeFalse()
+    expect(await store.read(providerCredentialRef('openrouter'))).toBeNull()
   })
 })
