@@ -97,6 +97,7 @@
   "writeApprovalExport": "智能体想用 {tool} 将 {format} 导出到 {target}。",
   "writeApprovalSettings": "智能体想用 {tool} 更改应用设置：{target}。",
   "writeApprovalWrite": "智能体想用 {tool} 写入文件：{target}。",
+  "writeApprovalCode": "智能体想用 {tool} 以应用的权限运行脚本：{target}",
   "writeApprovalUnknownTarget": "智能体想用 {tool} 在文档之外写入。",
   "writeApprovalDenyHint": "如果拒绝，智能体会收到错误，且不会写入任何内容。",
   "writeApprovalAllow": "允许",

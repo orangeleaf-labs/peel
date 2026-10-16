@@ -49,3 +49,12 @@ The agent's GitHub token has no `workflow` scope, so it cannot change files unde
 ### Fix the Native app contracts CI job
 
 The `Native app contracts` job in `.github/workflows/ci.yml` runs inside `ghcr.io/open-pencil/native-contracts-ci`, an upstream image this fork cannot pull ("manifest unknown"), so it fails on every PR. Build and push an equivalent image to an Orangeleaf registry and point the job's `container.image` at it, or remove the job until one exists. The agent can't make this change without `workflow` scope.
+
+### Review the write-approval translations
+
+The nine write-approval dialog strings in `packages/vue/src/i18n/locales/{de,es,fr,it,ja,pl,ru,zh-cn}/automation.json` were machine-written. Have a native speaker check them and open a PR with corrections.
+
+### Check the write-approval dialog on the desktop app
+
+1. With an MCP client connected, call `save_file` with a path; the dialog must name the tool and the file.
+2. Check Allow saves, Deny and Escape save nothing, and no answer within 45 s of the call denies (a minute for the in-app AI chat).
