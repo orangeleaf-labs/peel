@@ -1,6 +1,7 @@
 mod agents;
 mod credentials;
 mod deep_link;
+mod egress;
 mod fig_container;
 mod folder_picker;
 mod fonts;
@@ -84,7 +85,12 @@ fn sharing_disabled_by_env() -> bool {
             .unwrap_or(false)
     };
     let do_not_track = std::env::var("DO_NOT_TRACK")
-        .map(|value| !matches!(value.trim().to_ascii_lowercase().as_str(), "" | "0" | "false"))
+        .map(|value| {
+            !matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "" | "0" | "false"
+            )
+        })
         .unwrap_or(false);
     is_off("OPENPENCIL_TELEMETRY", &["0", "false", "no"]) || do_not_track
 }

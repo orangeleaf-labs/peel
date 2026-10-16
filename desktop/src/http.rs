@@ -11,6 +11,8 @@ use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::Manager;
 use tokio::sync::oneshot;
 
+use crate::egress::{check_str, error_chain, redirect_policy, refused_redirect};
+
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ProxyHttpHeader {
     name: String,
@@ -39,10 +41,12 @@ pub struct ProxyHttpHead {
 }
 
 /// `network` marks failures to reach the server or read from it, which the page
-/// reports the way `fetch` does so callers can retry them.
+/// reports the way `fetch` does so callers can retry them. `blocked` marks a URL or
+/// redirect the egress allow-list refused, which no retry can fix.
 #[derive(Serialize)]
 pub struct ProxyHttpError {
     network: bool,
+    blocked: bool,
     message: String,
 }
 
@@ -50,13 +54,30 @@ impl ProxyHttpError {
     fn request(message: impl Into<String>) -> Self {
         Self {
             network: false,
+            blocked: false,
+            message: message.into(),
+        }
+    }
+
+    fn blocked(message: impl Into<String>) -> Self {
+        Self {
+            network: false,
+            blocked: true,
             message: message.into(),
         }
     }
 
     fn network(error: reqwest::Error) -> Self {
+        if error.is_redirect() {
+            return Self {
+                network: false,
+                blocked: refused_redirect(&error),
+                message: error_chain(&error),
+            };
+        }
         Self {
             network: true,
+            blocked: false,
             message: error.to_string(),
         }
     }
@@ -133,21 +154,14 @@ fn request_method(method: Option<String>) -> Result<Method, ProxyHttpError> {
 }
 
 async fn send(request: ProxyHttpRequest) -> Result<reqwest::Response, ProxyHttpError> {
+    // Checked before a client exists, so a refused URL causes no network I/O.
     let parsed =
-        reqwest::Url::parse(&request.url).map_err(|e| ProxyHttpError::request(e.to_string()))?;
-    if !matches!(parsed.scheme(), "http" | "https") {
-        return Err(ProxyHttpError::request(
-            "Only HTTP(S) requests are supported",
-        ));
-    }
+        check_str(&request.url).map_err(|error| ProxyHttpError::blocked(error.to_string()))?;
 
-    let redirect_policy = if request.follow_redirects.unwrap_or(true) {
-        reqwest::redirect::Policy::limited(5)
-    } else {
-        reqwest::redirect::Policy::none()
-    };
+    let follow = request.follow_redirects.unwrap_or(true);
     let client = reqwest::Client::builder()
-        .redirect(redirect_policy)
+        // Every hop is re-checked against the same allow-list.
+        .redirect(redirect_policy(follow))
         // An idle limit, not a total one: a streamed model response can run for
         // minutes while still delivering bytes. Callers cap the total with timeout_ms.
         .connect_timeout(Duration::from_secs(30))
@@ -256,7 +270,8 @@ async fn run(
 }
 
 /// Sends a request from the native side, out of reach of WebView CORS. Resolves
-/// with the head as soon as it arrives and streams the body to `on_body`.
+/// with the head as soon as it arrives and streams the body to `on_body`. Only
+/// URLs the egress allow-list accepts are sent (`crate::egress`).
 #[tauri::command]
 pub async fn proxy_http_request<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
@@ -297,7 +312,42 @@ pub fn cancel_http_request(requests: tauri::State<'_, ProxyHttpRequests>, id: St
 
 #[cfg(test)]
 mod tests {
-    use super::Requests;
+    use super::{send, ProxyHttpRequest, Requests};
+
+    fn request(url: &str) -> ProxyHttpRequest {
+        ProxyHttpRequest {
+            id: "test".into(),
+            url: url.into(),
+            method: None,
+            headers: None,
+            body: None,
+            max_response_bytes: None,
+            follow_redirects: None,
+            timeout_ms: None,
+        }
+    }
+
+    #[test]
+    fn refused_urls_fail_as_blocked_before_any_request() {
+        // A loopback listener that would see the request if one were sent.
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+        listener.set_nonblocking(true).expect("nonblocking");
+        let port = listener.local_addr().expect("address").port();
+        for url in [
+            format!("http://127.0.0.1:{port}/"),
+            format!("https://127.0.0.1:{port}/"),
+            "https://api.anthropic.com@evil.com/".to_owned(),
+            "https://evil.com/collect".to_owned(),
+        ] {
+            let Err(error) = tauri::async_runtime::block_on(send(request(&url))) else {
+                panic!("{url} must be refused");
+            };
+            assert!(error.blocked, "{url}");
+            assert!(!error.network, "{url}");
+            assert!(error.message.starts_with("Blocked request"), "{url}");
+        }
+        assert!(listener.accept().is_err(), "no connection may be made");
+    }
 
     #[test]
     fn a_cancel_before_registration_refuses_the_request() {

@@ -26,10 +26,25 @@ export interface ProxyHttpHead {
   url: string
 }
 
-/** `network` marks failures to reach the server or read from it. */
+/**
+ * `network` marks failures to reach the server or read from it; `blocked` marks a URL or
+ * redirect the desktop egress allow-list refused (`desktop/src/egress.rs`).
+ */
 export interface ProxyHttpError {
   network: boolean
+  blocked?: boolean
   message: string
+}
+
+/**
+ * The desktop app refused to send a request: its host is not on the egress allow-list. Not a
+ * `TypeError`, so callers do not mistake it for a network or CORS failure and retry it.
+ */
+export class EgressBlockedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'EgressBlockedError'
+  }
 }
 
 /** Body chunks arrive as raw bytes, then one of these ends the body. */
@@ -49,11 +64,13 @@ function isProxyHttpError(error: unknown): error is ProxyHttpError {
 
 /**
  * Fails the way `fetch` does: a network failure is a `TypeError('fetch failed')` whose cause
- * names it, which the AI SDK and other callers recognise and retry.
+ * names it, which the AI SDK and other callers recognise and retry. A refused host is an
+ * `EgressBlockedError` instead.
  */
-function fetchError(error: unknown): Error {
+function proxyFetchError(error: unknown): Error {
   if (error instanceof Error) return error
   if (!isProxyHttpError(error)) return new TypeError('fetch failed', { cause: error })
+  if (error.blocked === true) return new EgressBlockedError(error.message)
   if (error.network) return new TypeError('fetch failed', { cause: new Error(error.message) })
   return new TypeError(error.message)
 }
@@ -180,7 +197,7 @@ async function executeTauriFetch(
           controller.enqueue(new Uint8Array(message))
         } else if ('error' in message) {
           finish()
-          controller.error(fetchError(message.error))
+          controller.error(proxyFetchError(message.error))
         } else {
           finish()
           controller.close()
@@ -213,7 +230,7 @@ async function executeTauriFetch(
     head = await withAbortSignal(
       invoke<ProxyHttpHead>('proxy_http_request', { request: payload, onBody }).catch(
         (error: unknown) => {
-          throw fetchError(error)
+          throw proxyFetchError(error)
         }
       ),
       request.signal

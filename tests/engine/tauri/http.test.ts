@@ -3,6 +3,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import type { Channel } from '@tauri-apps/api/core'
 
 import {
+  EgressBlockedError,
   createTauriFetch,
   tauriFetch,
   type ProxyHttpBodyMessage,
@@ -305,6 +306,25 @@ describe('tauriFetch', () => {
 
     await expect(tauriFetch('https://example.test/')).rejects.toThrow(
       'Only HTTP(S) requests are supported'
+    )
+  })
+
+  test('reports a host the egress allow-list refused as blocked, not as a network failure', async () => {
+    await mockTauriIPC(() =>
+      desktopError({
+        network: false,
+        blocked: true,
+        message: 'Blocked request: evil.example.com is not an allowed host'
+      })
+    )
+
+    const error = await tauriFetch('https://evil.example.com/').catch((reason: unknown) => reason)
+
+    expect(error).toBeInstanceOf(EgressBlockedError)
+    expect(error).not.toBeInstanceOf(TypeError)
+    expect(error).toHaveProperty(
+      'message',
+      'Blocked request: evil.example.com is not an allowed host'
     )
   })
 
