@@ -13,16 +13,16 @@ export interface PersonPoint extends PagePoint {
   zoom?: number
 }
 
-/** Who to keep in view: a person in the room, or any agent, ours or theirs. */
-export type FollowTarget = { kind: 'person'; clientId: number } | { kind: 'agent'; agentId: string }
+/** Who to keep in view: one of the agents working in this document. */
+export interface FollowTarget {
+  kind: 'agent'
+  agentId: string
+}
 
-/**
- * An agent as its owner publishes it: metadata only, never prompts or tool arguments. What its
- * streamed `render` call builds travels apart from presence (`./preview-stream.ts`).
- */
+/** An agent working in this document, as the canvas and page list show it: metadata only. */
 export interface AgentPresence {
   id: string
-  /** A callsign, unique among the agents in a room, such as "Fern". */
+  /** A callsign, unique among the document's agents, such as "Fern". */
   name: string
   kind: AgentKind
   model?: string

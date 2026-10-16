@@ -87,7 +87,7 @@ Connexions, déclencheurs, actions, animations, superpositions, défilement, par
 | Fonction | État | Notes |
 |----------|------|-------|
 | Commentaires | 🔲 | Pas de repères, fils de discussion ni résolution |
-| Multijoueur | ✅ | P2P avec Trystero et Yjs CRDT, curseurs et suivi de vue ; sans serveur |
+| Multijoueur | — | Non disponible : la collaboration est désactivée |
 | Chat de curseur | 🔲 | Pas de bulles dans la zone de travail |
 | Branches et fusions | 🔲 | Pas de branches de versions |
 | Mode développement | 🟡 | L’onglet Code affiche JSX ; pas de propriétés CSS ni spécifications de transmission |

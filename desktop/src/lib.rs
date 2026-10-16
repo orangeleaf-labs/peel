@@ -47,18 +47,6 @@ struct PendingOpenFile {
 
 struct PendingOpen(Mutex<Vec<PendingOpenFile>>);
 
-/// Rooms from `openpencil://join` links, waiting for the frontend to open them.
-struct PendingRooms(Mutex<Vec<String>>);
-
-#[tauri::command]
-fn take_pending_rooms(state: tauri::State<PendingRooms>) -> Vec<String> {
-    state
-        .0
-        .lock()
-        .map(|mut pending| pending.drain(..).collect())
-        .unwrap_or_default()
-}
-
 #[tauri::command]
 fn take_pending_open(state: tauri::State<PendingOpen>) -> Vec<PendingOpenFile> {
     state
@@ -269,7 +257,6 @@ fn queue_open_paths<R: tauri::Runtime>(app: &tauri::AppHandle<R>, paths: Vec<Pat
 /// file picker and allows the resolved absolute path there.
 fn queue_deep_links<R: tauri::Runtime>(app: &tauri::AppHandle<R>, urls: Vec<url::Url>) {
     let mut files = Vec::new();
-    let mut rooms = Vec::new();
     for url in urls.iter().filter(|url| url.scheme() == "openpencil") {
         match deep_link::parse_deep_link(url) {
             Ok(deep_link::DeepLink::Open(open)) => files.push(PendingOpenFile {
@@ -277,28 +264,11 @@ fn queue_deep_links<R: tauri::Runtime>(app: &tauri::AppHandle<R>, urls: Vec<url:
                 node: open.node,
                 deep_link: true,
             }),
-            Ok(deep_link::DeepLink::Join(join)) => rooms.push(join.room),
             Err(error) => eprintln!("[deep-link] refused {url}: {error:?}"),
         }
     }
 
     queue_pending(app, files);
-    queue_rooms(app, rooms);
-}
-
-fn queue_rooms<R: tauri::Runtime>(app: &tauri::AppHandle<R>, rooms: Vec<String>) {
-    if rooms.is_empty() {
-        return;
-    }
-
-    if let Ok(mut pending) = app.state::<PendingRooms>().0.lock() {
-        pending.extend(rooms);
-    }
-
-    let _ = app.emit("open-room-links", ());
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_focus();
-    }
 }
 
 /// `openpencil://` URLs among a second launch's arguments: Windows and Linux start a new
@@ -343,7 +313,6 @@ pub fn run() {
     builder
         .manage(PendingOpen(Mutex::new(Vec::new())))
         .manage(ProxyHttpRequests::default())
-        .manage(PendingRooms(Mutex::new(Vec::new())))
         .invoke_handler(tauri::generate_handler![
             agents::agent_lookup,
             approve_storage_endpoint,
@@ -366,7 +335,6 @@ pub fn run() {
             native_menu_checked,
             set_native_menu_checked,
             take_pending_open,
-            take_pending_rooms,
             webview_version
         ])
         .plugin(tauri_plugin_opener::init())

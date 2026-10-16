@@ -35,5 +35,7 @@
   "providerDisabled": "{provider} を無効にしました。",
   "fallbackDownloaded": "フォールバックフォントをダウンロードしました。",
   "fallbackDownloadFailed": "フォールバックフォントをダウンロードできませんでした。",
-  "clearCache": "キャッシュをクリア"
+  "clearCache": "キャッシュをクリア",
+  "remoteFonts": "リモートフォント",
+  "remoteFontsDescription": "ドキュメントで使用するフォントを Google Fonts、Fontsource などのオンラインプロバイダーからダウンロードします。オフの間は、不足しているフォントをインストール済みまたは同梱のフォントで代替します。"
 }

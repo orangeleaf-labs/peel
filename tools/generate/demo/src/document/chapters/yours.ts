@@ -17,9 +17,9 @@ const TIP_COMPONENT_GAP = 96
 
 const WAYS: { icon: IconProps['name']; title: string; body: string }[] = [
   {
-    icon: 'lucide:users',
-    title: 'Share it',
-    body: 'Press Share at the top right. The link opens this document in another browser with live cursors, selection, and a voice call. No account and no server in between.'
+    icon: 'lucide:message-square',
+    title: 'Comment on it',
+    body: 'Press C and click a layer to pin a comment to it. Threads stay with the document, and agents can read and answer them.'
   },
   {
     icon: 'lucide:folder-open',

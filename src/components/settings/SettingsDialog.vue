@@ -18,7 +18,6 @@ import DiagnosticsSettingsPanel from '@/components/settings/diagnostics/Diagnost
 import GeneralSettingsPanel from '@/components/settings/general/GeneralSettingsPanel.vue'
 import SettingsPage from '@/components/settings/layout/SettingsPage.vue'
 import MCPWorkspacePanel from '@/components/settings/mcp/MCPWorkspacePanel.vue'
-import MediaSettingsPanel from '@/components/settings/media/MediaSettingsPanel.vue'
 import ModelsPanel from '@/components/settings/models/ModelsPanel.vue'
 import StorageSettingsPanel from '@/components/settings/storage/StorageSettingsPanel.vue'
 import ToolAccessSettingsPanel from '@/components/settings/tool-access/ToolAccessSettingsPanel.vue'
@@ -50,7 +49,6 @@ const labels = computed((): Record<SettingsSection, string> => ({
   diagnostics: settings.value.diagnostics,
   mcp: settings.value.mcp,
   tools: settings.value.toolAccess,
-  media: settings.value.media,
   storage: settings.value.storage
 }))
 const sections = computed(() =>
@@ -130,10 +128,6 @@ function onOpenChange(open: boolean): void {
           <template #leading><icon-lucide-sliders-horizontal class="size-3.5" /></template>
           {{ settings.toolAccess }}
         </AppTabsTrigger>
-        <AppTabsTrigger value="media" data-test-id="settings-section-media">
-          <template #leading><icon-lucide-image class="size-3.5" /></template>
-          {{ settings.media }}
-        </AppTabsTrigger>
         <AppTabsTrigger value="storage" data-test-id="settings-section-storage">
           <template #leading><icon-lucide-cloud class="size-3.5" /></template>
           {{ settings.storage }}
@@ -164,9 +158,6 @@ function onOpenChange(open: boolean): void {
       </AppTabsContent>
       <AppTabsContent value="tools" as-child>
         <ToolAccessSettingsPanel />
-      </AppTabsContent>
-      <AppTabsContent value="media" as-child>
-        <MediaSettingsPanel />
       </AppTabsContent>
       <AppTabsContent value="storage" as-child>
         <StorageSettingsPanel />

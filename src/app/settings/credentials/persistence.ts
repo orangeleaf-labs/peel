@@ -2,11 +2,7 @@ import { AI_PROVIDERS } from '@open-pencil/core/constants'
 
 import { aiModelSettings, modelConnectionCredentialRef } from '@/app/ai/models'
 import { storageCredentialRefs, storageProviderRegistry } from '@/app/integrations/storage'
-import {
-  PEXELS_CREDENTIAL,
-  UNSPLASH_CREDENTIAL,
-  providerCredentialRef
-} from '@/app/settings/credentials/migration'
+import { providerCredentialRef } from '@/app/settings/credentials/migration'
 import { credentialKey } from '@/app/settings/credentials/reference'
 
 import { setBrowserCredentialPersistence } from './app'
@@ -22,13 +18,7 @@ export function appCredentialRefs(): CredentialRef[] {
   const storageCredentials = storageProviderRegistry
     .list()
     .flatMap((provider) => storageCredentialRefs(provider.id))
-  return uniqueCredentialRefs([
-    ...legacyAIRefs,
-    ...modelConnectionRefs,
-    PEXELS_CREDENTIAL,
-    UNSPLASH_CREDENTIAL,
-    ...storageCredentials
-  ])
+  return uniqueCredentialRefs([...legacyAIRefs, ...modelConnectionRefs, ...storageCredentials])
 }
 
 export function setAppCredentialPersistence(remembered: boolean): Promise<void> {

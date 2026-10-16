@@ -31,4 +31,4 @@ Lo zoom è centrato sul puntatore. Usa <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + rotella,
 
 Premi <kbd>⌘</kbd><kbd>K</kbd> su macOS o <kbd>Ctrl</kbd> + <kbd>K</kbd> su Windows/Linux per cercare azioni dell’editor e dell’applicazione. Seleziona un risultato per eseguirlo; le azioni non disponibili restano soggette alla selezione e allo stato del documento.
 
-La palette permette anche di passare da una pagina all’altra. Prima che tu scriva, elenca le pagine visitate di recente in questa scheda, dalla più recente, e **Vai alla pagina…** apre l’elenco di tutte le pagine. Anche digitare il nome di una pagina la trova. Le pagine in cui lavorano collaboratori o agenti AI ne riportano i nomi; il pannello Pagine le contrassegna con gli stessi colori.
+La palette permette anche di passare da una pagina all’altra. Prima che tu scriva, elenca le pagine visitate di recente in questa scheda, dalla più recente, e **Vai alla pagina…** apre l’elenco di tutte le pagine. Anche digitare il nome di una pagina la trova. Le pagine in cui lavorano agenti AI ne riportano i nomi; il pannello Pagine le contrassegna con gli stessi colori.

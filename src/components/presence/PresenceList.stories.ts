@@ -3,17 +3,17 @@ import { expect, fn, userEvent, within } from 'storybook/test'
 
 import type { FollowTarget } from '@/app/presence/types'
 
-import { room } from './examples/room'
+import { people } from './examples/people'
 import PresenceList from './PresenceList.vue'
 import type { PresencePersonRow } from './rows'
 
 type Args = { rows: PresencePersonRow[]; following: FollowTarget | null }
 
 const meta = {
-  title: 'App/Collaboration/Presence List',
+  title: 'App/Presence/Presence List',
   component: PresenceList,
   tags: ['autodocs'],
-  args: { rows: room, following: null, onFollow: fn(), onRename: fn() },
+  args: { rows: people.slice(0, 1), following: null, onFollow: fn(), onRename: fn() },
   render: (args) => ({
     components: { PresenceList },
     setup: () => ({ args }),
@@ -24,7 +24,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Room: Story = {
+export const YourAgents: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Follow Orbit' }))
@@ -50,8 +50,4 @@ export const RenamingYourAgent: Story = {
     await userEvent.type(input, 'Juniper{Enter}')
     await expect(args.onRename).toHaveBeenCalledWith('fern', 'Juniper')
   }
-}
-
-export const Alone: Story = {
-  args: { rows: room.slice(0, 1) }
 }

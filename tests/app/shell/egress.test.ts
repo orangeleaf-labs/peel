@@ -38,6 +38,7 @@ const SHIPPED_ROOTS = [
   'packages/mcp/src',
   'packages/docs/.vitepress/theme',
   'packages/docs/overview',
+  'skills',
   '.github',
   'tools'
 ]
@@ -77,6 +78,25 @@ async function readManifest(path: string) {
   const text = await readFile(repoPath(path), 'utf8')
   return v.parse(v.pipe(v.string(), v.parseJson(), WorkspaceManifest), text)
 }
+
+/** Stock-photo services Peel removed: their hosts, the `stock_photo` tool, and their settings. */
+const REMOVED_STOCK_PHOTO = /unsplash|pexels|stock[_-]?photos?\b/i
+
+describe('removed stock-photo egress', () => {
+  test('no shipped source or manifest names a stock-photo host, tool, or package', async () => {
+    const files = await shippedFiles()
+    const hits: string[] = []
+    for (const file of files) {
+      if (REMOVED_STOCK_PHOTO.test(await readFile(repoPath(file), 'utf8'))) hits.push(file)
+    }
+    const root = await readManifest('package.json')
+    for (const path of root.workspaces ?? []) {
+      const manifest = `${path}/package.json`
+      if (REMOVED_STOCK_PHOTO.test(await readFile(repoPath(manifest), 'utf8'))) hits.push(manifest)
+    }
+    expect(hits).toEqual([])
+  })
+})
 
 describe('removed telemetry egress', () => {
   test('no shipped source, config, or workflow names a removed host or switch', async () => {

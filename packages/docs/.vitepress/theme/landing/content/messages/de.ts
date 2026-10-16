@@ -52,12 +52,6 @@ export const de: LandingMessages = {
         'Beschreibe in normaler Sprache, was du willst: Der Agent bearbeitet das Dokument mit denselben Werkzeugen wie du und zeigt seine Arbeit schon während des Streamings auf der Arbeitsfläche. Verbinde einen beliebigen Anbieter mit deinem eigenen Schlüssel oder nutze den Coding-Agenten, den du ohnehin verwendest.',
       hint: 'Ein aufgezeichneter Durchgang läuft durch die echte Agentenschleife. Sieh zu, wie die Arbeitsfläche beim Streamen entsteht.'
     },
-    collab: {
-      title: 'Gemeinsam arbeiten, mit Menschen und Agenten',
-      detail:
-        'Teile einen Link, und alle bearbeiten dasselbe Dokument, Peer-to-Peer, mit Live-Cursorn, Folgemodus, an Ebenen gehefteten Kommentaren und Sprachanrufen. KI-Agenten kommen genauso dazu: Alle im Raum sehen zu, wie sie bauen, während sie streamen.',
-      hint: 'Beide Bildschirme gehören dir. Zieh auf einem eine Ebene und sieh zu, wie sie sich auf dem anderen bewegt; dann frag den Agenten.'
-    },
     code: {
       title: 'Vom Design zum Code',
       detail:
@@ -250,12 +244,6 @@ export const de: LandingMessages = {
         'Der Player steht allein im Hero-Rahmen, der seine Kinder in einer Reihe anordnet, also landet eine dort hinzugefügte Karte direkt daneben. Ich binde Hintergrund, Radius und Textfarben der Karte an die Theme-Variablen, die auch der Player nutzt, damit sie mit ihm zwischen Dunkel und Hell wechselt, und liste drei Titel auf, jeweils mit kleinem Cover, Titel und Interpret.',
       reply:
         'Neben dem Player gibt es jetzt eine Karte **Up next** mit drei Titeln. Farben und Radius kommen aus den Theme-Variablen, sie folgt dem Player also zwischen Dunkel und Hell.'
-    },
-    collab: {
-      you: 'Du',
-      yourScreen: 'Dein Bildschirm',
-      theirScreen: 'Sams Bildschirm',
-      askAgent: 'Agenten fragen'
     },
     sdk: {
       install: 'Installieren'
