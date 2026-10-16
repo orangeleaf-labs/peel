@@ -44,3 +44,7 @@ Pasting from Figma fetches image URLs with `POST www.figma.com/file/<key>/image/
 1. In a desktop build, copy a frame with an image fill in Figma and paste it into Peel.
 2. If the image is missing and the web inspector console warns about a blocked host, add that host to `ALLOWED_HOSTS` in `desktop/src/egress.rs` with a comment, and to EGRESS.md.
 3. If the console warns that `www.figma.com` is blocked, the lookup redirected or changed shape; adjust its entry in `ALLOWED_ENDPOINTS` in `desktop/src/egress.rs`.
+
+### Re-approve saved storage endpoints
+
+Users who saved an S3 storage endpoint before this release must open Settings → Storage, click Save, and choose Allow once. There is no revoke button yet: deleting `approved-storage-hosts.json` in the app config folder removes all approvals.

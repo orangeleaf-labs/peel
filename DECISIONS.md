@@ -38,4 +38,5 @@ did not cover a case, the safer and more reversible option was taken.
 | Keep the in-app install of the `@open-pencil/mcp` companion. | It only installs the local server; the npm registry host is listed in EGRESS.md. |
 | jsDelivr is allowed only under `/fontsource/`, and not for paths with an encoded `/` or `\`. | jsDelivr serves arbitrary third-party content and would otherwise be an exfiltration channel. |
 | `www.figma.com` is allowed only for `POST /file/<key>/image/batch`, and not as a redirect target. | It is the only Figma request the app makes; a redirect hop's method is unknown, so it is refused rather than guessed. |
-| Desktop S3 storage is blocked until endpoint approval lands (#14). | Safer interim than letting the webview reach user-configured hosts. |
+| Storage endpoints are approved in a native dialog on Save or Test connection, and the answer is kept in the app config folder. | Custom endpoints keep working after one prompt, and the webview cannot write that folder. |
+| Storage endpoints must be https domain names (no IP address, localhost, single-label name or http). | Safer default; a local MinIO over http no longer works in the desktop app. |
