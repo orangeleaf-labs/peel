@@ -281,9 +281,10 @@ describe('approvals never outlive their caller', () => {
   })
 
   test('the deadline ends before the MCP client, the MCP server, and the CLI stop waiting', () => {
-    // MCP SDK clients give up after 60 s by default; an Allow must never land after that.
+    // MCP SDK clients give up after 60 s by default, and the server may first wait 10 s for the
+    // app to connect; an Allow must never land after the client gave up.
     expect(AUTOMATION_APPROVAL_DEADLINE_MS).toBeLessThanOrEqual(
-      MCP_CLIENT_DEFAULT_REQUEST_TIMEOUT_MS - 10_000
+      MCP_CLIENT_DEFAULT_REQUEST_TIMEOUT_MS - 15_000
     )
     expect(AUTOMATION_APPROVAL_DEADLINE_MS).toBeLessThan(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)
     for (const command of ['save_file', 'close_file', 'new_document', 'update_settings', 'eval']) {
