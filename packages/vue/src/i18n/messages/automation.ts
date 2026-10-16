@@ -9,8 +9,7 @@ export const automationMessageDefaults = {
   builtInAI: 'Built-in AI',
   localMCP: 'Local MCP',
   restoreToolDefaults: 'Restore defaults',
-  aiToolAccessDescription:
-    'Choose tools for direct AI model connections. ACP and Pi agents use MCP access instead.',
+  aiToolAccessDescription: 'Choose tools for the built-in AI.',
   mcpToolAccessDescription:
     'Choose tools advertised by the local server to connected agents and clients.',
   aiToolsNotice:
@@ -62,26 +61,6 @@ export const automationMessageDefaults = {
   webmcpUnsupported:
     'This browser does not expose WebMCP. Use a supported Chrome version and enable WebMCP testing, then relaunch the browser.',
   noMatchingTools: 'No tools match your search.',
-  connections: 'MCP connections',
-  connectionsDescription: 'Give ACP agents access to trusted remote tools and services.',
-  addConnection: 'Add connection',
-  addServerConnection: 'Add MCP connection',
-  editConnection: 'Edit MCP connection',
-  connectionEditorDescription: 'Configure a Streamable HTTP server and optional authentication.',
-  connectionName: 'Connection name',
-  connectionNameHint: 'Use a unique name, up to 80 characters. The name open-pencil is reserved.',
-  connectionNameInvalid: 'Choose a unique name of at most 80 characters, other than open-pencil.',
-  serverURLHint:
-    'Use HTTPS. HTTP is allowed only for localhost or a loopback address. Do not include credentials in the URL.',
-  serverURL: 'MCP server URL',
-  enableConnection: 'Enable for ACP agents',
-  bearerAuthentication: 'Use bearer authentication',
-  bearerToken: 'Bearer token',
-  bearerTokenPlaceholder: 'Enter bearer token',
-  bearerTokenRequired: 'Enter a bearer token before enabling this connection.',
-  deleteConnection: 'Delete connection',
-  deleteConnectionDescription: 'Delete this MCP connection and remove its saved bearer token?',
-  noConnections: 'No external MCP connections configured.',
   description: 'Monitor and restart the local MCP server used by agents and automation.',
   status: 'Status',
   port: 'Port',

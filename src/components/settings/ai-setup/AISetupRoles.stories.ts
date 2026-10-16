@@ -10,10 +10,7 @@ interface Args {
   isRecommended: boolean
 }
 
-const plan = planOnboarding(
-  { goals: ['design', 'vision'], access: ['anthropic'] },
-  { agentsAvailable: false }
-)
+const plan = planOnboarding({ goals: ['design', 'vision'], access: ['anthropic'] }, {})
 
 const meta = {
   title: 'App/Settings/AI Setup/Roles',

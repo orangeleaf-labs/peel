@@ -9,7 +9,7 @@ description: Integrierter AI-Assistent mit mehr als 90 Werkzeugen zum Erstellen 
 
 ## Einrichtung
 
-Beim ersten Start fragt die geführte Einrichtung, wobei die KI helfen soll und was bereits vorhanden ist: ein Coding-Agent wie Claude Code, Codex oder Gemini CLI in der Desktop-App oder ein Anthropic-API-Schlüssel. Sie verbindet diesen Zugang und weist ihn den Rollen **Design agent** und **Vision** zu; manuell Eingerichtetes bleibt erhalten. Sie lässt sich überspringen und jederzeit über **Einstellungen → KI und Agenten → Geführte Einrichtung starten** erneut ausführen. Modelle manuell einrichten:
+Beim ersten Start fragt die geführte Einrichtung, wobei die KI helfen soll und was bereits vorhanden ist: ein Anthropic-API-Schlüssel. Sie verbindet diesen Zugang und weist ihn den Rollen **Design agent** und **Vision** zu; manuell Eingerichtetes bleibt erhalten. Sie lässt sich überspringen und jederzeit über **Einstellungen → KI und Agenten → Geführte Einrichtung starten** erneut ausführen. Modelle manuell einrichten:
 
 1. AI-Chat öffnen.
 2. Einstellungssymbol wählen.
@@ -21,12 +21,6 @@ Mehrere Modelle können getrennt für Gestaltung, Prüfung, schnelle Aufgaben un
 ### Anbieter
 
 Peel nutzt ausschließlich die Anthropic-API. Den API-Schlüssel gibt es unter [console.anthropic.com](https://console.anthropic.com); das Claude-Modell wird aus der mitgelieferten Liste gewählt, sodass für die Modellauswahl kein anderer Dienst kontaktiert wird. Anfragen gehen direkt an `api.anthropic.com`; eine eigene Basisadresse gibt es nicht. In der Desktop-App liegt der Schlüssel im Anmeldedatenspeicher des Betriebssystems.
-
-### Externe MCP-Verbindungen
-
-Desktop-ACP-Agenten können vertrauenswürdige entfernte MCP-Server verwenden. Unter **Einstellungen → MCP-Verbindungen** wird ein Streamable-HTTP-Endpunkt hinzugefügt, optional ein Bearer-Token gespeichert und die Verbindung aktiviert.
-
-Token werden im Anmeldedatenspeicher und erst beim Start einer ACP-Sitzung gelesen. Entfernte Server müssen HTTPS verwenden; für lokale Entwicklung sind Loopback-Adressen über HTTP erlaubt.
 
 ## Werkzeuge
 

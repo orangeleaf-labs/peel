@@ -4,12 +4,10 @@ import { computed, ref, useTemplateRef } from 'vue'
 import type { AIProviderID } from '@open-pencil/core/constants'
 import { useI18n } from '@open-pencil/vue'
 
-import { usePiSetup } from '@/app/ai/agents/setup'
 import { useModelProfileFeedback } from '@/app/ai/models/settings/profile-editor/feedback'
 import { useModelProfileEditor } from '@/app/ai/models/settings/profile-editor/use'
 import { thinkingLevelOptions as buildThinkingLevelOptions } from '@/app/ai/models/thinking'
 import { useSettingsFormGuard } from '@/app/settings/navigation/use'
-import PiSetup from '@/components/settings/agents/PiSetup.vue'
 import { focusInvalidField } from '@/components/settings/layout/focus'
 import SettingsPage from '@/components/settings/layout/SettingsPage.vue'
 import SettingsSaveFeedback from '@/components/settings/layout/SettingsSaveFeedback.vue'
@@ -40,9 +38,6 @@ const {
   dirty,
   busy: saving,
   providerDef,
-  isACP,
-  isHarness,
-  supportsThinking,
   modelOptions,
   selectedModelValue,
   knownModel,
@@ -60,10 +55,6 @@ const {
   clearKey,
   testConnection: runConnectionTest
 } = profile
-const pi = usePiSetup(isHarness)
-const customModelPlaceholder = computed(() =>
-  isHarness.value ? (pi.state.value?.defaultModel ?? 'provider/model') : 'e.g. llama-3.3-70b'
-)
 const feedback = useModelProfileFeedback(profile, keyInput, settings)
 const { errors: fieldErrors } = feedback
 const busy = computed(() => saving.value || connectionTestStatus.value === 'testing')
@@ -73,7 +64,6 @@ const CUSTOM_MODEL_VALUE = '__custom__'
 const advancedOpen = ref(Boolean(draft.customModelID.trim()))
 function updateProvider(id: AIProviderID) {
   profile.updateProvider(id)
-  advancedOpen.value = id === 'harness:pi'
 }
 function updateModel(id: string) {
   profile.updateModel(id)
@@ -142,92 +132,76 @@ async function remove() {
             />
           </ProviderSettingsField>
 
-          <div v-if="pi.state.value" class="flex flex-col gap-2" data-test-id="settings-pi-setup">
-            <PiSetup
-              :setup="pi.state.value"
-              @check="pi.refresh()"
-              @install-companion="pi.installCompanion()"
-              @install-bridge="pi.installBridge()"
-            />
+          <div class="flex items-center gap-2 pt-1">
+            <p class="text-[10px] font-medium uppercase tracking-wide text-muted">
+              {{ ai.modelConfiguration }}
+            </p>
+            <div class="h-px flex-1 bg-border" />
           </div>
 
-          <template v-if="!isACP">
-            <div class="flex items-center gap-2 pt-1">
-              <p class="text-[10px] font-medium uppercase tracking-wide text-muted">
-                {{ ai.modelConfiguration }}
-              </p>
-              <div class="h-px flex-1 bg-border" />
-            </div>
-
-            <ProviderSettingsField
-              v-if="modelOptions.length && !isHarness"
-              v-slot="{ control }"
+          <ProviderSettingsField
+            v-if="modelOptions.length"
+            v-slot="{ control }"
+            :label="ai.modelID"
+            :error="fieldErrors.modelID"
+            @blur="feedback.blur('modelID')"
+          >
+            <AppCombobox
+              v-bind="control"
+              :model-value="selectedModelValue"
+              :options="modelOptions"
               :label="ai.modelID"
-              :error="fieldErrors.modelID"
-              @blur="feedback.blur('modelID')"
-            >
-              <AppCombobox
-                v-bind="control"
-                :model-value="selectedModelValue"
-                :options="modelOptions"
-                :label="ai.modelID"
-                :placeholder="ai.selectModel"
-                :search-placeholder="ai.searchModels"
-                :empty-label="common.noResults"
-                @update:model-value="updateModel(String($event))"
-              />
-            </ProviderSettingsField>
-
-            <ProviderSettingsField
-              v-if="providerDef.supportsCustomModel && selectedModelValue === CUSTOM_MODEL_VALUE"
-              v-slot="{ control }"
-              :label="ai.customModelID"
-              :hint="isHarness ? ai.piModelHint : settings.modelIDHint"
-              :error="fieldErrors.customModelID"
-              @blur="feedback.blur('customModelID')"
-            >
-              <ProviderSettingsInput
-                v-bind="control"
-                v-model="draft.customModelID"
-                :aria-label="ai.customModelID"
-                data-test-id="provider-settings-custom-model"
-                :placeholder="customModelPlaceholder"
-              />
-            </ProviderSettingsField>
-
-            <div class="flex items-center gap-2 pt-1">
-              <p class="text-[10px] font-medium uppercase tracking-wide text-muted">
-                {{ ai.connectionSettings }}
-              </p>
-              <div class="h-px flex-1 bg-border" />
-            </div>
-
-            <ProviderSettingsKeyField
-              v-model="keyInput"
-              :label="ai.apiKey"
-              :saved="hasExistingKey"
-              :hint="
-                hasExistingKey ? settings.savedCredentialHint : settings.optionalCredentialHint
-              "
-              :error="fieldErrors.credential"
-              @blur="feedback.blur('credential')"
-              :placeholder="hasExistingKey ? credentials.savedReplace : providerDef.keyPlaceholder"
-              :key-u-r-l="providerDef.keyURL"
-              :key-u-r-l-label="credentials.getAPIKey"
-              @clear="clearKey"
+              :placeholder="ai.selectModel"
+              :search-placeholder="ai.searchModels"
+              :empty-label="common.noResults"
+              @update:model-value="updateModel(String($event))"
             />
+          </ProviderSettingsField>
 
-            <ProviderConnectionTestButton
-              v-if="!isHarness"
-              :status="connectionTestStatus"
-              :reason="connectionTestReason"
-              :disabled="busy"
-              @test="testConnection"
+          <ProviderSettingsField
+            v-if="providerDef.supportsCustomModel && selectedModelValue === CUSTOM_MODEL_VALUE"
+            v-slot="{ control }"
+            :label="ai.customModelID"
+            :hint="settings.modelIDHint"
+            :error="fieldErrors.customModelID"
+            @blur="feedback.blur('customModelID')"
+          >
+            <ProviderSettingsInput
+              v-bind="control"
+              v-model="draft.customModelID"
+              :aria-label="ai.customModelID"
+              data-test-id="provider-settings-custom-model"
             />
-          </template>
+          </ProviderSettingsField>
+
+          <div class="flex items-center gap-2 pt-1">
+            <p class="text-[10px] font-medium uppercase tracking-wide text-muted">
+              {{ ai.connectionSettings }}
+            </p>
+            <div class="h-px flex-1 bg-border" />
+          </div>
+
+          <ProviderSettingsKeyField
+            v-model="keyInput"
+            :label="ai.apiKey"
+            :saved="hasExistingKey"
+            :hint="hasExistingKey ? settings.savedCredentialHint : settings.optionalCredentialHint"
+            :error="fieldErrors.credential"
+            @blur="feedback.blur('credential')"
+            :placeholder="hasExistingKey ? credentials.savedReplace : providerDef.keyPlaceholder"
+            :key-u-r-l="providerDef.keyURL"
+            :key-u-r-l-label="credentials.getAPIKey"
+            @clear="clearKey"
+          />
+
+          <ProviderConnectionTestButton
+            :status="connectionTestStatus"
+            :reason="connectionTestReason"
+            :disabled="busy"
+            @test="testConnection"
+          />
 
           <AppCollapsible
-            v-if="!isACP"
             v-model:open="advancedOpen"
             :ui="{
               root: 'rounded border border-border',
@@ -265,25 +239,13 @@ async function remove() {
                 </div>
               </div>
 
-              <ProviderSettingsField v-if="supportsThinking" :label="ai.thinkingLevel">
+              <ProviderSettingsField :label="ai.thinkingLevel">
                 <AppSelect
                   v-model="draft.thinkingLevel"
                   :label="ai.thinkingLevel"
                   :options="thinkingLevelOptions"
                 />
                 <p class="mt-1 text-[10px] text-muted">{{ ai.thinkingLevelDescription }}</p>
-              </ProviderSettingsField>
-
-              <ProviderSettingsField v-if="isHarness" :label="ai.harnessToolPermissions">
-                <AppSelect
-                  v-model="draft.harnessPermissionMode"
-                  :label="ai.harnessToolPermissions"
-                  :options="[
-                    { value: 'allow-reads', label: ai.harnessPermissionReads },
-                    { value: 'allow-edits', label: ai.harnessPermissionEdits },
-                    { value: 'allow-all', label: ai.harnessPermissionAll }
-                  ]"
-                />
               </ProviderSettingsField>
 
               <div class="border-t border-border pt-2.5">

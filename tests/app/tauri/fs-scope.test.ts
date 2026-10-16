@@ -28,10 +28,8 @@ type FsGrant = v.InferOutput<typeof FsPermission>
  */
 const APP_CACHE = '$APPLOCALDATA/cache'
 
-/** Single files outside the cache the app reads: Pi's settings and MCP server discovery. */
+/** Single files outside the cache the app reads: MCP server discovery. */
 const NAMED_FILES = new Set([
-  '$HOME/.pi/agent/settings.json',
-  '$HOME/.pi/agent/auth.json',
   '$HOME/Library/Application Support/OpenPencil/mcp.json',
   '$LOCALDATA/OpenPencil/mcp.json',
   '$RUNTIME/openpencil/mcp.json',

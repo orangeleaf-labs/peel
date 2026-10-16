@@ -4,7 +4,6 @@ import type { Chat } from '@ai-sdk/vue'
 import type { UIMessage } from 'ai'
 import { ref, shallowRef } from 'vue'
 
-import { AgentSetupError } from '@/app/ai/agents/readiness'
 import { useChatSubmission } from '@/app/ai/chat/submission/use'
 import type { EditorStore } from '@/app/editor/active-store'
 
@@ -13,20 +12,11 @@ import { asDouble } from '#tests/helpers/doubles'
 const messages = ref({
   openSettings: 'Open settings',
   requestFailed: 'Request failed',
-  visionUnavailable: 'Vision unavailable',
-  runSetup: 'Run guided setup',
-  agentSetup: {
-    'companion-missing': 'Companion missing',
-    'companion-outdated': 'Companion outdated',
-    'mcp-outdated': 'MCP outdated',
-    'pi-sign-in': 'Pi sign-in',
-    'pi-model': 'Pi model'
-  }
+  visionUnavailable: 'Vision unavailable'
 })
 
 function submission(ensureChat: () => Promise<Chat<UIMessage> | null>) {
   const reportError = mock(() => undefined)
-  const openSetup = mock(() => undefined)
   const chat = useChatSubmission({
     chat: shallowRef<Chat<UIMessage> | null>(null),
     ensureChat,
@@ -34,10 +24,9 @@ function submission(ensureChat: () => Promise<Chat<UIMessage> | null>) {
     getEditor: () => ({}) as EditorStore,
     messages,
     reportError,
-    openModelSettings: () => undefined,
-    openSetup
+    openModelSettings: () => undefined
   })
-  return { chat, reportError, openSetup }
+  return { chat, reportError }
 }
 
 const message = { modelText: 'Draw a card', displayText: 'Draw a card', images: [], nodes: [] }
@@ -48,15 +37,12 @@ describe('useChatSubmission', () => {
     expect(await chat.submit(message)).toBe(false)
   })
 
-  test('names the setup problem that stopped an agent chat and offers guided setup', async () => {
-    const { chat, reportError, openSetup } = submission(async () => {
-      throw new AgentSetupError('mcp-outdated')
+  test('reports a chat that could not start as a failed request', async () => {
+    const { chat, reportError } = submission(async () => {
+      throw new Error('private transport details')
     })
     expect(await chat.submit(message)).toBe(false)
-    expect(reportError).toHaveBeenCalledWith('MCP outdated', {
-      label: 'Run guided setup',
-      run: openSetup
-    })
+    expect(reportError).toHaveBeenCalledWith('Request failed')
   })
 
   test('keeps the previews of an unsent message for the composer to take back', async () => {

@@ -11,8 +11,7 @@ import {
 
 import { defaultModel, isFastToolModel } from '#tests/helpers/ai/model-catalog'
 
-const desktop = { agentsAvailable: true }
-const browser = { agentsAvailable: false }
+const desktop = {}
 
 function answers(overrides: Partial<OnboardingAnswers>): OnboardingAnswers {
   return { goals: ['design'], access: [], ...overrides }
@@ -23,31 +22,6 @@ function plannedModelID(choice: OnboardingPlan['fast']): string {
 }
 
 describe('planOnboarding', () => {
-  test('uses an agent the person already has for design', () => {
-    const plan = planOnboarding(answers({ access: ['acp:codex'] }), desktop)
-    expect(plan.design).toMatchObject({ providerID: 'acp:codex', modelID: '' })
-    expect(plan.connections).toEqual(['acp:codex'])
-  })
-
-  test('runs design on Pi and takes the other roles from the Anthropic API', () => {
-    const plan = planOnboarding(
-      answers({ goals: ['design', 'vision'], access: ['harness:pi', 'anthropic'] }),
-      desktop
-    )
-    expect(plan.design).toMatchObject({ providerID: 'harness:pi', modelID: '' })
-    expect(plan.vision).toMatchObject({ providerID: 'anthropic' })
-    expect(plan.review).not.toBe('design')
-    expect(plan.connections).toEqual(['harness:pi', 'anthropic'])
-  })
-
-  test('ignores agents outside the desktop app', () => {
-    const plan = planOnboarding(answers({ access: ['acp:claude-code', 'anthropic'] }), browser)
-    expect(plan.design).toMatchObject({
-      providerID: 'anthropic',
-      modelID: defaultModel('anthropic')
-    })
-  })
-
   test('reuses a vision-capable design model for visual review', () => {
     const plan = planOnboarding(
       answers({ goals: ['design', 'vision'], access: ['anthropic'] }),
@@ -59,28 +33,6 @@ describe('planOnboarding', () => {
     })
     expect(plan.vision).toBe('design')
     expect(plan.connections).toEqual(['anthropic'])
-  })
-
-  test('takes visual review from the Anthropic API when design runs on an agent', () => {
-    const plan = planOnboarding(
-      answers({ goals: ['design', 'vision'], access: ['acp:claude-code', 'anthropic'] }),
-      desktop
-    )
-    expect(plan.design).toMatchObject({ providerID: 'acp:claude-code' })
-    expect(plan.vision).toMatchObject({
-      providerID: 'anthropic',
-      modelID: defaultModel('anthropic')
-    })
-    expect(plan.connections).toEqual(['acp:claude-code', 'anthropic'])
-  })
-
-  test('leaves visual review unassigned without an API account', () => {
-    const plan = planOnboarding(
-      answers({ goals: ['design', 'vision'], access: ['acp:codex'] }),
-      desktop
-    )
-    expect(plan.vision).toBeNull()
-    expect(plan.connections).toEqual(['acp:codex'])
   })
 
   test('proposes nothing when no access is selected', () => {
@@ -113,17 +65,16 @@ describe('planOnboarding with configured models', () => {
     expect(plan.connections).toEqual([])
   })
 
-  test('replaces a configured design model whose access was deselected', () => {
-    const plan = planOnboarding(answers({ access: ['acp:codex'] }), {
+  test('drops a configured design model whose access was deselected', () => {
+    const plan = planOnboarding(answers({ access: [] }), {
       ...desktop,
       current: { configured: true, design: opus, vision: null, review: null, fast: null }
     })
-    expect(plan.design).toMatchObject({ providerID: 'acp:codex' })
-    expect(plan.design?.profileId).toBeUndefined()
+    expect(plan.design).toBeNull()
   })
 
   test('keeps a configured vision model when nothing new covers visual review', () => {
-    const plan = planOnboarding(answers({ goals: ['design', 'vision'], access: ['acp:codex'] }), {
+    const plan = planOnboarding(answers({ goals: ['design', 'vision'], access: [] }), {
       ...desktop,
       current: {
         configured: true,
@@ -133,7 +84,7 @@ describe('planOnboarding with configured models', () => {
         fast: null
       }
     })
-    expect(plan.design).toMatchObject({ providerID: 'acp:codex' })
+    expect(plan.design).toBeNull()
     expect(plan.vision).toMatchObject({ profileId: 'model-opus' })
   })
 })
@@ -144,27 +95,6 @@ describe('planOnboarding for review and fast work', () => {
     expect(plan.review).toBe('design')
     expect(plan.fast).toMatchObject({ providerID: 'anthropic' })
     expect(isFastToolModel('anthropic', plannedModelID(plan.fast))).toBe(true)
-  })
-
-  test('uses the API vision model for review and fast work behind an agent', () => {
-    const plan = planOnboarding(
-      answers({ goals: ['design', 'vision'], access: ['acp:codex', 'anthropic'] }),
-      desktop
-    )
-    expect(plan.vision).toMatchObject({
-      providerID: 'anthropic',
-      modelID: defaultModel('anthropic')
-    })
-    expect(plan.review).toMatchObject({
-      providerID: 'anthropic',
-      modelID: defaultModel('anthropic')
-    })
-    expect(plan.fast).toMatchObject({ providerID: 'anthropic' })
-    expect(isFastToolModel('anthropic', plannedModelID(plan.fast))).toBe(true)
-    expect(planOnboarding(answers({ access: ['acp:codex'] }), desktop)).toMatchObject({
-      review: null,
-      fast: null
-    })
   })
 
   test('keeps configured review and fast choices, including none', () => {
@@ -179,19 +109,24 @@ describe('planOnboarding for review and fast work', () => {
 
 describe('roleOptions', () => {
   const plan = planOnboarding(
-    answers({ goals: ['design', 'vision'], access: ['acp:claude-code', 'anthropic'] }),
+    answers({ goals: ['design', 'vision'], access: ['anthropic'] }),
     desktop
   )
 
-  test('offers an agent only for the design role', () => {
-    expect(roleOptions('design', plan, []).map(roleChoiceKey)).toContain('acp:claude-code::')
-    expect(roleOptions('review', plan, []).map(roleChoiceKey)).not.toContain('acp:claude-code::')
+  test('offers only built-in Anthropic models, never a coding agent', () => {
+    for (const role of ['design', 'vision', 'review', 'fast'] as const) {
+      for (const option of roleOptions(role, plan, [])) {
+        if (option && option !== 'design') expect(option.providerID).toBe('anthropic')
+      }
+    }
+    expect(roleOptions('design', plan, []).map(roleChoiceKey).join(' ')).not.toMatch(
+      /acp:|harness:/
+    )
   })
 
-  test('offers only image-capable models for vision and none instead of an agent design', () => {
+  test('offers only image-capable models for vision', () => {
     const vision = roleOptions('vision', plan, [])
     expect(vision).toContain(null)
-    expect(vision).not.toContain('design')
     for (const option of vision) {
       if (option && option !== 'design') expect(option.capabilities).toContain('vision')
     }
@@ -205,9 +140,6 @@ describe('roleOptions', () => {
 
 describe('uncoveredGoals', () => {
   test('lists requested goals the selected access cannot cover', () => {
-    expect(
-      uncoveredGoals(answers({ goals: ['design', 'vision'], access: ['acp:codex'] }), desktop)
-    ).toEqual(['vision'])
     expect(uncoveredGoals(answers({ goals: ['design'] }), desktop)).toEqual(['design'])
   })
 })

@@ -14,5 +14,5 @@ export const FEATURE_KINDS = [
 
 export type FeatureKind = (typeof FEATURE_KINDS)[number]
 
-/** Coding agents documented for the MCP server, the agent skill, or as built-in ACP agents. */
+/** Coding agents documented for the MCP server or the agent skill. */
 export const AGENTS = ['Claude Code', 'Cursor', 'Windsurf', 'Codex', 'Gemini CLI'] as const

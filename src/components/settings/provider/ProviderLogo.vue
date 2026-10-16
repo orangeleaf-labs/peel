@@ -2,21 +2,13 @@
 import type { Component } from 'vue'
 import { computed } from 'vue'
 import IconAnthropic from '~icons/ai/anthropic'
-import IconClaudeCode from '~icons/ai/claudecode'
-import IconCodex from '~icons/ai/codex'
-import IconGeminiCLI from '~icons/ai/geminicli'
-import IconBot from '~icons/lucide/bot'
 import IconServer from '~icons/lucide/server'
 
-/** A provider or agent. */
+/** A model provider. */
 const { provider } = defineProps<{ provider: string }>()
 
 const LOGOS: Record<string, Component> = {
-  anthropic: IconAnthropic,
-  'acp:claude-code': IconClaudeCode,
-  'acp:codex': IconCodex,
-  'acp:gemini-cli': IconGeminiCLI,
-  'harness:pi': IconBot
+  anthropic: IconAnthropic
 }
 
 const logo = computed(() => LOGOS[provider] ?? IconServer)

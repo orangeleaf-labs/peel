@@ -91,7 +91,6 @@
     {
       "identifier": "fs:allow-read-text-file",
       "allow": [
-        { "path": "$HOME/.pi/agent/settings.json" },
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
         { "path": "$LOCALDATA/OpenPencil/mcp.json" },
         { "path": "$RUNTIME/openpencil/mcp.json" },
@@ -114,7 +113,6 @@
     {
       "identifier": "fs:allow-exists",
       "allow": [
-        { "path": "$HOME/.pi/agent/auth.json" },
         { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
         { "path": "$LOCALDATA/OpenPencil/mcp.json" },
         { "path": "$RUNTIME/openpencil/mcp.json" },
@@ -143,9 +141,6 @@
     {
       "identifier": "shell:allow-spawn",
       "allow": [
-        { "name": "claude-agent-acp", "cmd": "claude-agent-acp", "args": false },
-        { "name": "codex-acp", "cmd": "codex-acp", "args": false },
-        { "name": "gemini", "cmd": "gemini", "args": ["--acp"] },
         {
           "name": "npm",
           "cmd": "npm",
@@ -153,7 +148,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^@open-pencil/mcp@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -165,16 +160,12 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-pencil/mcp@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
         { "name": "openpencil-mcp-http", "cmd": "openpencil-mcp-http", "args": false },
-        { "name": "openpencil-harness", "cmd": "openpencil-harness", "args": false },
-        { "name": "cmd-claude-agent-acp", "cmd": "cmd", "args": ["/c", "claude-agent-acp"] },
-        { "name": "cmd-codex-acp", "cmd": "cmd", "args": ["/c", "codex-acp"] },
-        { "name": "cmd-gemini", "cmd": "cmd", "args": ["/c", "gemini", "--acp"] },
         {
           "name": "cmd-npm",
           "cmd": "cmd",
@@ -184,7 +175,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^@open-pencil/mcp@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -198,16 +189,14 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-pencil/mcp@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
-        { "name": "cmd-openpencil-mcp-http", "cmd": "cmd", "args": ["/c", "openpencil-mcp-http"] },
-        { "name": "cmd-openpencil-harness", "cmd": "cmd", "args": ["/c", "openpencil-harness"] }
+        { "name": "cmd-openpencil-mcp-http", "cmd": "cmd", "args": ["/c", "openpencil-mcp-http"] }
       ]
     },
-    "shell:allow-stdin-write",
     "shell:allow-kill"
   ]
 }

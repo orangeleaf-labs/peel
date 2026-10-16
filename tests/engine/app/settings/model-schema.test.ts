@@ -14,7 +14,6 @@ const messages = {
 }
 const context: ModelProfileValidationContext = {
   customModel: false,
-  providerKind: 'api',
   design: true,
   intent: 'save'
 }
@@ -52,11 +51,4 @@ test('independent field errors survive a failed tool-support rule', () => {
     name: ['Required'],
     modelID: ['Tools required']
   })
-})
-
-test('Pi may leave the model empty to use the default model set in Pi', () => {
-  expect(errors({ providerKind: 'harness' }, { ...values, modelID: '' })).toEqual({})
-  expect(errors({ providerKind: 'harness', intent: 'test' }, { ...values, modelID: '' })).toEqual(
-    {}
-  )
 })

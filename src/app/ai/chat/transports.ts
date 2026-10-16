@@ -8,13 +8,11 @@ import type {
   ToolExecutionOptions,
   UIMessage
 } from 'ai'
-import type { ComputedRef, Ref } from 'vue'
+import type { ComputedRef } from 'vue'
 import { ref } from 'vue'
 
-import { ACP_AGENTS } from '@open-pencil/core/constants'
-import type { ACPAgentID, AIProviderID } from '@open-pencil/core/constants'
+import type { AIProviderID } from '@open-pencil/core/constants'
 
-import { AgentSetupError, assertAgentReady } from '@/app/ai/agents/readiness'
 import { classifyAIChatError, type AIChatFailure } from '@/app/ai/chat/failure'
 import { resolveLanguageModelID } from '@/app/ai/chat/model'
 import {
@@ -24,13 +22,12 @@ import {
 } from '@/app/ai/chat/reasoning'
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { chatThinkingLevel } from '@/app/ai/chat/thinking'
-import { createAIModelRuntime, resolveModelConnectionAPIKey } from '@/app/ai/models'
+import { createAIModelRuntime } from '@/app/ai/models'
 import type { ThinkingLevel } from '@/app/ai/models/types'
 import { createRunPreview } from '@/app/ai/preview/run'
 import { createAITools, currentRun, endRun, recordStep, startRun } from '@/app/ai/tools'
 import { enabledAIToolDefinitions } from '@/app/ai/tools/catalog'
 import { aiToolOverrides } from '@/app/ai/tools/preferences'
-import { restAgents } from '@/app/automation/agents'
 import { diagnosticErrorDetails } from '@/app/diagnostics'
 import {
   recordChatCompleted,
@@ -53,9 +50,6 @@ type EditorStore = ReturnType<typeof getActiveEditorStore>
 
 type ChatSessionOptions = {
   isConfigured: ComputedRef<boolean>
-  isACPProvider: ComputedRef<boolean>
-  isHarnessProvider: ComputedRef<boolean>
-  providerID: Ref<AIProviderID>
   credentialsReady: Promise<void>
   getActiveEditorStore: () => EditorStore
 }
@@ -78,7 +72,7 @@ const ANTHROPIC_CACHE_CONTROL = {
   anthropic: { cacheControl: { type: 'ephemeral' } }
 } as const
 
-function supportsAnthropicCaching(providerID: AIProviderID): boolean {
+function supportsAnthropicCaching(providerID: string): boolean {
   return providerID === 'anthropic'
 }
 
@@ -88,16 +82,6 @@ function callSettings(
 ): { reasoning: ReasoningCallSettings['reasoning']; providerOptions?: AIProviderOptions } {
   const { reasoning } = reasoningCallSettings(thinkingLevel)
   return { reasoning, providerOptions: cacheOptions }
-}
-
-export async function createACPTransport(providerID: AIProviderID) {
-  const agentId = providerID.replace('acp:', '') as ACPAgentID
-  const agentDef = ACP_AGENTS.find((a) => a.id === agentId)
-  if (!agentDef) throw new Error(`Unknown ACP agent: ${agentId}`)
-
-  const { ACPChatTransport } = await import('@/app/ai/acp/transport')
-  const { homeDir } = await import('@tauri-apps/api/path')
-  return new ACPChatTransport({ agentDef, cwd: await homeDir() })
 }
 
 export function createToolLoopTransport({
@@ -248,9 +232,6 @@ async function settleEndedReply(
 
 export function createChatSessionManager({
   isConfigured,
-  isACPProvider,
-  isHarnessProvider,
-  providerID,
   credentialsReady,
   getActiveEditorStore
 }: ChatSessionOptions) {
@@ -259,8 +240,6 @@ export function createChatSessionManager({
   let currentChatStore: EditorStore | null = null
   const currentChatMessages = new WeakMap<EditorStore, UIMessage[]>()
   let chat: Chat<UIMessage> | null = null
-  let acpTransportInstance: { destroy(): Promise<void> } | null = null
-  let harnessTransportInstance: { stop(): Promise<void> } | null = null
   let overrideTransport: (() => ChatTransport<UIMessage>) | null = null
   let activeProviderError: unknown = null
   const runRecorder = createRunRecorder(createTraceStore())
@@ -298,73 +277,8 @@ export function createChatSessionManager({
     transportDirty = true
   }
 
-  async function destroyAgentTransports(): Promise<void> {
-    const acp = acpTransportInstance
-    const harness = harnessTransportInstance
-    acpTransportInstance = null
-    harnessTransportInstance = null
-    const results = await Promise.allSettled([acp?.destroy(), harness?.stop()])
-    const errors = results
-      .filter((result) => result.status === 'rejected')
-      .map((result) => result.reason)
-    if (errors.length) throw new AggregateError(errors, 'Agent transport teardown failed')
-  }
-
-  async function createActiveACPTransport() {
-    await destroyAgentTransports()
-    await assertAgentReady('acp')
-    const transport = await createACPTransport(providerID.value)
-    acpTransportInstance = transport
-    return transport as ChatTransport<UIMessage>
-  }
-
-  async function createActiveHarnessTransport(sessionId: string) {
-    await destroyAgentTransports()
-    const runtime = await createAIModelRuntime('design')
-    if (runtime?.kind !== 'harness') throw new Error('The Design agent is not configured for Pi')
-    await assertAgentReady('pi')
-    const [{ HarnessChatTransport }, { buildPiMCPServers }, { readPiAccount }] = await Promise.all([
-      import('@/app/ai/harness/transport'),
-      import('@/app/integrations/mcp'),
-      import('@/app/ai/harness/pi-settings')
-    ])
-    // A saved key is an AI Gateway key; without one, Pi uses the CLI's own sign-in.
-    const apiKey = await resolveModelConnectionAPIKey(runtime.role.connection.id)
-    const account = apiKey ? null : await readPiAccount()
-    const model =
-      runtime.role.profile.customModelID ||
-      runtime.role.profile.modelID ||
-      account?.defaultModel ||
-      ''
-    if (!apiKey && !account?.signedIn) throw new AgentSetupError('pi-sign-in')
-    if (!model) throw new AgentSetupError('pi-model')
-    const transport = new HarnessChatTransport(
-      sessionId,
-      {
-        adapter: 'pi',
-        sandbox: 'just-bash',
-        model,
-        settings: {
-          ...(runtime.role.profile.thinkingLevel !== 'default' && {
-            thinkingLevel: runtime.role.profile.thinkingLevel
-          }),
-          permissionMode: runtime.role.profile.harnessPermissionMode ?? 'allow-edits'
-        },
-        instructions: SYSTEM_PROMPT,
-        mcpServers: await buildPiMCPServers()
-      },
-      apiKey
-        ? { OPENPENCIL_HARNESS_API_KEY: apiKey }
-        : { OPENPENCIL_HARNESS_AGENT_DIR: account?.agentDir ?? '' }
-    )
-    harnessTransportInstance = transport
-    return transport as ChatTransport<UIMessage>
-  }
-
   async function createTransport(store: EditorStore, diagnosticContext: AIDiagnosticContext) {
     if (overrideTransport) return overrideTransport()
-
-    await destroyAgentTransports()
 
     const runtime = await createAIModelRuntime('design')
     if (runtime?.kind !== 'direct') {
@@ -398,18 +312,7 @@ export function createChatSessionManager({
     if (!chat || transportDirty || currentChatStore !== store) {
       const messages = initialMessages ?? currentChatMessages.get(store)
       const diagnosticContext: AIDiagnosticContext = { sessionId, runId: crypto.randomUUID() }
-      let transport: ChatTransport<UIMessage>
-      // An ACP or Pi chat's tool calls show as an agent of that kind (`src/app/automation/agents.ts`).
-      let agentKind: 'acp' | 'harness' | null = null
-      if (isACPProvider.value) {
-        agentKind = 'acp'
-        transport = await createActiveACPTransport()
-      } else if (isHarnessProvider.value) {
-        agentKind = 'harness'
-        transport = await createActiveHarnessTransport(sessionId)
-      } else {
-        transport = await createTransport(store, diagnosticContext)
-      }
+      const transport = await createTransport(store, diagnosticContext)
       const created: Chat<UIMessage> = new Chat<UIMessage>({
         transport: {
           sendMessages: (options) => {
@@ -428,8 +331,6 @@ export function createChatSessionManager({
         },
         onFinish: (event) => {
           handleChatFinish(diagnosticContext, event)
-          // The reply is over, however it ended; its agent rests instead of waiting it out.
-          if (agentKind) restAgents(agentKind)
           if (event.isAbort || event.isDisconnect || event.isError) {
             void settleEndedReply(created, store, event.message.id, event.isAbort)
           }
@@ -444,7 +345,6 @@ export function createChatSessionManager({
 
   async function resetChat() {
     if (currentChatStore) currentChatMessages.delete(currentChatStore)
-    await destroyAgentTransports()
     failure.value = null
     chat = null
     currentChatStore = null

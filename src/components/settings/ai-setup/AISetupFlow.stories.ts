@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 
 import {
-  aiModelSettings,
   modelSettingsSnapshot,
   replaceAIModelSettings,
   type AIModelSettings
@@ -14,7 +13,6 @@ import AISetupFlow from './AISetupFlow.vue'
 interface Args {
   entry: 'welcome' | 'guided'
   offersTour?: boolean
-  agentsAvailable: boolean
 }
 
 const freshInstall: AIModelSettings = {
@@ -43,7 +41,7 @@ const freshInstall: AIModelSettings = {
 
 const meta = {
   title: 'App/Settings/AI Setup/Guided Setup',
-  args: { entry: 'guided', agentsAvailable: false },
+  args: { entry: 'guided' },
   parameters: {
     docs: {
       description: {
@@ -82,35 +80,12 @@ export const Welcome: Story = { args: { entry: 'welcome' } }
 /** Offered over the demo, which is the tour, so it does not point to it. */
 export const WelcomeInTour: Story = { args: { entry: 'welcome', offersTour: false } }
 export const Goals: Story = {}
-export const AccessInBrowser: Story = {
+/** Anthropic is the only access offered, and no coding agent is. */
+export const Access: Story = {
   play: async () => {
     await next()
+    await expect(page().getAllByRole('checkbox')).toHaveLength(1)
     await expect(page().getByRole('checkbox', { name: 'Anthropic' })).toBeVisible()
-    await expect(page().queryByRole('checkbox', { name: 'Claude Code' })).toBeNull()
-  }
-}
-export const AccessOnDesktop: Story = {
-  args: { agentsAvailable: true },
-  play: async () => {
-    await next()
-    await expect(page().getByRole('checkbox', { name: 'Claude Code' })).toBeVisible()
-  }
-}
-
-export const ConnectAgentAndFinish: Story = {
-  args: { agentsAvailable: true },
-  play: async () => {
-    await next()
-    await choose('Codex')
-    await next()
-    // Codex covers the design goal, so there is no pay-as-you-go question.
-    await expect(page().getByRole('heading', { name: 'Connect your AI' })).toBeVisible()
-    await expect(page().getByText('npm i -g @agentclientprotocol/codex-acp')).toBeVisible()
-    await next()
-    await expect(page().getByText('Codex · Model chosen by the agent')).toBeVisible()
-    await userEvent.click(page().getByRole('button', { name: 'Finish setup' }))
-    await expect(page().getByRole('heading', { name: 'AI is ready' })).toBeVisible()
-    await expect(aiModelSettings.value.models.map((profile) => profile.name)).toEqual(['Codex'])
   }
 }
 

@@ -33,9 +33,6 @@ export function useModelProfileEditor({ profileId, keyInput, labels: ai }: Profi
   const selection = useProfileModelSelection(draft, ai)
   const {
     providerDef,
-    isACP,
-    isHarness,
-    supportsThinking,
     providerDisplayName,
     modelOptions,
     selectedModelValue,
@@ -152,9 +149,6 @@ export function useModelProfileEditor({ profileId, keyInput, labels: ai }: Profi
     dirty,
     busy,
     providerDef,
-    isACP,
-    isHarness,
-    supportsThinking,
     providerDisplayName,
     modelOptions,
     selectedModelValue,

@@ -26,8 +26,6 @@ export type DiagnosticEventName =
   | 'editor.preparation.finished'
   | 'document.operation.failed'
   | 'storage.operation.failed'
-  | 'mcp.connection.failed'
-  | 'acp.transport.failed'
 
 export type DiagnosticEvent = {
   id: string

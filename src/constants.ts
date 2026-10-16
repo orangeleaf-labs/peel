@@ -1,5 +1,3 @@
-import ACP_DESIGN_CONTEXT from '@/app/ai/acp/design-context.md'
-
 export {
   IS_BROWSER,
   IS_TAURI,
@@ -73,9 +71,6 @@ export const NODE_DOWNLOAD_URL = 'https://nodejs.org/en/download'
 const DOCS_ORIGIN = 'https://openpencil.dev'
 export const MCP_SERVER_DOCS_URL = `${DOCS_ORIGIN}/programmable/mcp-server`
 export const WEBMCP_DOCS_URL = `${MCP_SERVER_DOCS_URL}#webmcp`
-export const MCP_CONNECTIONS_DOCS_URL = `${DOCS_ORIGIN}/programmable/ai-chat#external-mcp-connections`
-export const CODING_AGENTS_GUIDE_URL = `${DOCS_ORIGIN}/programmable/coding-agents`
-export const PI_GUIDE_URL = `${CODING_AGENTS_GUIDE_URL}#pi`
 
 /** The published release page, with its full notes, for a desktop version. */
 export function releaseNotesURL(version: string): string {
@@ -122,8 +117,5 @@ export const ROTATION_SNAP_DEGREES = 15
 export const DEFAULT_TEXT_WIDTH = 200
 export const DEFAULT_TEXT_HEIGHT = 24
 
-export const ACP_PERMISSION_TIMEOUT_MS = 60_000
 /** An agent's write outside the document is denied if the user has not answered by then. */
 export const WRITE_APPROVAL_TIMEOUT_MS = 60_000
-
-export { ACP_DESIGN_CONTEXT }

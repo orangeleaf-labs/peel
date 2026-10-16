@@ -4,7 +4,6 @@ import { requiredSetting, type SettingsValidationMessages } from '@/app/settings
 
 export interface ModelProfileValidationContext {
   customModel: boolean
-  providerKind: 'api' | 'acp' | 'harness'
   design: boolean
   intent: 'save' | 'test'
 }
@@ -18,20 +17,13 @@ export function modelProfileSchema(
   messages: ModelProfileValidationMessages
 ) {
   const modelField = context.customModel ? 'customModelID' : 'modelID'
-  // Agents choose their own model, and Pi falls back to the default model set in Pi.
-  const requiresAPI = context.providerKind === 'api'
-  const requiresModel = requiresAPI
   return v.pipe(
     v.object({
       name: context.intent === 'save' ? requiredSetting(messages.requiredField) : v.string(),
-      modelID:
-        requiresModel && !context.customModel
-          ? requiredSetting(messages.requiredField)
-          : v.string(),
-      customModelID:
-        requiresModel && context.customModel ? requiredSetting(messages.requiredField) : v.string(),
+      modelID: !context.customModel ? requiredSetting(messages.requiredField) : v.string(),
+      customModelID: context.customModel ? requiredSetting(messages.requiredField) : v.string(),
       credential:
-        requiresAPI && context.intent === 'test'
+        context.intent === 'test'
           ? v.pipe(
               v.boolean(),
               v.check((value: boolean) => value, messages.requiredField)

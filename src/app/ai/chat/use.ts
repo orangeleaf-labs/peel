@@ -8,8 +8,6 @@ import {
   browserCredentialsRemembered,
   credentialsReady,
   customModelID,
-  isACPProvider,
-  isHarnessProvider,
   isConfigured,
   maxOutputTokens,
   modelID,
@@ -31,9 +29,6 @@ const activeTab = ref<PropertiesTab>('design')
 
 const chatSession = createChatSessionManager({
   isConfigured,
-  isACPProvider,
-  isHarnessProvider,
-  providerID,
   credentialsReady,
   getActiveEditorStore
 })
@@ -43,10 +38,7 @@ const history = createConversationHistory({
   getEditor: getActiveEditorStore,
   ensureChat: chatSession.ensureChat,
   resetChat: chatSession.resetChat,
-  backend: () => {
-    if (isACPProvider.value) return 'acp'
-    return isHarnessProvider.value ? 'harness' : 'direct'
-  }
+  backend: () => 'direct'
 })
 
 registerAIChatEffects(chatSession.markTransportDirty)

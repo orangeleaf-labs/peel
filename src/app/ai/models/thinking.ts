@@ -19,8 +19,3 @@ export function thinkingLevelLabel(level: ThinkingLevel, labels: ThinkingLevelLa
 export function thinkingLevelOptions(labels: ThinkingLevelLabels) {
   return THINKING_LEVELS.map((value) => ({ value, label: thinkingLevelLabel(value, labels) }))
 }
-
-/** ACP agents choose their own reasoning; API models and Pi accept a level. */
-export function supportsThinkingLevel(providerID: string): boolean {
-  return !providerID.startsWith('acp:')
-}

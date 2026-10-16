@@ -33,6 +33,9 @@ did not cover a case, the safer and more reversible option was taken.
 | The model list is checked in rather than fetched. | No runtime call to models.dev; new Claude models arrive with an app update. |
 | Plaintext localStorage keys for removed AI providers are deleted at startup, not migrated. | No plaintext secret outlives its provider; upstream's own migration already deletes these entries. |
 | Stored Recraft and fal.ai keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
+| Remove the ACP coding agents and the Pi harness rather than hide them. | They spawn CLIs that talk to non-Anthropic providers; removing them leaves no path to turn back on. |
+| Remove connections to external MCP servers; keep the app's local MCP server. | A remote MCP server is an unlisted host; the local server only serves AI clients the user runs. |
+| Keep the in-app install of the `@open-pencil/mcp` companion. | It only installs the local server; the npm registry host is listed in EGRESS.md. |
 | No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
 | Collaboration code and dependencies are deleted rather than feature-flagged. | Nothing bundled can reach signalling hosts; bringing it back means reverting one commit. |

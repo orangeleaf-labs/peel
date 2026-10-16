@@ -43,9 +43,6 @@
       "#mcp/*": [
         "./packages/mcp/src/*"
       ],
-      "@open-pencil/harness": [
-        "./packages/harness/src/index.ts"
-      ],
       "#dom-css/*": [
         "./packages/dom-css/src/*"
       ],

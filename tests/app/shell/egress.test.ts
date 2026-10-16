@@ -36,7 +36,6 @@ const SHIPPED_ROOTS = [
   'packages/vue/src',
   'packages/cli/src',
   'packages/mcp/src',
-  'packages/harness/src',
   'packages/docs/.vitepress/theme',
   'packages/docs/overview',
   'skills',

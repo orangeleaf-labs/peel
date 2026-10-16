@@ -1,5 +1,6 @@
-import type { ProgrammableLabels, SidebarLabels } from './labels.ts'
 import type { DefaultTheme } from 'vitepress'
+
+import type { ProgrammableLabels, SidebarLabels } from './labels.ts'
 
 export const guideSidebar = (prefix: string, labels: SidebarLabels): DefaultTheme.SidebarItem[] => [
   {
@@ -9,22 +10,22 @@ export const guideSidebar = (prefix: string, labels: SidebarLabels): DefaultThem
       { text: labels.features, link: `${prefix}/overview/features` },
       { text: labels.comparison, link: `${prefix}/overview/comparison` },
       // English only until translated; locales link to the canonical page.
-      { text: labels.privacy, link: '/overview/privacy' },
-    ],
-  },
+      { text: labels.privacy, link: '/overview/privacy' }
+    ]
+  }
 ]
 
 export const userGuideSidebar = (
   prefix: string,
-  labels: SidebarLabels,
+  labels: SidebarLabels
 ): DefaultTheme.SidebarItem[] => [
   {
     text: labels.gettingAround,
     items: [
       { text: labels.canvasNav, link: `${prefix}/user-guide/canvas-navigation` },
       { text: labels.selection, link: `${prefix}/user-guide/selection-and-manipulation` },
-      { text: labels.contextMenu, link: `${prefix}/user-guide/context-menu` },
-    ],
+      { text: labels.contextMenu, link: `${prefix}/user-guide/context-menu` }
+    ]
   },
   {
     text: labels.creatingContent,
@@ -34,8 +35,8 @@ export const userGuideSidebar = (
       { text: labels.pen, link: `${prefix}/user-guide/pen-tool` },
       { text: labels.vectorEditing, link: `${prefix}/user-guide/vector-edit` },
       // English only until translated; locales link to the canonical page.
-      { text: labels.icons, link: '/user-guide/icons' },
-    ],
+      { text: labels.icons, link: '/user-guide/icons' }
+    ]
   },
   {
     text: labels.organizing,
@@ -43,8 +44,8 @@ export const userGuideSidebar = (
       { text: labels.layers, link: `${prefix}/user-guide/layers-and-pages` },
       { text: labels.exporting, link: `${prefix}/user-guide/exporting` },
       // English only until translated; locales link to the canonical page.
-      { text: labels.cloudStorage, link: '/user-guide/cloud-storage' },
-    ],
+      { text: labels.cloudStorage, link: '/user-guide/cloud-storage' }
+    ]
   },
   {
     text: labels.advanced,
@@ -53,14 +54,14 @@ export const userGuideSidebar = (
       { text: labels.components, link: `${prefix}/user-guide/components` },
       { text: labels.variables, link: `${prefix}/user-guide/variables` },
       // English only until translated; locales link to the canonical page.
-      { text: labels.checkingDesigns, link: '/user-guide/checking-designs' },
-    ],
-  },
+      { text: labels.checkingDesigns, link: '/user-guide/checking-designs' }
+    ]
+  }
 ]
 
 export const programmableSidebar = (
   prefix: string,
-  labels: ProgrammableLabels,
+  labels: ProgrammableLabels
 ): DefaultTheme.SidebarItem[] => [
   {
     text: labels.overview,
@@ -77,20 +78,15 @@ export const programmableSidebar = (
       { text: 'Native JavaScript APIs', link: '/programmable/native-api' },
       { text: 'Design authoring reference', link: '/reference/design-authoring' },
       { text: labels.mcpServer, link: '/programmable/mcp-server' },
-      { text: labels.aiChat, link: `${prefix}/programmable/ai-chat` },
-      ...(!prefix
-        ? [
-            { text: 'Coding agents', link: '/programmable/coding-agents' },
-          ]
-        : []),
-    ],
-  },
+      { text: labels.aiChat, link: `${prefix}/programmable/ai-chat` }
+    ]
+  }
 ]
 
 export const referenceSidebar = (
   prefix: string,
   label: string,
-  labels: SidebarLabels,
+  labels: SidebarLabels
 ): DefaultTheme.SidebarItem[] => [
   {
     text: label,
@@ -101,15 +97,15 @@ export const referenceSidebar = (
       { text: 'Scene Graph', link: '/reference/scene-graph' },
       { text: labels.figmaMatrix, link: `${prefix}/reference/figma-compatibility` },
       ...(!prefix ? [{ text: 'DOM/CSS Mapping', link: '/reference/dom-css-mapping' }] : []),
-      { text: 'File Format', link: '/reference/file-format' },
-    ],
-  },
+      { text: 'File Format', link: '/reference/file-format' }
+    ]
+  }
 ]
 
 export const developmentSidebar = (
   prefix: string,
   label: string,
-  labels: SidebarLabels,
+  labels: SidebarLabels
 ): DefaultTheme.SidebarItem[] => [
   {
     text: label,
@@ -127,9 +123,9 @@ export const developmentSidebar = (
             { text: 'Navigation Performance', link: '/development/navigation-performance' },
             { text: 'Renderer Lifecycle', link: '/development/renderer-lifecycle' },
             { text: 'Renderer Profiler', link: '/development/renderer-profiler' },
-            { text: 'Vector Conversion', link: '/development/vector-conversion' },
+            { text: 'Vector Conversion', link: '/development/vector-conversion' }
           ]
-        : []),
-    ],
-  },
+        : [])
+    ]
+  }
 ]

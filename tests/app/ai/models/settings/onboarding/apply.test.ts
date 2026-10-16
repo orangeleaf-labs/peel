@@ -66,10 +66,7 @@ function sequentialIds() {
 function apply(settings: AIModelSettings, answers: OnboardingAnswers) {
   return applyOnboardingPlan({
     settings,
-    plan: planOnboarding(answers, {
-      agentsAvailable: true,
-      current: currentOnboardingModels(settings)
-    }),
+    plan: planOnboarding(answers, { current: currentOnboardingModels(settings) }),
     createId: sequentialIds()
   })
 }
@@ -103,15 +100,9 @@ describe('applyOnboardingPlan', () => {
   test('produces settings the store accepts unchanged', () => {
     const { settings } = apply(freshInstall(), {
       goals: ['design', 'vision'],
-      access: ['acp:claude-code', 'anthropic']
+      access: ['anthropic']
     })
     expect(parseAIModelSettings(settings)).toEqual(settings)
-  })
-
-  test('clears roles an agent cannot take when design moves to an agent', () => {
-    const { settings } = apply(freshInstall(), { goals: ['design'], access: ['acp:codex'] })
-    expect(settings.assignments).toMatchObject({ review: null, fast: null, vision: null })
-    expect(parseAIModelSettings(settings)?.assignments).toEqual(settings.assignments)
   })
 
   test('reuses a matching connection and profile and keeps advanced settings', () => {

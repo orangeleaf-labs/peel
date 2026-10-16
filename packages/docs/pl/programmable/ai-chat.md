@@ -9,7 +9,7 @@ Naciśnij <kbd>⌘</kbd><kbd>J</kbd> albo <kbd>Ctrl</kbd> + <kbd>J</kbd>. Asyste
 
 ## Konfiguracja
 
-Przy pierwszym uruchomieniu konfiguracja z przewodnikiem pyta, w czym ma pomagać AI i z czego już korzystasz: z agenta programistycznego, takiego jak Claude Code, Codex lub Gemini CLI w aplikacji na komputer albo z klucza API Anthropic. Łączy ten dostęp i przypisuje go do ról **Design agent** i **Vision**, nie zmieniając ręcznej konfiguracji. Możesz ją pominąć i uruchomić ponownie w **Ustawienia → AI i agenci → Uruchom konfigurację z przewodnikiem**. Aby skonfigurować modele ręcznie:
+Przy pierwszym uruchomieniu konfiguracja z przewodnikiem pyta, w czym ma pomagać AI i z czego już korzystasz: z klucza API Anthropic. Łączy ten dostęp i przypisuje go do ról **Design agent** i **Vision**, nie zmieniając ręcznej konfiguracji. Możesz ją pominąć i uruchomić ponownie w **Ustawienia → AI i agenci → Uruchom konfigurację z przewodnikiem**. Aby skonfigurować modele ręcznie:
 
 1. Otwórz panel czatu AI.
 2. Kliknij ikonę ustawień.
@@ -21,14 +21,6 @@ Możesz utworzyć kilka modeli i osobno przypisać je do projektowania, przeglą
 ### Dostawcy
 
 Peel korzysta wyłącznie z API Anthropic. Klucz API uzyskasz na [console.anthropic.com](https://console.anthropic.com), a model Claude wybierasz z wbudowanej listy, więc wybór modelu nie łączy się z żadną inną usługą. Żądania trafiają bezpośrednio do `api.anthropic.com`; nie ma własnego adresu bazowego. W aplikacji na komputer klucz jest przechowywany w magazynie poświadczeń systemu operacyjnego.
-
-### Zewnętrzne połączenia MCP
-
-W wersji komputerowej agenci ACP mogą korzystać z zaufanych zdalnych serwerów [Model Context Protocol](https://modelcontextprotocol.io/). Otwórz **Ustawienia → Połączenia MCP**, dodaj nazwany punkt końcowy Streamable HTTP, opcjonalnie zapisz token Bearer i włącz połączenie.
-
-Token jest przechowywany w skonfigurowanym magazynie danych uwierzytelniających i odczytywany dopiero podczas uruchamiania sesji ACP.
-
-Zdalny serwer musi używać HTTPS. W lokalnym środowisku programistycznym dozwolone są adresy pętli zwrotnej przez HTTP. Włączaj wyłącznie zaufane serwery. Wbudowany serwer MCP OpenPencil jest podłączany automatycznie.
 
 ## Możliwości
 

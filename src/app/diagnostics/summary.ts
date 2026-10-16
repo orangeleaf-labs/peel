@@ -27,8 +27,6 @@ export interface DiagnosticLabels {
   chatFailed: string
   storageFailed: string
   documentFailed: string
-  acpFailed: string
-  mcpFailed: string
   modelStep: (values: { model: string }) => string
   modelStepTokens: (values: { input: string; output: string }) => string
   toolCompleted: (values: { tool: string }) => string
@@ -141,9 +139,7 @@ const DESCRIBE: Record<DiagnosticEventName, Describe> = {
   'document.operation.failed': (attributes, labels) => [
     labels.documentFailed,
     errorDetail(attributes)
-  ],
-  'acp.transport.failed': (attributes, labels) => [labels.acpFailed, errorDetail(attributes)],
-  'mcp.connection.failed': (attributes, labels) => [labels.mcpFailed, errorDetail(attributes)]
+  ]
 }
 
 function isRecordedEventName(name: string): name is DiagnosticEventName {

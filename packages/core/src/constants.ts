@@ -164,55 +164,8 @@ export const TEXT_SELECTION_ALPHA = 0.3
 export const TEXT_CARET_COLOR = BLACK
 export const TEXT_CARET_WIDTH = 1
 
-export type ACPAgentID = 'claude-code' | 'codex' | 'gemini-cli'
-
-export interface ACPAgentDef {
-  id: ACPAgentID
-  name: string
-  command: string
-  args: string[]
-  /** The agent's own CLI, when the ACP program is a separate adapter for it. */
-  cliCommand?: string
-  /** npm package that provides `command` when it is an adapter. */
-  adapterPackage?: string
-  /** The vendor's installation guide for the agent itself. */
-  setupURL?: string
-  installCommand?: string
-}
-
-export const ACP_AGENTS: ACPAgentDef[] = [
-  {
-    id: 'claude-code',
-    name: 'Claude Code',
-    command: 'claude-agent-acp',
-    args: [],
-    cliCommand: 'claude',
-    adapterPackage: '@agentclientprotocol/claude-agent-acp',
-    setupURL: 'https://code.claude.com/docs/en/setup',
-    installCommand: 'npm i -g @agentclientprotocol/claude-agent-acp'
-  },
-  {
-    id: 'codex',
-    name: 'Codex',
-    command: 'codex-acp',
-    args: [],
-    cliCommand: 'codex',
-    adapterPackage: '@agentclientprotocol/codex-acp',
-    setupURL: 'https://developers.openai.com/codex/cli',
-    installCommand: 'npm i -g @agentclientprotocol/codex-acp'
-  },
-  {
-    id: 'gemini-cli',
-    name: 'Gemini CLI',
-    command: 'gemini',
-    args: ['--acp'],
-    setupURL: 'https://geminicli.com/docs/get-started/installation/',
-    installCommand: 'npm i -g @google/gemini-cli'
-  }
-]
-
-/** Peel talks to the Anthropic API only; agents run on this computer. */
-export type AIProviderID = 'anthropic' | 'harness:pi' | `acp:${ACPAgentID}`
+/** Peel talks to the Anthropic API only. */
+export type AIProviderID = 'anthropic'
 
 export interface ModelOption {
   id: string
@@ -234,17 +187,7 @@ export interface AIProviderDef {
   supportsCustomModel?: boolean
 }
 
-export const HARNESS_PROVIDER_ID = 'harness:pi' as const
-
 export const AI_PROVIDERS: AIProviderDef[] = [
-  {
-    id: HARNESS_PROVIDER_ID,
-    name: 'Pi',
-    keyPlaceholder: 'AI Gateway key (optional)',
-    keyURL: '',
-    defaultModel: '',
-    supportsCustomModel: true
-  },
   {
     id: 'anthropic',
     name: 'Anthropic',
@@ -258,8 +201,8 @@ export const DEFAULT_AI_PROVIDER: AIProviderID = 'anthropic'
 
 export const AUTOMATION_HTTP_PORT = 7600
 /**
- * Request header the app's own ACP and Pi harness chats send to the MCP server, so their sessions
- * show as those agents rather than as an outside MCP client.
+ * Request header that marks an MCP session as an ACP or harness chat rather than an outside MCP
+ * client. The app no longer starts such chats; the MCP server still accepts the header.
  */
 export const MCP_AGENT_HEADER = 'x-openpencil-agent'
 

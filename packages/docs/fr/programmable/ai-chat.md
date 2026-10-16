@@ -9,7 +9,7 @@ Appuyez sur <kbd>⌘</kbd><kbd>J</kbd> ou <kbd>Ctrl</kbd><kbd>J</kbd>. L’assis
 
 ## Configurer les modèles
 
-Au premier lancement, la configuration guidée demande pour quoi l’IA doit vous aider et ce que vous utilisez déjà : un agent de code comme Claude Code, Codex ou Gemini CLI dans l’application de bureau ou une clé d’API Anthropic. Elle connecte cet accès et l’attribue aux rôles **Design agent** et **Vision**, sans toucher à ce que vous avez configuré à la main. Vous pouvez la passer et la relancer depuis **Réglages → IA et agents → Lancer la configuration guidée**. Pour configurer les modèles à la main :
+Au premier lancement, la configuration guidée demande pour quoi l’IA doit vous aider et ce que vous utilisez déjà : une clé d’API Anthropic. Elle connecte cet accès et l’attribue aux rôles **Design agent** et **Vision**, sans toucher à ce que vous avez configuré à la main. Vous pouvez la passer et la relancer depuis **Réglages → IA et agents → Lancer la configuration guidée**. Pour configurer les modèles à la main :
 
 1. Ouvrez le chat.
 2. Sélectionnez l’icône des réglages.
@@ -20,12 +20,6 @@ Plusieurs profils peuvent être enregistrés et attribués séparément au desig
 ## Fournisseurs
 
 Peel utilise uniquement l’API Anthropic. Obtenez une clé sur [console.anthropic.com](https://console.anthropic.com) et choisissez un modèle Claude dans la liste intégrée à l’application : choisir un modèle ne contacte aucun autre service. Les requêtes vont directement à `api.anthropic.com` ; aucune adresse de base personnalisée n’est possible. Dans l’application de bureau, la clé est conservée dans le magasin d’identifiants du système d’exploitation.
-
-## Agents ACP et MCP distant
-
-L’application de bureau peut lancer des agents ACP et les connecter à des serveurs distants de confiance compatibles avec [Model Context Protocol](https://modelcontextprotocol.io/). Dans **Réglages → Connexions MCP**, ajoutez un point d’accès HTTP diffusé, un nom et, si nécessaire, un jeton Bearer.
-
-Le jeton est conservé dans le stockage sécurisé des identifiants, pas dans les réglages ordinaires, et n’est récupéré qu’au démarrage de la session ACP.
 
 ## Outils
 

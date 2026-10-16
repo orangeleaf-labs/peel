@@ -32,13 +32,13 @@ const MODEL_PROVIDER_ADAPTERS = {
   anthropic: anthropicAdapter
 } satisfies Record<DirectProviderID, ModelProviderAdapter>
 
-export function isDirectProviderID(providerID: AIProviderID): providerID is DirectProviderID {
+export function isDirectProviderID(providerID: string): providerID is DirectProviderID {
   return DIRECT_PROVIDER_IDS.some((candidate) => candidate === providerID)
 }
 
 export function modelProviderAdapter(providerID: AIProviderID): ModelProviderAdapter {
   if (!isDirectProviderID(providerID)) {
-    throw new Error('ACP providers and Harness agents do not use direct API models')
+    throw new Error('Not a direct API model provider')
   }
   return MODEL_PROVIDER_ADAPTERS[providerID]
 }

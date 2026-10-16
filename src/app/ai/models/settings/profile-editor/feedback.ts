@@ -12,10 +12,6 @@ export function useModelProfileFeedback(
   messages: Readonly<Ref<ModelProfileValidationMessages>>
 ) {
   const testing = ref(false)
-  const providerKind = computed(() => {
-    if (profile.isACP.value) return 'acp'
-    return profile.isHarness.value ? 'harness' : 'api'
-  })
   const values = computed(() => ({
     name: profile.draft.name,
     modelID: profile.draft.modelID,
@@ -31,7 +27,6 @@ export function useModelProfileFeedback(
       {
         customModel: profile.customModelSelected.value,
         intent: testing.value ? 'test' : 'save',
-        providerKind: providerKind.value,
         design: profile.draft.profileId === aiModelSettings.value.assignments.design
       },
       messages.value

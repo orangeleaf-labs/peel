@@ -9,7 +9,7 @@ Press <kbd>⌘</kbd><kbd>J</kbd> (<kbd>Ctrl</kbd> + <kbd>J</kbd>) to open the AI
 
 ## Setup
 
-The first time you open OpenPencil, guided setup asks what AI should help with and what you already use: a [coding agent](./coding-agents) such as Claude Code, Codex, Gemini CLI, or Pi in the desktop app, or an Anthropic API key. It connects that access and assigns it to the **Design agent** and **Vision** roles, keeping anything you configured by hand. Skip it to start designing, and run it again from **Settings → AI & agents → Run guided setup**. To configure models by hand:
+The first time you open OpenPencil, guided setup asks what AI should help with and whether you have an Anthropic API key. It connects that key and assigns it to the **Design agent** and **Vision** roles, keeping anything you configured by hand. Skip it to start designing, and run it again from **Settings → AI & agents → Run guided setup**. To configure models by hand:
 
 1. Open the AI chat panel (<kbd>⌘</kbd><kbd>J</kbd>)
 2. Click the settings icon
@@ -24,15 +24,15 @@ The chat composer grows with multiline prompts and can pin the current canvas se
 
 In **Settings → AI & agents → Chat**, set **Maximum steps per message** to a whole number from 1 to 1,000. The default is 50. Press Enter or leave the field to save a valid value; invalid drafts do not replace the saved preference. Higher limits allow longer tool-driven tasks but can increase latency and provider cost.
 
-The built-in AI captures this limit when each message starts. Stopping, remaining-step warnings, and the **Continue** action use that same budget. Changing it does not interrupt an ongoing request; the next message or continuation uses the new limit. A step is one model iteration and can include multiple tool calls. ACP and Pi agents manage their own limits.
+The built-in AI captures this limit when each message starts. Stopping, remaining-step warnings, and the **Continue** action use that same budget. Changing it does not interrupt an ongoing request; the next message or continuation uses the new limit. A step is one model iteration and can include multiple tool calls.
 
 ## Tool access
 
-Open **Settings → Tool access** to choose which tools direct AI model connections can use. Search by name or description, expand read-only or side-effect groups, and toggle individual tools or an entire group. Group switches affect all tools in that group, not only search results. **Restore defaults** restores the default tool set: the core editing and inspection tools, the library tools (`get_components`, `list_libraries`, `insert_library_component`), comments, variables, `lint` and `lint_fix`, `export_image`, `list_pages`, and `create_page`. Extended tools such as `create_component` can be enabled individually.
+Open **Settings → Tool access** to choose which tools the built-in AI can use. Search by name or description, expand read-only or side-effect groups, and toggle individual tools or an entire group. Group switches affect all tools in that group, not only search results. **Restore defaults** restores the default tool set: the core editing and inspection tools, the library tools (`get_components`, `list_libraries`, `insert_library_component`), comments, variables, `lint` and `lint_fix`, `export_image`, `list_pages`, and `create_page`. Extended tools such as `create_component` can be enabled individually.
 
 Preferences are saved locally and apply to the next message, including in an existing conversation. They do not change an already-running request. Enabling many tools increases the schemas sent to the model.
 
-The **Local MCP** segment has independent settings for clients connected to OpenPencil's MCP server, including ACP and Pi agents. Restart the server and reconnect stdio clients after changing those settings. Remote MCP connections, WebMCP access, and Pi's shell/filesystem permissions remain separate.
+The **Local MCP** segment has independent settings for clients connected to OpenPencil's MCP server, such as coding agents you run yourself. Restart the server and reconnect stdio clients after changing those settings. WebMCP access remains separate.
 
 Tool toggles control which tools are offered. The AI chat never offers `eval` or any other tool that runs model-written scripts; MCP clients get `eval` only when the server enables it.
 
@@ -40,19 +40,13 @@ Tool toggles control which tools are offered. The AI chat never offers `eval` or
 
 Use **Conversation history** to return to a saved chat, start a **New chat**, or rename or delete a conversation. History and attachment previews are stored locally; **All chats** lets you browse transcripts from other documents.
 
-A conversation belonging to another document is read-only until you open that document. A saved agent transcript is not a guarantee that its external agent session can resume: when resumption is unavailable, start a new chat. Local history is not cloud synchronization or a backup.
+A conversation belonging to another document is read-only until you open that document. Local history is not cloud synchronization or a backup.
 
 In the Chat settings beside the model overview, choose whether reasoning is **Collapsed by default**, **Expand while thinking**, or **Expanded by default**. Disclosure animations follow the app's reduced-motion preference. Expanding older reasoning does not force the conversation to scroll to the bottom.
 
 ## Provider
 
 Peel talks to the Anthropic API only. Get an API key at [console.anthropic.com](https://console.anthropic.com) and choose a Claude model from the built-in list, which ships with the app, so listing models contacts no other service. Requests go directly from your computer to `api.anthropic.com`; there is no custom base URL. In the desktop app the key is stored in the operating system's credential store (Keychain on macOS, Credential Manager on Windows).
-
-## External MCP connections
-
-Desktop ACP agents can also use trusted remote [Model Context Protocol](https://modelcontextprotocol.io/) servers. In **Settings → MCP**, under MCP connections, add a named Streamable HTTP endpoint, optionally save a bearer token, and enable the connection. OpenPencil stores the token in the configured credential backend rather than ordinary settings and resolves it only when starting the ACP session.
-
-Remote servers must use HTTPS. Loopback HTTP endpoints are accepted for local development. Review and trust a server before enabling it: its tools may read external data or perform actions with the credentials you provide. OpenPencil's built-in design MCP server remains attached automatically and does not need to be added here.
 
 ## What It Can Do
 

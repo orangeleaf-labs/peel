@@ -11,9 +11,10 @@ import {
   resolveModelConnectionAPIKey,
   type AIModelConnection
 } from '@/app/ai/models'
+import { belongsToProvider } from '@/app/ai/models/provider-name'
 import type { CredentialStatus } from '@/app/settings/credentials/types'
 
-import { isOnboardingAgent, type OnboardingAccess, type PlannedModel } from './plan'
+import type { OnboardingAccess, PlannedModel } from './plan'
 
 export type ConnectionTestStatus = 'idle' | 'testing' | 'success' | 'error'
 
@@ -32,8 +33,9 @@ export function existingOnboardingConnection(
   providerID: OnboardingAccess
 ): AIModelConnection | null {
   return (
-    aiModelSettings.value.connections.find((connection) => connection.providerID === providerID) ??
-    null
+    aiModelSettings.value.connections.find((connection) =>
+      belongsToProvider(connection, providerID)
+    ) ?? null
   )
 }
 
@@ -75,7 +77,6 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
 
   /** The configured connection matching what is entered now, whose saved key may be used. */
   function savedConnection(providerID: OnboardingAccess): AIModelConnection | null {
-    if (isOnboardingAgent(providerID)) return null
     const saved = existingOnboardingConnection(providerID)
     if (saved && !(saved.id in keyStatuses)) {
       keyStatuses[saved.id] = 'missing'
@@ -90,7 +91,6 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
   }
 
   function ready(providerID: OnboardingAccess): boolean {
-    if (isOnboardingAgent(providerID)) return true
     const state = connection(providerID)
     if (state.test === 'success') return true
     return hasSavedKey(providerID) && !state.apiKey.trim()

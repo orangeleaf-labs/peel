@@ -144,66 +144,6 @@ describe('AI model profiles and role assignments', () => {
     expect(modelSettingsSnapshot().connections).toHaveLength(2)
   })
 
-  test('stores multiple Harness provider profiles with independent model IDs', () => {
-    const first = createModelProfileDraft()
-    Object.assign(first, {
-      name: 'Pi Sonnet',
-      providerID: 'harness:pi',
-      modelID: '',
-      customModelID: 'anthropic/claude-sonnet-4.6',
-      thinkingLevel: 'medium',
-      harnessPermissionMode: 'allow-edits'
-    })
-    const second = createModelProfileDraft()
-    Object.assign(second, {
-      name: 'Pi custom',
-      providerID: 'harness:pi',
-      modelID: '',
-      customModelID: 'custom/provider-model',
-      thinkingLevel: 'high',
-      harnessPermissionMode: 'allow-reads'
-    })
-
-    const savedFirst = saveModelProfileDraft(first)
-    const savedSecond = saveModelProfileDraft(second)
-    expect(savedFirst.customModelID).toBe('anthropic/claude-sonnet-4.6')
-    expect(savedSecond.customModelID).toBe('custom/provider-model')
-    expect(savedFirst.thinkingLevel).toBe('medium')
-    expect(savedSecond.thinkingLevel).toBe('high')
-    expect(savedFirst.harnessPermissionMode).toBe('allow-edits')
-    expect(savedSecond.harnessPermissionMode).toBe('allow-reads')
-  })
-
-  test('keeps ACP agents exclusive to the Design role', () => {
-    const settings = modelSettingsSnapshot()
-    settings.connections.push({
-      id: 'connection-acp',
-      providerID: 'acp:claude-code',
-      credentialProfileId: 'connection-acp'
-    })
-    settings.models.push({
-      id: 'model-acp',
-      name: 'Claude Code',
-      connectionId: 'connection-acp',
-      modelID: '',
-      customModelID: '',
-      maxOutputTokens: 16_384,
-      thinkingLevel: 'default',
-      capabilities: ['tools']
-    })
-    replaceAIModelSettings(settings)
-
-    setModelRoleAssignment('review', null)
-    setModelRoleAssignment('review', 'model-acp')
-    expect(resolveAIModelRole('review')).toBeNull()
-
-    setModelRoleAssignment('design', 'model-acp')
-    expect(resolveAIModelRole('design')?.profile.id).toBe('model-acp')
-    setModelRoleAssignment('fast', null)
-    setModelRoleAssignment('fast', 'design')
-    expect(resolveAIModelRole('fast')).toBeNull()
-  })
-
   test('normalizes invalid output limits before persistence', () => {
     const draft = createModelProfileDraft('model-fast')
     draft.maxOutputTokens = Number.NaN

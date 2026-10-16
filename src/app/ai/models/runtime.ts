@@ -17,17 +17,7 @@ export type DirectAIModelRuntime = {
   model: LanguageModel
 }
 
-export type ACPModelRuntime = {
-  kind: 'acp'
-  role: ResolvedAIModelRole
-}
-
-export type HarnessModelRuntime = {
-  kind: 'harness'
-  role: ResolvedAIModelRole
-}
-
-export type AIModelRuntime = DirectAIModelRuntime | ACPModelRuntime | HarnessModelRuntime
+export type AIModelRuntime = DirectAIModelRuntime
 
 export function modelConnectionCredentialRef(connection: AIModelConnection): CredentialRef {
   return providerCredentialRef(connection.providerID, connection.credentialProfileId)
@@ -37,7 +27,7 @@ export async function modelConnectionCredentialStatus(
   connectionId: string
 ): Promise<CredentialStatus> {
   const connection = modelConnection(connectionId)
-  if (!connection || connection.providerID.startsWith('acp:')) return 'missing'
+  if (!connection) return 'missing'
   return appCredentialServices.manager.status(modelConnectionCredentialRef(connection))
 }
 
@@ -46,7 +36,7 @@ export const modelCredentialRevision = ref(0)
 
 export async function setModelConnectionAPIKey(connectionId: string, value: string): Promise<void> {
   const connection = modelConnection(connectionId)
-  if (!connection || connection.providerID.startsWith('acp:')) return
+  if (!connection) return
   const reference = modelConnectionCredentialRef(connection)
   const key = value.trim()
   try {
@@ -60,7 +50,7 @@ export async function setModelConnectionAPIKey(connectionId: string, value: stri
 export async function resolveModelConnectionAPIKey(connectionId: string): Promise<string | null> {
   await initializeCredentialMigration()
   const connection = modelConnection(connectionId)
-  if (!connection || connection.providerID.startsWith('acp:')) return null
+  if (!connection) return null
   return appCredentialServices.resolver.resolve(modelConnectionCredentialRef(connection))
 }
 
@@ -73,19 +63,6 @@ export async function createAIModelRuntime(role: AIModelRole): Promise<AIModelRu
   if (role === 'vision' && !resolved.profile.capabilities.includes('vision')) {
     throw new Error('The Vision model must support image input')
   }
-  if (resolved.connection.providerID === 'harness:pi') {
-    if (role !== 'design') {
-      throw new Error('Harness agents can only be assigned to the Design agent role')
-    }
-    return { kind: 'harness', role: resolved }
-  }
-  if (resolved.connection.providerID.startsWith('acp:')) {
-    if (role !== 'design') {
-      throw new Error('ACP agents can only be assigned to the Design agent role')
-    }
-    return { kind: 'acp', role: resolved }
-  }
-
   const apiKey = await resolveModelConnectionAPIKey(resolved.connection.id)
   if (!apiKey) throw new Error(`Credential is unavailable for the ${role} model role`)
   return {

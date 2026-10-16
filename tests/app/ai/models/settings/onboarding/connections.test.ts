@@ -41,6 +41,5 @@ afterEach(() => replaceAIModelSettings(original))
 describe('existingOnboardingConnection', () => {
   test('reuses the Anthropic connection that is already configured', () => {
     expect(existingOnboardingConnection('anthropic')?.id).toBe('connection-anthropic')
-    expect(existingOnboardingConnection('acp:codex')).toBeNull()
   })
 })

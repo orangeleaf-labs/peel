@@ -89,43 +89,6 @@ async function failCredentialWrites(page: Page) {
   })
 }
 
-test('MCP requires a token only for enabled bearer connections and preserves failed saves', async ({
-  page
-}) => {
-  await openSettings(page)
-  await page.getByTestId('settings-section-mcp').click()
-  await page.getByRole('button', { name: 'Add connection', exact: true }).click()
-  await page.getByRole('textbox', { name: 'Connection name', exact: true }).fill('Test server')
-  await page
-    .getByRole('textbox', { name: 'MCP server URL', exact: true })
-    .fill('https://example.com/mcp')
-  await page.getByRole('switch', { name: 'Enable for ACP agents' }).click()
-  await page.getByRole('switch', { name: 'Use bearer authentication' }).click()
-  const key = page.getByRole('textbox', { name: 'Bearer token', exact: true })
-  await page.getByRole('button', { name: 'Save', exact: true }).click()
-  await expect(key).toBeFocused()
-  await expect(key).toHaveAttribute('aria-invalid', 'true')
-  await key.fill('test-only-replacement')
-  await expect(key).toHaveAttribute('aria-invalid', 'false')
-  const failure = await failCredentialWrites(page)
-  try {
-    await page.getByRole('button', { name: 'Save', exact: true }).click()
-    await expect(
-      page.getByText('Could not save these changes. Check the settings and try again.', {
-        exact: true
-      })
-    ).toBeVisible()
-    await expect(key).toHaveValue('test-only-replacement')
-    await expect(
-      page.getByText('Some changes may already be saved. Review the settings and try again.')
-    ).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeEnabled()
-  } finally {
-    await failure.evaluate((handle) => handle.restore())
-    await failure.dispose()
-  }
-})
-
 test('a partial model save is explained and retry does not duplicate the profile', async ({
   page
 }) => {
@@ -174,23 +137,4 @@ test('the sole design-capable profile cannot be deleted even with other profiles
   await page.locator(`[data-model-id="${designId}"]`).click()
   await expect(page.getByRole('button', { name: 'Save model', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Delete model', exact: true })).toHaveCount(0)
-})
-
-test('MCP field feedback is translated after switching the locale', async ({ page }) => {
-  await openSettings(page)
-  await page.getByTestId('settings-language').click()
-  await page.getByRole('option', { name: 'Русский', exact: true }).click()
-  await page.getByTestId('settings-section-mcp').click()
-  await page.getByRole('button', { name: 'Добавить подключение', exact: true }).click()
-  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
-  const name = page.getByRole('textbox', { name: 'Название подключения', exact: true })
-  await expect(name).toBeFocused()
-  await expect(name).toHaveAccessibleDescription(/Это поле обязательно\./)
-  await name.fill('Мой сервер')
-  await expect(name).toHaveAttribute('aria-invalid', 'false')
-  const url = page.getByRole('textbox', { name: 'URL сервера MCP', exact: true })
-  await url.fill('http://example.com/mcp')
-  await url.press('Tab')
-  await expect(url).toHaveAccessibleDescription(/Используйте HTTPS/)
-  await expect(page.getByText('This field is required.', { exact: true })).toHaveCount(0)
 })

@@ -18,8 +18,6 @@ export const diagnosticsMessageDefaults = {
   chatFailed: 'AI chat failed',
   storageFailed: 'Storage operation failed',
   documentFailed: 'Document operation failed',
-  acpFailed: 'ACP transport failed',
-  mcpFailed: 'MCP connection failed',
   modelStep: params('Model step · {model}'),
   modelStepTokens: params('{input} in · {output} out tokens'),
   toolCompleted: params('Tool: {tool}'),

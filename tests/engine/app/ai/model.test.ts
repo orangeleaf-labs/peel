@@ -12,12 +12,8 @@ function languageModelInstance(model: LanguageModel): Exclude<LanguageModel, str
 }
 
 describe('model provider registry', () => {
-  test('creates Anthropic models without handling agent runtimes as models', () => {
+  test('creates Anthropic models', () => {
     expect(modelProviderAdapter('anthropic').create).toBeFunction()
-    expect(() => modelProviderAdapter('harness:pi')).toThrow('Harness agents')
-    expect(() => modelProviderAdapter('acp:claude-code')).toThrow(
-      'ACP providers and Harness agents do not use direct API models'
-    )
   })
 })
 
