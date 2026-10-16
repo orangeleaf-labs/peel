@@ -62,10 +62,6 @@ export {
 import type { Color } from '@open-pencil/scene-graph/primitives'
 
 export const WEB_APP_ORIGIN = 'https://app.openpencil.dev'
-/** The privacy page: every request the app makes, and every usage event and field. */
-export const PRIVACY_URL = 'https://openpencil.dev/overview/privacy'
-/** The OpenPencil Cloud section of the website, with its waitlist form. */
-export const CLOUD_WAITLIST_URL = 'https://openpencil.dev/#cloud'
 /** Where the desktop app's installers are published. */
 export const DESKTOP_DOWNLOAD_URL = 'https://github.com/open-pencil/open-pencil/releases/latest'
 export const NODE_DOWNLOAD_URL = 'https://nodejs.org/en/download'

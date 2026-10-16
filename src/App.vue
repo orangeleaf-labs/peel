@@ -23,7 +23,6 @@ import LibraryUpdateReviewDialog from '@/components/libraries/review/LibraryUpda
 import RecoveryDialog from '@/components/recovery/RecoveryDialog.vue'
 import AISetupDialog from '@/components/settings/ai-setup/AISetupDialog.vue'
 import SettingsDialog from '@/components/settings/SettingsDialog.vue'
-import UsageStatsPrompt from '@/components/sharing/UsageStatsPrompt.vue'
 import AppShell from '@/components/shell/AppShell.vue'
 import Toaster from '@/components/shell/Toaster.vue'
 
@@ -65,7 +64,6 @@ onMounted(() => {
       <WriteApprovalDialog />
       <PublishLibraryDialog />
       <LibraryUpdateReviewDialog />
-      <UsageStatsPrompt />
       <Toaster />
     </TooltipProvider>
   </MotionConfig>

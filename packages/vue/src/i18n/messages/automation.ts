@@ -122,6 +122,9 @@ export const automationMessageDefaults = {
   writeApprovalExport: params('An agent wants to export {format} with {tool} to {target}.'),
   writeApprovalSettings: params('An agent wants to change app settings with {tool}: {target}.'),
   writeApprovalWrite: params('An agent wants to write a file with {tool}: {target}.'),
+  writeApprovalCode: params(
+    'An agent wants to run a script with the app’s permissions using {tool}: {target}'
+  ),
   writeApprovalUnknownTarget: params('An agent wants to write outside the document with {tool}.'),
   writeApprovalDenyHint: 'If you deny, the agent gets an error and nothing is written.',
   writeApprovalAllow: 'Allow',
