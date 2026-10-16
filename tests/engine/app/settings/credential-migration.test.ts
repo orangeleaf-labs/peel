@@ -156,12 +156,12 @@ describe('legacy credential migration', () => {
   test('clearing after migration removes a legacy-only credential for good', async () => {
     const storage = new TestStorage()
     const store = new MemoryCredentialStore()
-    storage.setItem('open-pencil:openrouter-api-key', 'legacy-openrouter-key')
+    storage.setItem('open-pencil:ai-key:anthropic', 'legacy-anthropic-key')
 
     expect(await migrateLegacyCredentials(storage, store)).toBeTrue()
-    await store.remove(providerCredentialRef('openrouter'))
+    await store.remove(providerCredentialRef('anthropic'))
 
-    expect(hasLegacyCredential(providerCredentialRef('openrouter'), storage)).toBeFalse()
-    expect(await store.read(providerCredentialRef('openrouter'))).toBeNull()
+    expect(hasLegacyCredential(providerCredentialRef('anthropic'), storage)).toBeFalse()
+    expect(await store.read(providerCredentialRef('anthropic'))).toBeNull()
   })
 })
