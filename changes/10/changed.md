@@ -1,0 +1,1 @@
+- AI chat uses only the Anthropic API, with a built-in list of Claude models, and keeps the API key in the operating system's credential store.

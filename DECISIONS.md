@@ -29,3 +29,5 @@ did not cover a case, the safer and more reversible option was taken.
 | AI writes are approved per call; there is no "allow for this session". | Safer default; nothing is remembered that the user cannot see. |
 | No answer to a write approval within 60 s counts as Deny. | Matches the ACP permission timeout; an unattended app never writes. |
 | Network-only tools (icons, stock photos, vision) do not ask for write approval. | They read, not write; egress is handled in Phase 2. |
+| AI connections saved for a removed provider are dropped when settings load; their old keys are not deleted from the keychain. | Peel never reads them; deleting could affect a co-installed upstream OpenPencil. |
+| The model list is checked in rather than fetched. | No runtime call to models.dev; new Claude models arrive with an app update. |
