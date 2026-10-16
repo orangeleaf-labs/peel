@@ -144,7 +144,6 @@ ja:media.pexelsAPIKey
 ja:media.pexelsAlternativeOptional
 ja:media.stockPhotoToolOptional
 ja:media.unsplashAccessKey
-ja:media.vectorizationDescription
 ja:menu.copyAsJSX
 ja:menu.copyAsPNG
 ja:menu.copyAsSVG
@@ -334,7 +333,6 @@ zh-cn:media.pexelsAPIKey
 zh-cn:media.pexelsAlternativeOptional
 zh-cn:media.stockPhotoToolOptional
 zh-cn:media.unsplashAccessKey
-zh-cn:media.vectorizationDescription
 zh-cn:menu.copyAsJSX
 zh-cn:menu.copyAsPNG
 zh-cn:menu.copyAsSVG

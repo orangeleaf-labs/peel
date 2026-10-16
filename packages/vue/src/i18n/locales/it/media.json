@@ -1,7 +1,4 @@
 {
-  "vectorization": "Vettorializzazione immagini",
-  "vectorizationDescription": "Invia i livelli immagine a Recraft o fal.ai e restituisce vettori modificabili. Potrebbero essere applicati costi.",
-  "vectorizeProvider": "Servizio di vettorializzazione",
   "pexelsAPIKey": "Chiave API Pexels",
   "unsplashAccessKey": "Chiave di accesso Unsplash",
   "stockPhotoToolOptional": "Facoltativo — abilita lo strumento foto stock",

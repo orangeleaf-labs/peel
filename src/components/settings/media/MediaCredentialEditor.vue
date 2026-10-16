@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import {
-  useCommonMessages,
-  useCredentialMessages,
-  useMediaMessages,
-  useSettingsMessages
-} from '@open-pencil/vue'
+import { useCommonMessages, useCredentialMessages, useSettingsMessages } from '@open-pencil/vue'
 
 import { useMediaSettingsEditor, type MediaSettingsService } from '@/app/settings/media/use'
 import { useSettingsFormGuard } from '@/app/settings/navigation/use'
@@ -15,35 +10,24 @@ import SettingsSaveFeedback from '@/components/settings/layout/SettingsSaveFeedb
 import SettingsSection from '@/components/settings/layout/SettingsSection.vue'
 import ProviderSettingsKeyField from '@/components/settings/provider/ProviderSettingsKeyField.vue'
 import AppButton from '@/components/ui/button/AppButton.vue'
-import AppSelect from '@/components/ui/select/AppSelect.vue'
 
 const { service } = defineProps<{ service: MediaSettingsService }>()
 const emit = defineEmits<{ done: [] }>()
 const editor = useMediaSettingsEditor(service)
-const { key, providerID, keyStatus, error, dirty, busy, clearCredential } = editor
+const { key, keyStatus, error, dirty, busy, clearCredential } = editor
 useSettingsFormGuard({ dirty, busy, cancel: () => emit('done') })
 const common = useCommonMessages()
 const credentials = useCredentialMessages()
-const media = useMediaMessages()
 const settings = useSettingsMessages()
-const provider = computed(() => editor.vector?.provider.value)
-const providerOptions = editor.vector?.providerOptions ?? []
-const title = computed(() => {
-  if (service === 'vectorize') return media.value.vectorization
-  return service === 'pexels' ? 'Pexels' : 'Unsplash'
-})
+const title = service === 'pexels' ? 'Pexels' : 'Unsplash'
 const keyLabel = computed(() =>
   service === 'unsplash' ? credentials.value.accessKey : credentials.value.apiKey
 )
-const keyURL = computed(() => {
-  if (service === 'pexels') return 'https://www.pexels.com/api/'
-  if (service === 'unsplash') return 'https://unsplash.com/oauth/applications'
-  return provider.value?.keyURL
-})
-const placeholder = computed(() => {
-  if (keyStatus.value === 'configured') return credentials.value.savedReplace
-  return provider.value?.keyPlaceholder ?? ''
-})
+const keyURL =
+  service === 'pexels' ? 'https://www.pexels.com/api/' : 'https://unsplash.com/oauth/applications'
+const placeholder = computed(() =>
+  keyStatus.value === 'configured' ? credentials.value.savedReplace : ''
+)
 async function save() {
   if (await editor.save()) emit('done')
 }
@@ -55,15 +39,6 @@ async function save() {
       <SettingsSection class="gap-5">
         <template #title>{{ title }}</template>
         <fieldset :disabled="busy" class="flex w-full min-w-0 max-w-md flex-col gap-5">
-          <label v-if="service === 'vectorize'" class="flex flex-col gap-1.5 text-xs text-surface">
-            {{ media.vectorizeProvider }}
-            <AppSelect
-              v-model="providerID"
-              :options="providerOptions"
-              :label="media.vectorizeProvider"
-              :disabled="busy"
-            />
-          </label>
           <ProviderSettingsKeyField
             v-model="key"
             :label="keyLabel"

@@ -23,7 +23,7 @@ Renderer, layout, editor, Figma API, tools, clipboard, vector conversion, and do
 
 ## Vector conversion
 
-- Bitmap-to-vector conversion lives in `packages/core/src/vector/vectorize/`; app provider clients, preferences, and credential resolution live under `src/app/editor/vectorize/` in the app. Bound request and response sizes and validate provider-owned download URLs before importing returned SVG.
+- Turning a vectorizer's SVG into vector layers lives in `packages/core/src/vector/vectorize/`. The app ships no raster vectorization service, so adding one is an egress change (`tests/app/editor/canvas/menu/vectorize.test.ts`).
 
 ## Tools (AI, MCP, CLI, WebMCP)
 

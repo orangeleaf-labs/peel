@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import { useMediaMessages, useSettingsMessages } from '@open-pencil/vue'
+import { useSettingsMessages } from '@open-pencil/vue'
 
-import { vectorizeProviderID, VECTORIZE_PROVIDER_DEFINITIONS } from '@/app/editor/vectorize'
 import { pexelsKeyStatus, unsplashKeyStatus } from '@/app/settings/credentials/media'
 import type { MediaSettingsService } from '@/app/settings/media/use'
 import SettingsPage from '@/components/settings/layout/SettingsPage.vue'
@@ -14,14 +13,10 @@ import MediaCredentialEditor from './MediaCredentialEditor.vue'
 
 const editing = ref<MediaSettingsService | null>(null)
 const settings = useSettingsMessages()
-const media = useMediaMessages()
 const stockServices = computed(() => [
   { id: 'pexels' as const, name: 'Pexels', status: pexelsKeyStatus.value },
   { id: 'unsplash' as const, name: 'Unsplash', status: unsplashKeyStatus.value }
 ])
-const vectorProvider = computed(() =>
-  VECTORIZE_PROVIDER_DEFINITIONS.find((item) => item.id === vectorizeProviderID.value)
-)
 </script>
 
 <template>
@@ -45,16 +40,6 @@ const vectorProvider = computed(() =>
             <template #description>{{
               service.status === 'configured' ? settings.configured : settings.notConfigured
             }}</template>
-            <template #trailing
-              >{{ settings.edit }}<icon-lucide-chevron-right class="size-3.5"
-            /></template>
-          </AppActionRow>
-        </SettingsSection>
-        <SettingsSection>
-          <template #title>{{ media.vectorization }}</template>
-          <template #description>{{ media.vectorizationDescription }}</template>
-          <AppActionRow data-vectorize-settings @click="editing = 'vectorize'">
-            {{ vectorProvider?.name }}
             <template #trailing
               >{{ settings.edit }}<icon-lucide-chevron-right class="size-3.5"
             /></template>

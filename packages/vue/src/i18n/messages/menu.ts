@@ -73,7 +73,6 @@ export const menuMessageDefaults = {
   copyAsJSX: 'Copy as JSX',
   copyNodeId: 'Copy node ID',
   copyXPath: 'Copy XPath',
-  convertToVector: 'Convert to vector',
   booleanOperations: 'Boolean operations',
   arrangeAlignLeft: 'Align left',
   arrangeAlignCenter: 'Align center',
