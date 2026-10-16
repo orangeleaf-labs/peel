@@ -54,8 +54,8 @@ Users who saved an S3 storage endpoint before this release must open Settings â†
 The agent's GitHub token has no `workflow` scope, so it cannot change files under `.github/workflows/`. Workflow edits are saved as patches in `.github/pending-workflows/` instead.
 
 1. From the repository root on `master`, run `git apply .github/pending-workflows/remove-telemetry.patch`. This deletes `feedback.yml`, drops the `feedback-tests` job from `ci.yml`, and removes `VITE_OPENPENCIL_FEEDBACK` from `app.yml` and `build.yml`.
-2. Delete the applied patch file, and remove the `.github/workflows` exclusion in `tests/app/shell/egress.test.ts`.
-3. Commit, open a PR, and confirm `bun test tests/app/shell/egress.test.ts` passes.
+2. Delete the applied patch file, and remove the `.github/workflows` exclusion in `tests/helpers/egress/shipped.ts`.
+3. Commit, open a PR, and confirm `bun test tests/app/shell/egress` passes.
 4. To let future agent runs change workflows directly, reconnect GitHub with the `workflow` permission at https://claude.ai/connect-github.
 
 ### Fix the Native app contracts CI job
