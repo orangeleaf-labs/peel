@@ -4,7 +4,7 @@ import { mkdir, readFile, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { registerTools } from '../src/tool/registration'
+import { registerTools, type MCPAgentSession } from '../src/tool/registration'
 
 type MCPServer = Parameters<typeof registerTools>[0]
 
@@ -16,7 +16,7 @@ function asServer(double: object): MCPServer {
 type Handler = (args: Record<string, unknown>) => Promise<unknown>
 
 /** Registers the tools against a stand-in server and records what each call forwards to the app. */
-function setup(mcpRoot: string | null) {
+function setup(mcpRoot: string | null, agentSession?: MCPAgentSession) {
   const handlers = new Map<string, Handler>()
   const forwarded: Array<Record<string, unknown>> = []
   const server = asServer({
@@ -28,6 +28,7 @@ function setup(mcpRoot: string | null) {
   registerTools(server, {
     policy: { scope: 'document', allowEval: false, disabledTools: [] },
     mcpRoot,
+    agentSession,
     sendRPC: async (body) => {
       forwarded.push(body)
       return { ok: true, result: { svg: '<svg/>', base64: 'AA==', mimeType: 'application/pdf' } }
@@ -41,7 +42,7 @@ function setup(mcpRoot: string | null) {
     const rpcArgs = body?.args as { args?: Record<string, unknown> } | undefined
     return rpcArgs?.args ?? {}
   }
-  return { call }
+  return { call, forwarded }
 }
 
 let root = ''
@@ -72,5 +73,22 @@ describe('an export written to a path', () => {
     await mkdir(root, { recursive: true })
     const { call } = setup(root)
     expect(await call('export_pdf', { path: 'card.pdf' })).toEqual({ path: 'card.pdf' })
+  })
+})
+
+describe('a call that may ask the user', () => {
+  test.each([
+    ['save_file', {}],
+    ['new_document', {}],
+    ['close_file', { unsaved: 'save' }],
+    ['update_settings', { settings: { autoSave: true } }]
+  ])('%s names the agent session, so stopping that chat withdraws its dialog', async (name, args) => {
+    root = join(await realpath(tmpdir()), `op-agent-${randomUUID()}`)
+    await mkdir(root, { recursive: true })
+    const { call, forwarded } = setup(root, { id: 'session-1', kind: 'acp' })
+    await call(name, args)
+    const body = forwarded.at(-1)
+    expect(body?.command).toBe(name)
+    expect(body?.args).toMatchObject({ agent: { session: 'session-1', kind: 'acp' } })
   })
 })

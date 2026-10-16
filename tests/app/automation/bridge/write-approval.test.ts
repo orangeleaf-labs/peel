@@ -6,6 +6,7 @@ import { toRaw } from 'vue'
 import * as layoutModule from '@open-pencil/core/layout'
 import {
   AUTOMATION_APPROVAL_DEADLINE_MS,
+  MCP_CLIENT_DEFAULT_REQUEST_TIMEOUT_MS,
   AUTOMATION_APPROVAL_RPC_TIMEOUT_MS,
   automationRPCTimeout
 } from '@open-pencil/core/rpc'
@@ -279,7 +280,11 @@ describe('approvals never outlive their caller', () => {
     expect(save).not.toHaveBeenCalled()
   })
 
-  test('the deadline ends before the MCP server and the CLI stop waiting', () => {
+  test('the deadline ends before the MCP client, the MCP server, and the CLI stop waiting', () => {
+    // MCP SDK clients give up after 60 s by default; an Allow must never land after that.
+    expect(AUTOMATION_APPROVAL_DEADLINE_MS).toBeLessThanOrEqual(
+      MCP_CLIENT_DEFAULT_REQUEST_TIMEOUT_MS - 10_000
+    )
     expect(AUTOMATION_APPROVAL_DEADLINE_MS).toBeLessThan(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)
     for (const command of ['save_file', 'close_file', 'new_document', 'update_settings', 'eval']) {
       expect(automationRPCTimeout(command, 20_000)).toBe(AUTOMATION_APPROVAL_RPC_TIMEOUT_MS)

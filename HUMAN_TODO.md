@@ -44,4 +44,4 @@ The nine write-approval dialog strings in `packages/vue/src/i18n/locales/{de,es,
 ### Check the write-approval dialog on the desktop app
 
 1. With an MCP client connected, call `save_file` with a path; the dialog must name the tool and the file.
-2. Check Allow saves, Deny and Escape save nothing, and a minute without an answer denies.
+2. Check Allow saves, Deny and Escape save nothing, and no answer within 50 s of the call denies (a minute for the in-app AI chat).

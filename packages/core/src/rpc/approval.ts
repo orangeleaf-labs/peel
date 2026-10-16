@@ -1,9 +1,12 @@
 /**
  * How long the app waits for the user to allow an automation call that writes outside the
  * document, from when the app receives the call. Past it the call is denied whatever the dialog
- * shows, so an Allow can never land after the caller gave up.
+ * shows, so an Allow can never land after the caller gave up. It stays below the 60 s request
+ * timeout MCP SDK clients use by default, with room for the hops in between.
  */
-export const AUTOMATION_APPROVAL_DEADLINE_MS = 75_000
+export const AUTOMATION_APPROVAL_DEADLINE_MS = 50_000
+/** The MCP SDK's default client request timeout (`DEFAULT_REQUEST_TIMEOUT_MSEC`). */
+export const MCP_CLIENT_DEFAULT_REQUEST_TIMEOUT_MS = 60_000
 /**
  * How long the MCP server and the CLI wait for the app to answer a command that may ask for
  * approval; it outlasts `AUTOMATION_APPROVAL_DEADLINE_MS`, so the caller hears the outcome.

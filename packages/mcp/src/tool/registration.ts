@@ -236,7 +236,7 @@ export function registerTools(mcpServer: McpServer, options: RegisterToolsOption
         const { target } = splitAutomationTarget(args)
         const result = await sendRPC({
           command: 'save_file',
-          args: { ...target, path: safePath?.realPath }
+          args: { ...target, path: safePath?.realPath, agent: agent() }
         })
         const res = result as { ok?: boolean; result?: unknown; target?: unknown; error?: string }
         if (res.ok === false) return fail(new Error(res.error))
@@ -306,7 +306,7 @@ export function registerTools(mcpServer: McpServer, options: RegisterToolsOption
           const { target } = splitAutomationTarget(args)
           const result = await sendRPC({
             command: 'new_document',
-            args: { ...target, path: safePath?.realPath }
+            args: { ...target, path: safePath?.realPath, agent: agent() }
           })
           const res = result as { ok?: boolean; result?: unknown; target?: unknown; error?: string }
           if (res.ok === false) return fail(new Error(res.error))
@@ -362,7 +362,7 @@ export function registerTools(mcpServer: McpServer, options: RegisterToolsOption
             ? await resolveSafePath(args.path, resolvedRoot)
             : undefined
         const { target } = splitAutomationTarget(args)
-        const rpcArgs: Record<string, unknown> = { ...target }
+        const rpcArgs: Record<string, unknown> = { ...target, agent: agent() }
         if (args.unsaved) rpcArgs.unsaved = args.unsaved
         if (safePath) rpcArgs.path = safePath.realPath
         const res = await sendCommand(sendRPC, 'close_file', rpcArgs)
@@ -433,7 +433,7 @@ export function registerTools(mcpServer: McpServer, options: RegisterToolsOption
     async (args: { settings: Record<string, unknown> }) => {
       try {
         // Echo only the applied patch: with get_settings disabled, writing must not read.
-        await sendCommand(sendRPC, 'update_settings', { settings: args.settings })
+        await sendCommand(sendRPC, 'update_settings', { settings: args.settings, agent: agent() })
         return ok({ updated: args.settings })
       } catch (e) {
         return fail(e)
