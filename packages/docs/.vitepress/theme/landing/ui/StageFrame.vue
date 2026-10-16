@@ -17,9 +17,6 @@ const SERVER_ONLY = () => Promise.reject(new Error('Landing stages render only i
 const FeatureStage = defineClientComponent(() =>
   import.meta.env.SSR ? SERVER_ONLY() : import('../stage/FeatureStage.vue')
 )
-const CollabStage = defineClientComponent(() =>
-  import.meta.env.SSR ? SERVER_ONLY() : import('../stage/collab/CollabStage.vue')
-)
 
 const { kind } = defineProps<{ kind: FeatureKind }>()
 
@@ -65,8 +62,7 @@ onMounted(() => {
       <span />
     </div>
     <template v-if="live">
-      <CollabStage v-if="kind === 'collab'" @start="loading = true" @ready="ready = true" />
-      <FeatureStage v-else :kind="kind" @start="loading = true" @ready="ready = true" />
+      <FeatureStage :kind="kind" @start="loading = true" @ready="ready = true" />
     </template>
     <!-- The live stage is already drawn underneath, so the still fades into it. -->
     <Transition name="stage-poster">

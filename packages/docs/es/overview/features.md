@@ -92,10 +92,6 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 Todos los comandos admiten `--json`. Instalación: `npm install -g @open-pencil/cli` o `bun add -g @open-pencil/cli`.
 
-## Colaboración en tiempo real
-
-La colaboración funciona directamente entre participantes mediante WebRTC y no necesita servidor central. Basta con compartir un enlace. Incluye cursores, presencia, seguimiento de la vista de otro participante y llamadas de voz con quienes están en la sala.
-
 ## Escritorio y web
 
 **Escritorio:** Tauri v2, unos 7 MB, para macOS, Windows y Linux, con menús nativos, uso sin conexión y guardado automático.

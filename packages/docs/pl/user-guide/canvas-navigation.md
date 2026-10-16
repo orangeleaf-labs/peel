@@ -45,7 +45,7 @@ Gest zmiany powiększenia jest wyłączony na panelach warstw i właściwości, 
 
 Naciśnij <kbd>⌘</kbd><kbd>K</kbd> w macOS albo <kbd>Ctrl</kbd> + <kbd>K</kbd> w Windows i Linuksie, aby przeszukać działania edytora i aplikacji. Wybranie wyniku uruchamia je; niedostępne działania nadal zależą od bieżącego zaznaczenia i stanu dokumentu.
 
-Paleta służy też do przechodzenia między stronami. Zanim zaczniesz pisać, wyświetla strony odwiedzone ostatnio w tej karcie, od najnowszej, a **Przejdź do strony…** otwiera listę wszystkich stron. Stronę można też znaleźć, wpisując jej nazwę. Strony, na których pracują współpracownicy lub agenci AI, są wyświetlane z ich nazwami; panel Strony oznacza te same strony ich kolorami.
+Paleta służy też do przechodzenia między stronami. Zanim zaczniesz pisać, wyświetla strony odwiedzone ostatnio w tej karcie, od najnowszej, a **Przejdź do strony…** otwiera listę wszystkich stron. Stronę można też znaleźć, wpisując jej nazwę. Strony, na których pracują agenci AI, są wyświetlane z ich nazwami; panel Strony oznacza te same strony ich kolorami.
 
 ## Wskazówki
 

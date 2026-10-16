@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { SceneGraph } from '@open-pencil/scene-graph'
 
 import { previewFocus } from '@/app/ai/preview/canvas'
-import { MAX_OUTLINE } from '@/app/presence/schema'
+import { MAX_OUTLINE } from '@/app/presence/limits'
 
 import { expectDefined } from '#tests/helpers/assert'
 

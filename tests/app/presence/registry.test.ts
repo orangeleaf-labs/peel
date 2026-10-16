@@ -8,9 +8,7 @@ import {
   followedLabel,
   presenceByPage,
   presenceOf,
-  renameAgent,
-  setOwnerColor,
-  setPeers
+  renameAgent
 } from '@/app/presence/registry'
 
 const stores: ReturnType<typeof createEditorStore>[] = []
@@ -24,21 +22,18 @@ function setup() {
   return { store, pageId: store.state.currentPageId, other: store.graph.addPage('Other').id }
 }
 
-const red = { r: 1, g: 0, b: 0, a: 1 }
-
-test('draws active agents on their page, in their owner color', () => {
+test('draws active agents on their page, in the agent color', () => {
   const { store, pageId, other } = setup()
   const here = addAgent(store, 'chat')
   const there = addAgent(store, 'chat')
   here.update({ status: 'editing', cursor: { x: 5, y: 6, pageId } })
   there.update({ status: 'editing', cursor: { x: 1, y: 1, pageId: other } })
-  setOwnerColor(store, red)
   expect(store.state.presenceCursors).toEqual([
     {
       id: `agent:${here.id}`,
       kind: 'agent',
       name: here.name,
-      color: red,
+      color: expect.anything(),
       x: 5,
       y: 6,
       selection: undefined,
@@ -53,27 +48,6 @@ test('hides idle agents and gives each a different callsign', () => {
   expect(new Set(agents.map((agent) => agent.name)).size).toBe(5)
   agents[0]?.update({ status: 'idle', cursor: { x: 0, y: 0, pageId } })
   expect(store.state.presenceCursors).toEqual([])
-})
-
-test('draws people and their agents with the person color', () => {
-  const { store, pageId } = setup()
-  setPeers(store, [
-    {
-      clientId: 3,
-      name: 'Ana',
-      color: red,
-      cursor: { x: 1, y: 2, pageId },
-      agents: [
-        { id: 'a', name: 'Orbit', kind: 'mcp', status: 'thinking', cursor: { x: 3, y: 4, pageId } }
-      ]
-    }
-  ])
-  expect(
-    store.state.presenceCursors.map(({ kind, name, color }) => ({ kind, name, color }))
-  ).toEqual([
-    { kind: 'person', name: 'Ana', color: red },
-    { kind: 'agent', name: 'Orbit', color: red }
-  ])
 })
 
 test('follows the page on screen', async () => {
@@ -118,24 +92,17 @@ test('an idle agent keeps its followers; a departed one releases them', () => {
   expect(presenceOf(store).following.value).toBeNull()
 })
 
-test('following a person matches their zoom, and stops when they leave', () => {
-  const { store, pageId } = setup()
-  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
-  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 2 } }])
-  follow(store, { kind: 'person', clientId: 4 })
-  expect(store.state.zoom).toBe(2)
-  expect(centered(store)).toEqual({ x: 40, y: 50 })
-  setPeers(store, [])
-  expect(presenceOf(store).following.value).toBeNull()
-})
-
 test('switching to another page yourself stops following', async () => {
   const { store, pageId, other } = setup()
   store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
-  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
-  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
-  follow(store, { kind: 'person', clientId: 4 })
-  expect(followedLabel(store)).toEqual({ kind: 'person', name: 'Ana', color: red })
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 40, y: 50, pageId } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  expect(followedLabel(store)).toEqual({
+    kind: 'agent',
+    name: agent.name,
+    color: expect.anything()
+  })
   await store.switchPage(other)
   expect(presenceOf(store).following.value).toBeNull()
 })
@@ -168,23 +135,13 @@ test('switching pages yourself stops following a resting agent too', async () =>
   expect(presenceOf(store).following.value).toBeNull()
 })
 
-test('waits for a person who has not pointed anywhere yet', () => {
-  const { store, pageId } = setup()
-  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
-  setPeers(store, [ana])
-  follow(store, { kind: 'person', clientId: 4 })
-  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
-  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
-  expect(centered(store)).toEqual({ x: 40, y: 50 })
-})
-
 test('zooming yourself stops following', () => {
   const { store, pageId } = setup()
-  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
-  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
-  follow(store, { kind: 'person', clientId: 4 })
-  setPeers(store, [{ ...ana, cursor: { x: 60, y: 70, pageId, zoom: 1 } }])
-  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 40, y: 50, pageId } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  agent.update({ cursor: { x: 60, y: 70, pageId } })
+  expect(presenceOf(store).following.value).toEqual({ kind: 'agent', agentId: agent.id })
   store.applyZoom(-100, 960, 540)
   expect(presenceOf(store).following.value).toBeNull()
 })
@@ -217,11 +174,11 @@ test('zooming while following heads to another page stops following', () => {
 test('a cursor on a page this document lacks is waited out, not switched to', () => {
   const { store } = setup()
   const switchPage = spyOn(store, 'switchPage')
-  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
-  setPeers(store, [{ ...ana, cursor: { x: 1, y: 1, pageId: 'missing', zoom: 1 } }])
-  follow(store, { kind: 'person', clientId: 4 })
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 1, y: 1, pageId: 'missing' } })
+  follow(store, { kind: 'agent', agentId: agent.id })
   expect(switchPage).not.toHaveBeenCalled()
-  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  expect(presenceOf(store).following.value).toEqual({ kind: 'agent', agentId: agent.id })
 })
 
 test('stopping while following heads to another page stays where you are', async () => {
@@ -237,16 +194,6 @@ test('stopping while following heads to another page stays where you are', async
   expect(store.state.currentPageId).toBe(pageId)
 })
 
-test('labels a followed agent with the person who runs it', () => {
-  const { store, pageId } = setup()
-  const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }
-  setPeers(store, [
-    { clientId: 4, name: 'Ana', color: red, agents: [{ ...fern, cursor: { x: 1, y: 1, pageId } }] }
-  ])
-  follow(store, { kind: 'agent', agentId: 'fern' })
-  expect(followedLabel(store)).toEqual({ kind: 'agent', name: 'Fern', owner: 'Ana', color: red })
-})
-
 test('renames our agents, and their handles report the new name', () => {
   const { store } = setup()
   const agent = addAgent(store, 'chat')
@@ -256,41 +203,15 @@ test('renames our agents, and their handles report the new name', () => {
   expect(agent.name).toBe('Juniper')
 })
 
-test("lists people and working agents by page, knowing an agent's page before its first edit", () => {
+test("lists working agents by page, knowing an agent's page before its first edit", () => {
   const { store, pageId, other } = setup()
-  setPeers(store, [
-    {
-      clientId: 5,
-      name: 'Ana',
-      color: red,
-      cursor: { x: 0, y: 0, pageId },
-      agents: [{ id: 'o', name: 'Orbit', kind: 'mcp', status: 'idle', pageId: other }]
-    }
-  ])
+  addAgent(store, 'chat')
   const thinking = addAgent(store, 'chat')
   thinking.update({ status: 'thinking', pageId: other })
-  expect(
-    presenceByPage(store)
-      .get(pageId)
-      ?.map((entry) => entry.name)
-  ).toEqual(['Ana'])
+  expect(presenceByPage(store).get(pageId)).toBeUndefined()
   expect(presenceByPage(store).get(other)).toEqual([
     { id: `agent:${thinking.id}`, kind: 'agent', name: thinking.name, color: expect.anything() }
   ])
-})
-
-test('keeps people with the same name apart on a page', () => {
-  const { store, pageId } = setup()
-  const anonymous = { name: 'Anonymous', color: red, agents: [], cursor: { x: 0, y: 0, pageId } }
-  setPeers(store, [
-    { ...anonymous, clientId: 4 },
-    { ...anonymous, clientId: 5 }
-  ])
-  expect(
-    presenceByPage(store)
-      .get(pageId)
-      ?.map((entry) => entry.id)
-  ).toEqual(['person:4', 'person:5'])
 })
 
 test('without animation frames, cursors and following move at once', () => {

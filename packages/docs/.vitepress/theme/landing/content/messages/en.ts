@@ -52,12 +52,6 @@ export const en: LandingMessages = {
         'Ask in plain language and the agent edits the document with the same tools you use, previewing its work on the canvas as it streams. Connect any provider with your own key, or bring the coding agent you already use.',
       hint: 'A recorded turn plays through the real agent loop. Watch the canvas build as it streams.'
     },
-    collab: {
-      title: 'Work together, with people and agents',
-      detail:
-        'Share a link and everyone edits the same document, peer to peer, with live cursors, follow mode, comments pinned to layers, and voice calls. AI agents join the same way: everyone in the room watches them build as they stream.',
-      hint: 'Both screens are yours to use. Drag a layer on one and watch it move on the other, then ask the agent.'
-    },
     code: {
       title: 'From design to code',
       detail:
@@ -240,12 +234,6 @@ export const en: LandingMessages = {
         'The player sits alone in the hero frame, which lays its children out in a row, so a card added there lands right beside it. I’ll bind the card’s background, radius, and text colors to the Theme variables the player uses, so it switches between dark and light with it, and list three tracks, each with a small cover, a title, and an artist.',
       reply:
         'Added an **Up next** card beside the player with three tracks. Its colors and radius come from the Theme variables, so it follows the player between dark and light.'
-    },
-    collab: {
-      you: 'You',
-      yourScreen: 'Your screen',
-      theirScreen: 'Sam’s screen',
-      askAgent: 'Ask the agent'
     },
     sdk: {
       install: 'Install'

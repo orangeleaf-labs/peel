@@ -83,8 +83,8 @@ async function capturePage(browser: Browser, origin: string, target: PosterTarge
       // The page's web fonts swap in when they arrive; a still must show the final ones.
       await page.evaluate(() => document.fonts.ready)
       await page.waitForTimeout(SETTLE_MS)
-      for (const part of posterParts(kind)) {
-        const element = part === 'frame' ? frame : frame.locator(`[data-poster-part="${part}"]`)
+      for (const part of posterParts()) {
+        const element = frame.locator(`[data-poster-part="${part}"]`)
         const png = await element.screenshot({ animations: 'disabled' })
         const file = join(out, posterPath(target, kind, part))
         await mkdir(dirname(file), { recursive: true })

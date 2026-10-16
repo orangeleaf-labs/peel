@@ -4,8 +4,8 @@ import { computed } from 'vue'
 
 import { useCollaborationMessages } from '@open-pencil/vue'
 
-import { DEFAULT_COLLAB_STATE, useCollabInjected } from '@/app/collab/use'
 import { useActiveEditorStoreRef } from '@/app/editor/active-store'
+import { useLocalIdentity } from '@/app/identity/use'
 import { follow, presenceOf } from '@/app/presence/registry'
 import type { FollowTarget } from '@/app/presence/types'
 import { pagePresence } from '@/theme/collaboration/page-presence'
@@ -15,12 +15,12 @@ import PresenceList from './PresenceList.vue'
 import { pagePresenceRows } from './rows'
 
 /**
- * Wraps a page in a page list: hovering it shows who is on that page and what their agents are
- * doing there, and lets you follow them.
+ * Wraps a page in a page list: hovering it shows which of your agents work on that page and what
+ * they are doing there, and lets you follow them.
  */
 const { pageId } = defineProps<{ pageId: string }>()
 
-const collab = useCollabInjected()
+const identity = useLocalIdentity()
 const messages = useCollaborationMessages()
 const tabStore = useActiveEditorStoreRef()
 const ui = pagePresence()
@@ -28,11 +28,8 @@ const ui = pagePresence()
 const people = computed(() => {
   const store = tabStore.value
   if (!store) return []
-  const state = collab?.state.value ?? DEFAULT_COLLAB_STATE
-  const presence = presenceOf(store)
   return pagePresenceRows(
-    { name: state.localName, color: state.localColor, agents: presence.agents.value },
-    presence.peers.value,
+    { name: identity.name.value, color: identity.color, agents: presenceOf(store).agents.value },
     pageId
   )
 })
