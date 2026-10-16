@@ -36,7 +36,6 @@ ja:ai.changePreviewHint
 ja:automation.aiToolAccessDescription
 ja:automation.authenticationDescription
 ja:automation.builtInAI
-ja:automation.connections
 ja:automation.description
 ja:automation.localMCP
 ja:automation.localServerDesktopOnly
@@ -192,7 +191,6 @@ zh-cn:ai.changePreviewHint
 zh-cn:automation.aiToolAccessDescription
 zh-cn:automation.authenticationDescription
 zh-cn:automation.builtInAI
-zh-cn:automation.connections
 zh-cn:automation.description
 zh-cn:automation.localMCP
 zh-cn:automation.localServerDesktopOnly

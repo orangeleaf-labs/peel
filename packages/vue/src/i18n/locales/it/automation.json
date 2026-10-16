@@ -7,7 +7,6 @@
   "aiToolAccessDescription": "Scegli gli strumenti per l’IA integrata.",
   "mcpToolAccessDescription": "Scegli gli strumenti che il server locale offre agli agenti e ai client connessi.",
   "aiToolsNotice": "Le modifiche si applicano dal prossimo messaggio. Gli interruttori non isolano l’esecuzione: gli strumenti di script abilitati possono eseguire altre operazioni di progettazione.",
-  "connections": "Connessioni MCP",
   "description": "Monitora e riavvia il server MCP locale utilizzato dagli agenti e dall’automazione.",
   "status": "Stato",
   "port": "Porta",

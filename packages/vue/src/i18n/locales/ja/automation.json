@@ -7,7 +7,6 @@
   "aiToolAccessDescription": "内蔵 AI で使うツールを選択します。",
   "mcpToolAccessDescription": "ローカルサーバーが接続中のエージェントやクライアントに公開するツールを選択します。",
   "aiToolsNotice": "変更は次のメッセージから適用されます。ツールの切り替えはサンドボックスではありません。有効なスクリプトツールは他のデザイン操作も実行できます。",
-  "connections": "MCP接続",
   "description": "エージェントと自動化で使用するローカル MCP サーバーを監視・再起動します。",
   "status": "状態",
   "port": "ポート",

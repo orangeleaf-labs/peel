@@ -7,7 +7,6 @@
   "aiToolAccessDescription": "选择内置 AI 可用的工具。",
   "mcpToolAccessDescription": "选择本地服务器向已连接的智能体和客户端提供的工具。",
   "aiToolsNotice": "更改从下一条消息开始生效。工具开关不是沙箱：已启用的脚本工具仍可执行其他设计操作。",
-  "connections": "MCP 连接",
   "description": "监控并重启供代理和自动化使用的本地 MCP 服务器。",
   "status": "状态",
   "port": "端口",

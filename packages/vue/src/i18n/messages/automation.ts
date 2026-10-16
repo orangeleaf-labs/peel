@@ -61,7 +61,6 @@ export const automationMessageDefaults = {
   webmcpUnsupported:
     'This browser does not expose WebMCP. Use a supported Chrome version and enable WebMCP testing, then relaunch the browser.',
   noMatchingTools: 'No tools match your search.',
-  connections: 'MCP connections',
   description: 'Monitor and restart the local MCP server used by agents and automation.',
   status: 'Status',
   port: 'Port',

@@ -7,7 +7,6 @@
   "aiToolAccessDescription": "Choisissez les outils de l’IA intégrée.",
   "mcpToolAccessDescription": "Choisissez les outils que le serveur local propose aux agents et clients connectés.",
   "aiToolsNotice": "Les modifications s’appliquent au prochain message. Les interrupteurs ne constituent pas un bac à sable : les outils de script activés peuvent effectuer d’autres opérations de conception.",
-  "connections": "Connexions MCP",
   "description": "Surveillez et redémarrez le serveur MCP local utilisé par les agents et l’automatisation.",
   "status": "État",
   "port": "Port",

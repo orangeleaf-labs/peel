@@ -7,7 +7,6 @@
   "aiToolAccessDescription": "Wybierz narzędzia dla wbudowanej AI.",
   "mcpToolAccessDescription": "Wybierz narzędzia udostępniane przez lokalny serwer połączonym agentom i klientom.",
   "aiToolsNotice": "Zmiany obowiązują od następnej wiadomości. Przełączniki nie izolują wykonania: włączone narzędzia skryptowe mogą wykonywać inne operacje projektowe.",
-  "connections": "Połączenia MCP",
   "description": "Monitoruj i uruchamiaj ponownie lokalny serwer MCP używany przez agentów i automatyzację.",
   "status": "Stan",
   "port": "Port",

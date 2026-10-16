@@ -98,8 +98,6 @@ export const NODE_DOWNLOAD_URL = 'https://nodejs.org/en/download'
 const DOCS_ORIGIN = 'https://openpencil.dev'
 export const MCP_SERVER_DOCS_URL = `${DOCS_ORIGIN}/programmable/mcp-server`
 export const WEBMCP_DOCS_URL = `${MCP_SERVER_DOCS_URL}#webmcp`
-export const CODING_AGENTS_GUIDE_URL = `${DOCS_ORIGIN}/programmable/coding-agents`
-export const PI_GUIDE_URL = `${CODING_AGENTS_GUIDE_URL}#pi`
 
 /** The published release page, with its full notes, for a desktop version. */
 export function releaseNotesURL(version: string): string {
