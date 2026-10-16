@@ -3,10 +3,12 @@
 //! The proxy runs outside the WebView, so the CSP `connect-src` does not bound it. Every URL it
 //! is asked for, and every redirect it would follow, is checked here first: HTTPS only, no
 //! credentials in the URL, a domain name rather than an IP address, the default port, and a host
-//! on the static list below. User-configured cloud storage endpoints are not on it, so storage
-//! requests are refused on desktop until the user can approve an endpoint.
+//! on the static list below, or a cloud storage endpoint the user approved
+//! (`crate::storage_endpoints`).
 
+use std::collections::HashSet;
 use std::fmt;
+use std::sync::Arc;
 
 use reqwest::Method;
 use url::{Host, Url};
@@ -114,7 +116,7 @@ impl fmt::Display for EgressError {
 impl std::error::Error for EgressError {}
 
 /// The domain of an HTTPS URL without credentials, lowercased by the URL parser.
-fn https_domain(url: &Url) -> Result<&str, EgressError> {
+pub(crate) fn https_domain(url: &Url) -> Result<&str, EgressError> {
     if url.scheme() != "https" {
         return Err(EgressError::NotHttps);
     }
@@ -134,6 +136,14 @@ fn https_domain(url: &Url) -> Result<&str, EgressError> {
     }
 }
 
+/// `host` or `host:port`, the form storage approvals are kept in.
+pub(crate) fn authority(domain: &str, port: Option<u16>) -> String {
+    match port {
+        Some(port) => format!("{domain}:{port}"),
+        None => domain.to_owned(),
+    }
+}
+
 /// `method` is None for a redirect hop, whose method reqwest does not expose; hosts limited to
 /// one method then refuse it.
 fn statically_allowed(domain: &str, url: &Url, method: Option<&Method>) -> bool {
@@ -150,30 +160,46 @@ fn statically_allowed(domain: &str, url: &Url, method: Option<&Method>) -> bool 
         })
 }
 
-/// Accepts a URL the proxy may send to with `method`, or says why not. `method` is None for a
-/// redirect hop.
-pub fn check(url: &Url, method: Option<&Method>) -> Result<(), EgressError> {
-    let domain = https_domain(url)?;
-    // `port()` is None for the default port, which the parser drops from `https://h:443`.
-    if let Some(port) = url.port() {
-        return Err(EgressError::Port(format!("{domain}:{port}")));
-    }
-    if statically_allowed(domain, url, method) {
-        Ok(())
-    } else {
-        Err(EgressError::NotAllowed(domain.to_owned()))
-    }
+/// The static list plus the storage endpoints the user approved, as of one request.
+#[derive(Clone, Debug, Default)]
+pub struct Allowed {
+    approved: Arc<HashSet<String>>,
 }
 
-pub fn check_str(url: &str, method: &Method) -> Result<Url, EgressError> {
-    let parsed = Url::parse(url).map_err(|error| EgressError::Invalid(error.to_string()))?;
-    check(&parsed, Some(method))?;
-    Ok(parsed)
+impl Allowed {
+    pub fn new(approved: Arc<HashSet<String>>) -> Self {
+        Self { approved }
+    }
+
+    /// Accepts a URL the proxy may send to with `method`, or says why not. `method` is None for
+    /// a redirect hop.
+    pub fn check(&self, url: &Url, method: Option<&Method>) -> Result<(), EgressError> {
+        let domain = https_domain(url)?;
+        // `port()` is None for the default port, which the parser drops from `https://h:443`.
+        let authority = authority(domain, url.port());
+        if self.approved.contains(&authority) {
+            return Ok(());
+        }
+        if url.port().is_some() {
+            return Err(EgressError::Port(authority));
+        }
+        if statically_allowed(domain, url, method) {
+            Ok(())
+        } else {
+            Err(EgressError::NotAllowed(authority))
+        }
+    }
+
+    pub fn check_str(&self, url: &str, method: &Method) -> Result<Url, EgressError> {
+        let parsed = Url::parse(url).map_err(|error| EgressError::Invalid(error.to_string()))?;
+        self.check(&parsed, Some(method))?;
+        Ok(parsed)
+    }
 }
 
 /// The redirect policy for a request: each hop is checked like the first URL.
-pub fn redirect_policy(follow: bool) -> reqwest::redirect::Policy {
-    checked_redirects(follow, |url| check(url, None))
+pub fn redirect_policy(allowed: Allowed, follow: bool) -> reqwest::redirect::Policy {
+    checked_redirects(follow, move |url| allowed.check(url, None))
 }
 
 fn checked_redirects(
@@ -226,7 +252,7 @@ mod tests {
     use EgressError::*;
 
     fn check(url: &str) -> Result<(), EgressError> {
-        check_str(url, &Method::GET).map(|_| ())
+        Allowed::default().check_str(url, &Method::GET).map(|_| ())
     }
 
     fn assert_cases(cases: &[(&str, Result<(), EgressError>)]) {
@@ -361,7 +387,7 @@ mod tests {
     #[test]
     fn limits_figma_to_the_image_batch_lookup() {
         let figma = refused("www.figma.com");
-        let post = |url: &str| check_str(url, &Method::POST).map(|_| ());
+        let post = |url: &str| Allowed::default().check_str(url, &Method::POST).map(|_| ());
         assert_eq!(
             post("https://www.figma.com/file/AbC123-x_y/image/batch"),
             Ok(())
@@ -381,14 +407,32 @@ mod tests {
         }
         for method in [Method::GET, Method::PUT, Method::DELETE] {
             assert_eq!(
-                check_str("https://www.figma.com/file/abc/image/batch", &method).map(|_| ()),
+                Allowed::default()
+                    .check_str("https://www.figma.com/file/abc/image/batch", &method)
+                    .map(|_| ()),
                 figma.clone(),
                 "{method}"
             );
         }
         // A redirect hop's method is unknown, so it may not land on the method-limited host.
         let url = Url::parse("https://www.figma.com/file/abc/image/batch").expect("url");
-        assert_eq!(super::check(&url, None), figma);
+        assert_eq!(Allowed::default().check(&url, None), figma);
+    }
+
+    #[test]
+    fn allows_approved_storage_endpoints_only() {
+        let approved = ["s3.example.com", "minio.example.com:9000"];
+        let allowed = Allowed::new(Arc::new(approved.iter().map(|h| (*h).into()).collect()));
+        for (url, ok) in [
+            ("https://s3.example.com/bucket/key", true),
+            ("https://minio.example.com:9000/bucket", true),
+            ("https://minio.example.com/bucket", false),
+            ("https://s3.example.com:9000/bucket", false),
+            ("http://s3.example.com/bucket", false),
+            ("https://other.s3.example.com/bucket", false),
+        ] {
+            assert_eq!(allowed.check_str(url, &Method::GET).is_ok(), ok, "{url}");
+        }
     }
 
     /// Serves one redirect on a loopback port and reports how many requests it answered.
@@ -417,7 +461,7 @@ mod tests {
         // never sends it, because `check` refuses it before a client is built.
         let client = reqwest::Client::builder()
             .no_proxy()
-            .redirect(redirect_policy(follow))
+            .redirect(redirect_policy(Allowed::default(), follow))
             .build()
             .expect("client");
         tauri::async_runtime::block_on(client.get(start).send())

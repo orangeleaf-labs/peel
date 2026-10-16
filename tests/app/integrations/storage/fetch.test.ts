@@ -7,7 +7,7 @@ import { clearTauriMocks, mockTauriIPC } from '#tests/helpers/tauri/mocks'
 
 afterEach(clearTauriMocks)
 
-test('a storage endpoint the desktop proxy refused says custom endpoints are not allowed yet', async () => {
+test('a storage endpoint the desktop proxy refused explains how to approve it', async () => {
   // Tauri rejects invoke() with the command's serialized error, not an Error.
   await mockTauriIPC(() => {
     const refusal = Promise.withResolvers<never>()
@@ -25,10 +25,7 @@ test('a storage endpoint the desktop proxy refused says custom endpoints are not
 
   expect(error).toBeInstanceOf(Error)
   expect(error).toHaveProperty('message', expect.stringContaining('s3.example.com'))
-  expect(error).toHaveProperty(
-    'message',
-    expect.stringContaining('Custom storage endpoints are not allowed')
-  )
+  expect(error).toHaveProperty('message', expect.stringContaining('choose Allow'))
   // Not shown as a CORS or network problem, which a bucket setting could fix.
   expect(isLikelyCORSOrNetworkError(error)).toBe(false)
 })

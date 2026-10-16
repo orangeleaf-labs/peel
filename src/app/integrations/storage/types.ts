@@ -112,6 +112,11 @@ export type StorageProviderRegistration = {
   preferenceFields: readonly StoragePreferenceField[]
   credentialFields: readonly StorageCredentialField[]
   createAdapter(runtime: StorageProviderRuntime): StorageAdapter
+  /**
+   * Asks the user, before the first request, to let the desktop app reach the server these
+   * preferences name; rejects when they decline. Providers with fixed hosts leave it out.
+   */
+  approveEndpoint?(preferences: Readonly<Record<StorageFieldID, string>>): Promise<void>
 }
 
 export type StorageAdapterContext = {
