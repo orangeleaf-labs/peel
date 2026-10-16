@@ -9,12 +9,8 @@ const STORAGE_PREFIX = 'open-pencil:'
 const MIGRATION_VERSION_KEY = `${STORAGE_PREFIX}credential-migration`
 const MIGRATION_VERSION = '1'
 const AI_KEY_PREFIX = `${STORAGE_PREFIX}ai-key:`
-/** Plaintext keys for providers and integrations Peel removed: deleted, never migrated, so no secret outlives them. */
-const REMOVED_PROVIDER_KEYS = [
-  `${STORAGE_PREFIX}openrouter-api-key`,
-  `${STORAGE_PREFIX}pexels-api-key`,
-  `${STORAGE_PREFIX}unsplash-access-key`
-]
+/** Plaintext keys for providers Peel removed: deleted, never migrated, so no secret outlives them. */
+const REMOVED_PROVIDER_KEYS = [`${STORAGE_PREFIX}openrouter-api-key`]
 
 export function providerCredentialRef(
   providerId: AIProviderID,
