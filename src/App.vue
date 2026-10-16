@@ -25,7 +25,6 @@ import AISetupDialog from '@/components/settings/ai-setup/AISetupDialog.vue'
 import SettingsDialog from '@/components/settings/SettingsDialog.vue'
 import AppShell from '@/components/shell/AppShell.vue'
 import Toaster from '@/components/shell/Toaster.vue'
-import VoiceCallAudio from '@/components/voice-call/VoiceCallAudio.vue'
 
 const { updates, locale } = useI18n()
 
@@ -66,7 +65,6 @@ onMounted(() => {
       <PublishLibraryDialog />
       <LibraryUpdateReviewDialog />
       <Toaster />
-      <VoiceCallAudio />
     </TooltipProvider>
   </MotionConfig>
 </template>

@@ -128,7 +128,6 @@ fr:code.sourceVue
 fr:code.sourceReact
 fr:code.stylingCSS
 fr:code.stylingTailwind
-fr:collaboration.microphone
 fr:common.ok
 fr:diagnostics.categoryDocument
 fr:diagnostics.categoryMCP

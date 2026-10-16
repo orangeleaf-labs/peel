@@ -118,8 +118,6 @@ tests/engine/clipboard/figma/images.test.ts
 tests/engine/clipboard/fixtures/gold-preview-roundtrip.test.ts
 tests/engine/clipboard/openpencil/green-50.test.ts
 tests/engine/clipboard/openpencil/images.test.ts
-tests/engine/collab/room-id.test.ts
-tests/engine/collab/yjs-sync.test.ts
 tests/engine/color/basic.test.ts
 tests/engine/color/color-model.test.ts
 tests/engine/color/document-space-conversion.test.ts

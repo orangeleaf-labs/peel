@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { parseAppRuntimeConfig } from '@/app/runtime/config'
 
 describe('app runtime configuration', () => {
+  // The collaboration flags stay in the query to show they no longer configure anything.
   test('parses supported development and presentation flags once', () => {
     expect(
       parseAppRuntimeConfig(
@@ -15,9 +16,7 @@ describe('app runtime configuration', () => {
       showChrome: false,
       showRulers: false,
       sceneRenderer: 'tiled',
-      sceneRendererOverride: true,
-      collaborationTransport: 'test',
-      collaborationRelayURL: 'ws://localhost:4000'
+      sceneRendererOverride: true
     })
   })
 
@@ -39,9 +38,7 @@ describe('app runtime configuration', () => {
       showChrome: true,
       showRulers: true,
       sceneRenderer: 'retained',
-      sceneRendererOverride: false,
-      collaborationTransport: 'default',
-      collaborationRelayURL: null
+      sceneRendererOverride: false
     })
   })
 })

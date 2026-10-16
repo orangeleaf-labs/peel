@@ -54,7 +54,7 @@ Importazione/esportazione `.fig`, salvataggio, appunti Figma ed esportazione imm
 
 ## Collaborazione e modalità sviluppo
 
-Collaborazione P2P, visualizzazione JSX, Tailwind, server MCP e CLI sono disponibili. Commenti, Code Connect, ramificazioni e specifiche complete di consegna mancano.
+Visualizzazione JSX, Tailwind, server MCP e CLI sono disponibili. Collaborazione, commenti, Code Connect, ramificazioni e specifiche complete di consegna mancano.
 
 ## Figma Draw
 

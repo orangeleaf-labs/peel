@@ -19,13 +19,12 @@ export type TauriClipboardMock = {
 const IPC_BINDING = '__playwrightTauriIPC'
 
 /**
- * What the desktop app's own commands return on a machine with no system fonts, no pending files
- * or rooms, and no stored credentials. Any other command fails the spec, so a new one is noticed.
+ * What the desktop app's own commands return on a machine with no system fonts, no pending files,
+ * and no stored credentials. Any other command fails the spec, so a new one is noticed.
  */
 const APP_COMMAND_RESULTS: Record<string, unknown> = {
   list_system_fonts: [],
   take_pending_open: [],
-  take_pending_rooms: [],
   credential_status: 'missing',
   load_system_font: null,
   set_native_menu_checked: null,

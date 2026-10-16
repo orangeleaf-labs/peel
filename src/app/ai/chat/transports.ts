@@ -123,8 +123,7 @@ export function createToolLoopTransport({
   const tools = createAITools(store, diagnosticContext)
   // The reply in progress; a transport sends one message at a time.
   let run = currentRun(store)
-  // While JSX streams, the chat's agent moves through the elements as they appear, here and
-  // on the screens of everyone else in the room.
+  // While JSX streams, the chat's agent moves through the elements as they appear.
   const preview = createRunPreview(store)
   const renderTool = tools.render
   renderTool.onInputStart = ({ toolCallId, abortSignal }) => preview.start(toolCallId, abortSignal)

@@ -1,0 +1,1 @@
+- Collaboration is removed: there are no share links, rooms, voice calls or peer-to-peer connections, and the app no longer contacts public signalling, STUN or TURN servers.

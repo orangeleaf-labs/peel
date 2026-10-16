@@ -87,7 +87,6 @@ export const programmableSidebar = (
             },
           ]
         : []),
-      { text: labels.collaboration, link: `${prefix}/programmable/collaboration` },
     ],
   },
 ]

@@ -10,7 +10,6 @@
 | **Styling** | Tailwind CSS 4 | Utility-first, fast iteration, dark theme |
 | **Layout** | Yoga WASM | CSS flexbox and grid engine from Meta, battle-tested in React Native |
 | **File Format** | Kiwi binary + Zstd | Figma's own format — compact, fast parsing, .fig compatible |
-| **Collaboration** | Trystero + Yjs | P2P WebRTC via MQTT signaling, CRDT sync, y-indexeddb persistence |
 | **Color** | culori | Color space conversions (HSV, RGB, hex) |
 | **AI/MCP** | MCP SDK + Hono | 90+ tools for AI coding tools, stdio + HTTP transports |
 | **JSX Transform** | Sucrase | Lightweight (201 KB) JSX → JS, synchronous, browser-compatible |
@@ -35,10 +34,7 @@
   "tailwindcss": "^4.3.3",
   "culori": "^4.0.2",
   "fzstd": "^0.1.1",
-  "fflate": "^0.8.3",
-  "@trystero-p2p/mqtt": "^0.26.0",
-  "yjs": "^13.6.32",
-  "y-indexeddb": "^9.0.12"
+  "fflate": "^0.8.3"
 }
 ```
 

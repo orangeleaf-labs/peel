@@ -16,12 +16,6 @@ Wbudowany asystent używa ponad 90 narzędzi. Opisz zadanie zwykłym językiem, 
 
 [Czat AI →](./ai-chat)
 
-## Współpraca
-
-Dokument jest synchronizowany bezpośrednio między uczestnikami przez WebRTC. Centralny serwer i konto nie są potrzebne. Kursory uczestników i tryb śledzenia pokazują ich obecność, a Yjs CRDT łączy równoczesne zmiany.
-
-[Współpraca →](./collaboration)
-
 ## Vue SDK
 
 Twórz edytory oparte na OpenPencil za pomocą tego samego Vue SDK, którego używa aplikacja. SDK udostępnia kontekst edytora, podłączenie obszaru roboczego, stan zaznaczenia, modele poleceń, composables dla paneli właściwości i komponenty bez narzuconego wyglądu.
@@ -70,7 +64,7 @@ Wersja internetowa przyjmuje taki sam odnośnik z własnego paska adresu:
 https://app.openpencil.dev/?file=https://raw.githubusercontent.com/open-pencil/open-pencil/master/tests/fixtures/pencil_button.pen&node=Button/Large/Default
 ```
 
-Tutaj `file` to bezwzględny adres `https:` kończący się na `.pen` lub `.fig` — wersja internetowa nie ma systemu plików, więc ścieżka względna, adres `http:` lub inne rozszerzenie są odrzucane z ostrzeżeniem w konsoli i niczym więcej. Rozszerzenie jest odczytywane ze ścieżki adresu, więc zapytanie w adresie pliku niczego nie zmienia. Fragment jest odcinany przed pobraniem: nigdy nie trafia na serwer, więc `…/hikyo.pen#a` i `…/hikyo.pen#b` otwierają jedną kartę, nie dwie. `node` działa dokładnie jak wyżej: to samo zaznaczanie po dokładnej nazwie i przybliżenie, to samo powiadomienie, gdy żadna warstwa nie ma takiej nazwy. Obie wartości są kodowane jako URL, dosłowny `+` trzeba wysłać jako `%2B`, a powtórzony klucz przyjmuje ostatnią wartość, tak jak na komputerze. Odnośnik jest obsługiwany na każdej trasie, więc `/share/<room>?file=…` i `/demo?file=…` działają jak `/?file=…`.
+Tutaj `file` to bezwzględny adres `https:` kończący się na `.pen` lub `.fig` — wersja internetowa nie ma systemu plików, więc ścieżka względna, adres `http:` lub inne rozszerzenie są odrzucane z ostrzeżeniem w konsoli i niczym więcej. Rozszerzenie jest odczytywane ze ścieżki adresu, więc zapytanie w adresie pliku niczego nie zmienia. Fragment jest odcinany przed pobraniem: nigdy nie trafia na serwer, więc `…/hikyo.pen#a` i `…/hikyo.pen#b` otwierają jedną kartę, nie dwie. `node` działa dokładnie jak wyżej: to samo zaznaczanie po dokładnej nazwie i przybliżenie, to samo powiadomienie, gdy żadna warstwa nie ma takiej nazwy. Obie wartości są kodowane jako URL, dosłowny `+` trzeba wysłać jako `%2B`, a powtórzony klucz przyjmuje ostatnią wartość, tak jak na komputerze. Odnośnik jest obsługiwany na każdej trasie, więc `/demo?file=…` działa jak `/?file=…`.
 
 Przeglądarka pobiera plik między domenami, więc host musi to dopuszczać: `raw.githubusercontent.com` wysyła `Access-Control-Allow-Origin: *` i działa. Żądanie nie niesie danych uwierzytelniających i odmawia podążania za przekierowaniami, co chroni przed przekierowaniem odnośnika `https:` na niezaszyfrowany — adres `https://github.com/<owner>/<repo>/raw/...` przekierowuje na `raw.githubusercontent.com`, więc jest odrzucany; podaj bezpośrednio adres hosta raw. `file` i `node` są usuwane z paska adresu przez router zaraz po odczycie — przed pobraniem, a także gdy odnośnik został odrzucony — więc przeładowanie nie otwiera dokumentu ponownie, a skopiowany adres ani późniejsza nawigacja w aplikacji nie niosą danych odnośnika. Dokument z odnośnika jest ograniczony do 64 MiB: treść jest liczona w trakcie strumieniowania, nie na podstawie `Content-Length`, a żądanie jest przerywane w chwili przekroczenia limitu, po czym odnośnik zgłasza, że plik przekracza 64 MiB. Wdrożenie udostępniające aplikację z Content-Security-Policy musi dopuścić host odnośnika w `connect-src`, inaczej pobranie jest blokowane, a odnośnik zgłasza, że nie udało się otworzyć pliku.
 

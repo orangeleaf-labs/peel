@@ -1,5 +1,3 @@
-import { IS_BROWSER, IS_TAURI } from '@open-pencil/core/constants'
-
 import ACP_DESIGN_CONTEXT from '@/app/ai/acp/design-context.md'
 
 export {
@@ -63,27 +61,6 @@ export {
 
 import type { Color } from '@open-pencil/scene-graph/primitives'
 
-/**
- * The collaboration namespace. It names the shared document format and how peers send it, so
- * builds that sync the layer tree or variables differently, or encode what they send
- * differently, never join each other's rooms; change it with either.
- */
-export const COLLAB_APP_ID = 'openpencil/5'
-
-/**
- * The most a room message may decode to, compressed or not. A peer's update past it is dropped
- * before it is decoded, so a small compressed reply cannot expand without bound.
- */
-export const MAX_COLLAB_MESSAGE_BYTES = 256 * 1024 * 1024
-// 32 base36 characters provide roughly 165 bits of entropy. The room ID is a
-// bearer credential and must resist offline enumeration from public signaling topics.
-export const ROOM_ID_LENGTH = 32
-export const ROOM_ID_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789'
-/** How long a room tab tries to reach the service that introduces peers before saying it cannot. */
-export const ROOM_UNREACHABLE_MS = 20_000
-/** How often a room tab rechecks its connection while it waits for the file. */
-export const ROOM_STATUS_TICK_MS = 500
-
 export const WEB_APP_ORIGIN = 'https://app.openpencil.dev'
 /** Where the desktop app's installers are published. */
 export const DESKTOP_DOWNLOAD_URL = 'https://github.com/open-pencil/open-pencil/releases/latest'
@@ -103,11 +80,6 @@ export const PI_GUIDE_URL = `${CODING_AGENTS_GUIDE_URL}#pi`
 /** The published release page, with its full notes, for a desktop version. */
 export function releaseNotesURL(version: string): string {
   return `https://github.com/open-pencil/open-pencil/releases/tag/v${version}`
-}
-
-export function getShareURL(roomId: string): string {
-  const base = IS_TAURI || !IS_BROWSER ? WEB_APP_ORIGIN : window.location.origin
-  return `${base}/share/${roomId}`
 }
 
 export const PEER_COLORS: Color[] = [
