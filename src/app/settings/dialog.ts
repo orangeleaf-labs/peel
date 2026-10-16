@@ -1,16 +1,19 @@
 import { ref } from 'vue'
 
-export type SettingsSection =
-  | 'general'
-  | 'toolbar'
-  | 'ai'
-  | 'usage'
-  | 'diagnostics'
-  | 'privacy'
-  | 'mcp'
-  | 'tools'
-  | 'media'
-  | 'storage'
+/** The Settings dialog's sections, in the order its navigation lists them. */
+export const SETTINGS_SECTIONS = [
+  'general',
+  'toolbar',
+  'ai',
+  'usage',
+  'diagnostics',
+  'mcp',
+  'tools',
+  'media',
+  'storage'
+] as const
+
+export type SettingsSection = (typeof SETTINGS_SECTIONS)[number]
 
 export const settingsDialogOpen = ref(false)
 export const settingsDialogSection = ref<SettingsSection>('general')

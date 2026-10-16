@@ -1,0 +1,1 @@
+- Peel sends no telemetry: the daily ping, usage stats and their consent prompt, the Privacy settings section, and the Cloud waitlist are removed.

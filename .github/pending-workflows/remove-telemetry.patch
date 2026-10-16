@@ -1,0 +1,102 @@
+diff --git a/.github/workflows/app.yml b/.github/workflows/app.yml
+index 01e7546..04d5036 100644
+--- a/.github/workflows/app.yml
++++ b/.github/workflows/app.yml
+@@ -28,9 +28,6 @@ jobs:
+       - run: bunx playwright install --with-deps chromium
+ 
+       - run: bun run build
+-        env:
+-          # Official releases only: lets the app send its daily ping and, with consent, usage stats.
+-          VITE_OPENPENCIL_FEEDBACK: "on"
+ 
+       - uses: cloudflare/wrangler-action@v4
+         with:
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+index 850f1a7..8408d8c 100644
+--- a/.github/workflows/build.yml
++++ b/.github/workflows/build.yml
+@@ -68,9 +68,6 @@ jobs:
+       - name: Install pinned workflow tooling
+         run: bun install --cwd .pipeline --frozen-lockfile
+       - name: Build shared desktop frontend and package outputs
+-        env:
+-          # Official releases only: lets the app send its daily ping and, with consent, usage stats.
+-          VITE_OPENPENCIL_FEEDBACK: "on"
+         run: |
+           bun run generate:icons --target desktop
+           bun run generate:tauri-menu
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 177e964..ad890ca 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -269,25 +269,9 @@ jobs:
+       - name: Run ${{ matrix.group }} unit tests
+         run: bun tools/dev/unit-tests/src/run.ts "${{ matrix.group }}"
+ 
+-  feedback-tests:
+-    name: Feedback service
+-    needs: changes
+-    if: needs.changes.outputs.scope == 'code'
+-    timeout-minutes: 10
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+-        with:
+-          persist-credentials: false
+-
+-      - uses: ./.github/actions/setup-bun
+-
+-      - name: Typecheck and test the feedback Worker against a local D1
+-        run: bun run test:feedback
+-
+   result:
+     name: CI result
+-    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, unit-tests, feedback-tests]
++    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, unit-tests]
+     if: always()
+     runs-on: ubuntu-latest
+     timeout-minutes: 3
+diff --git a/.github/workflows/feedback.yml b/.github/workflows/feedback.yml
+deleted file mode 100644
+index 17731d4..0000000
+--- a/.github/workflows/feedback.yml
++++ /dev/null
+@@ -1,37 +0,0 @@
+-name: Deploy feedback service
+-
+-on:
+-  push:
+-    branches: [master]
+-    paths:
+-      - packages/feedback/**
+-  workflow_dispatch:
+-
+-concurrency:
+-  group: feedback-deploy
+-  cancel-in-progress: false
+-
+-jobs:
+-  deploy:
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 10
+-    permissions:
+-      contents: read
+-    steps:
+-      - uses: actions/checkout@v7
+-
+-      - uses: ./.github/actions/setup-bun
+-
+-      - name: Typecheck and test against a local D1
+-        run: bun run test:feedback
+-
+-      # Migrations run before the new code, so it never queries a table that is not there yet.
+-      - uses: cloudflare/wrangler-action@v4
+-        with:
+-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+-          workingDirectory: packages/feedback
+-          packageManager: bun
+-          command: |
+-            d1 migrations apply feedback --remote
+-            deploy

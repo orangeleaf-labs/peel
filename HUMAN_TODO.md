@@ -37,6 +37,19 @@ Only Linux was exercised; the macOS-only native cases were skipped.
 3. Edit that file in another app and check Peel reloads it.
 4. Save As into a new folder, export a PNG, and double-click a `.fig` in Finder or Explorer; each must work.
 
+### Apply the pending workflow changes
+
+The agent's GitHub token has no `workflow` scope, so it cannot change files under `.github/workflows/`. Workflow edits are saved as patches in `.github/pending-workflows/` instead.
+
+1. From the repository root on `master`, run `git apply .github/pending-workflows/remove-telemetry.patch`. This deletes `feedback.yml`, drops the `feedback-tests` job from `ci.yml`, and removes `VITE_OPENPENCIL_FEEDBACK` from `app.yml` and `build.yml`.
+2. Delete the applied patch file, and remove the `.github/workflows` exclusion in `tests/app/shell/egress.test.ts`.
+3. Commit, open a PR, and confirm `bun test tests/app/shell/egress.test.ts` passes.
+4. To let future agent runs change workflows directly, reconnect GitHub with the `workflow` permission at https://claude.ai/connect-github.
+
+### Fix the Native app contracts CI job
+
+The `Native app contracts` job in `.github/workflows/ci.yml` runs inside `ghcr.io/open-pencil/native-contracts-ci`, an upstream image this fork cannot pull ("manifest unknown"), so it fails on every PR. Build and push an equivalent image to an Orangeleaf registry and point the job's `container.image` at it, or remove the job until one exists. The agent can't make this change without `workflow` scope.
+
 ### Review the write-approval translations
 
 The nine write-approval dialog strings in `packages/vue/src/i18n/locales/{de,es,fr,it,ja,pl,ru,zh-cn}/automation.json` were machine-written. Have a native speaker check them and open a PR with corrections.
